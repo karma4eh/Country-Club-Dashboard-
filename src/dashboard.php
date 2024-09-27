@@ -75,7 +75,7 @@ include_once '../backend/count_socios_activos.php';
                     <table class="min-w-full bg-gray-900">
                         <thead>
                             <tr>
-                                <th class="px-6 py-3 border-b border-gray-700 text-left text-sm font-semibold text-gray-400">ID</th>
+                                
                                 <th class="px-6 py-3 border-b border-gray-700 text-left text-sm font-semibold text-gray-400">Nombre Completo</th>
                                 <th class="px-6 py-3 border-b border-gray-700 text-left text-sm font-semibold text-gray-400">Cédula</th>
                                 <th class="px-6 py-3 border-b border-gray-700 text-left text-sm font-semibold text-gray-400">Acción</th>

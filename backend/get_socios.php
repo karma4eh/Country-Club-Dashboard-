@@ -3,14 +3,14 @@
 include 'db_connection.php'; // Asegúrate de que este archivo contiene tu conexión a la base de datos
 
 // Obtener los primeros 5 socios
-$sql = "SELECT id, nombre, apellido, cedula, accion, estado, vencimiento FROM socios LIMIT 100";
+$sql = "SELECT  nombre, apellido, cedula, accion, estado, vencimiento FROM socios LIMIT 100";
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
     // Generar filas de la tabla para cada socio
     while ($row = $result->fetch_assoc()) {
         echo "<tr>";
-        echo "<td class='px-6 py-4 border-b border-gray-700 text-sm'>" . $row['id'] . "</td>";
+        
         echo "<td class='px-6 py-4 border-b border-gray-700 text-sm'>" . $row['nombre'] . " " . $row['apellido'] . "</td>";
         // Agrega "V-" antes del número de cédula
         echo "<td class='px-6 py-4 border-b border-gray-700 text-sm'>V-" . $row['cedula'] . "</td>";
