@@ -13,16 +13,18 @@ include_once '../backend/count_socios_activos.php';
     <script src="../js/ver_socios.js"></script>
 </head>
 <body class="bg-gray-900 text-gray-100">
+
 <!-- Modal (Inicialmente oculto) -->
 <div id="modal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 hidden">
-    <div class="bg-white rounded-lg shadow-lg p-6 w-1/2">
-        <h2 class="text-2xl font-bold mb-4">Detalles del Socio</h2>
-        <div id="modal-content">
+    <div class="bg-gray-800 rounded-lg shadow-lg p-6 w-1/3">
+        <h2 class="text-2xl font-bold mb-4 text-white">Detalles del Socio</h2>
+        <div id="modal-content" class="text-gray-200">
             <!-- Aquí se cargarán los datos -->
         </div>
-        <button onclick="cerrarModal()" class="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg">Cerrar</button>
+        <button onclick="cerrarModal()" class="mt-4 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg">Cerrar</button>
     </div>
 </div>
+
 
 <script>
     function cerrarModal() {
