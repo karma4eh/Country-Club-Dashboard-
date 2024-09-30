@@ -15,7 +15,7 @@ include_once '../backend/count_socios_activos.php';
 <body class="bg-gray-900 text-gray-100">
 <!-- Modal (Inicialmente oculto) -->
 <div id="modal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 hidden">
-    <div class="bg-gray rounded-lg shadow-lg p-6 w-1/2">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-1/2">
         <h2 class="text-2xl font-bold mb-4">Detalles del Socio</h2>
         <div id="modal-content">
             <!-- Aquí se cargarán los datos -->
