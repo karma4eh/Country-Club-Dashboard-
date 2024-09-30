@@ -4,7 +4,7 @@ include 'db_connection.php';
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
     
-    $sql = "SELECT nombre, apellido,direccion, cedula,numero,correo, accion,estado, vencimiento FROM socios WHERE id = ?";
+    $sql = "SELECT id, nombre, apellido,direccion, cedula,numero,correo, accion,estado, vencimiento FROM socios WHERE id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $id);
     $stmt->execute();

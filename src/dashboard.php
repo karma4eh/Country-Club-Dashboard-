@@ -17,15 +17,15 @@ include_once '../backend/count_socios_activos.php';
 <!-- Modal -->
 <div id="modal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 hidden">
     <div class="bg-gray-800 rounded-lg shadow-lg p-6 w-1/3">
-        <h2 class="text-2xl font-bold mb-4 text-white text-center">Detalles del Socio</h2>
-        <div id="modal-content" class="text-gray-200 mb-4 flex flex-col ">
-           
+        <div id="modal-content" class="text-gray-200 mb-4 flex flex-col">
+            <!-- El contenido se agregará aquí mediante JavaScript -->
         </div>
         <div class="flex justify-center">
             <button onclick="cerrarModal()" class="px-6 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg">Cerrar</button>
         </div>
     </div>
 </div>
+
 
 
 <script>
