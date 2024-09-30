@@ -12,6 +12,22 @@ include_once '../backend/count_socios_activos.php';
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body class="bg-gray-900 text-gray-100">
+<!-- Modal (Inicialmente oculto) -->
+<div id="modal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-1/2">
+        <h2 class="text-2xl font-bold mb-4">Detalles del Socio</h2>
+        <div id="modal-content">
+            <!-- Aquí se cargarán los datos -->
+        </div>
+        <button onclick="cerrarModal()" class="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg">Cerrar</button>
+    </div>
+</div>
+
+<script>
+    function cerrarModal() {
+        document.getElementById('modal').classList.add('hidden');
+    }
+</script>
 
     <!-- Sidebar -->
     <div class="flex h-screen">
@@ -91,6 +107,7 @@ include_once '../backend/count_socios_activos.php';
                         <tbody>
                             <?php include '../backend/get_socios.php'; ?>
                         </tbody>
+                        
                     </table>
                 </div>
                 
