@@ -1,4 +1,3 @@
- console.log ('conectado perfectamente');
  function verDetallesSocio(socioId) {
         // Mostrar la modal
         document.getElementById('modal').classList.remove('hidden');
