@@ -14,19 +14,22 @@ include_once '../backend/count_socios_activos.php';
 </head>
 <body class="bg-gray-900 text-gray-100">
 
-<!-- Modal -->
 <div id="modal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 hidden">
-    <div class="bg-gray-800 rounded-lg shadow-lg p-6 w-1/3">
-        <div id="modal-content" class="text-gray-200 mb-4 flex flex-col">
-            <!-- El contenido se agregará aquí mediante JavaScript -->
+    <div class="bg-gray-800 rounded-lg shadow-lg p-6 w-1/3 relative">
+        <!-- Botón "X" para cerrar el modal -->
+        <button onclick="cerrarModal()" class="absolute top-2 right-2 text-gray-300 hover:text-white text-2xl">&times;</button>
+        <!-- Contenido del Modal -->
+        <div id="modal-content" class="text-gray-200 mb-4 flex flex-col bg-gray-700 p-4 rounded-lg">
+            <!-- Aquí irán los datos específicos del socio -->
         </div>
-        <div class="flex justify-center">
-            <button onclick="cerrarModal()" class="px-6 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg">Cerrar</button>
+        
+        <!-- Botón Cerrar en la parte inferior -->
+        <div class="flex justify-center mt-4">
+        <button class='px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-500' 
+        onclick='cerrarModal()'>Cerrar</button>
         </div>
     </div>
 </div>
-
-
 
 <script>
     function cerrarModal() {
@@ -83,7 +86,7 @@ include_once '../backend/count_socios_activos.php';
             <header class="bg-gray-800 shadow-lg h-16 flex items-center justify-between px-6">
                 <div class="flex items-center">
                     <!-- Logo del Club -->
-                    <img src="../img/logo.png" alt="Logo Country Club" class="h-9 mr-4"> <!-- Ajusta la clase para el tamaño adecuado -->
+                    <img src="../img/logo.png" alt="Logo Country Club" class="h-9 mr-4"> 
                     <h1 class="text-xl font-bold text-gray-100">Country Club</h1>
                 </div>
                 <div class="flex items-center space-x-4">

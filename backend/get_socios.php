@@ -1,9 +1,9 @@
 <?php
-// Conexión a la base de datos
+include_once 'verificar_seccion.php';
 include 'db_connection.php';
 
-// Obtener los primeros 5 socios
-$sql = "SELECT id, nombre, apellido, cedula, accion, estado, vencimiento FROM socios LIMIT 100"; // Asegúrate de que 'id' sea el identificador único del socio
+
+$sql = "SELECT id, nombre, apellido, cedula, accion, estado, vencimiento FROM socios LIMIT 100"; 
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
@@ -19,7 +19,7 @@ if ($result->num_rows > 0) {
         echo "<td class='px-6 py-4 border-b border-gray-700 text-sm $estado_clase'>" . $estado_texto . "</td>";
         echo "<td class='px-6 py-4 border-b border-gray-700 text-sm'>" . $row['vencimiento'] . "</td>";
         
-        // Botón para abrir el modal con detalles del socio
+        // Botón para abrir el modal 
         echo "<td class='px-6 py-4 border-b border-gray-700 text-sm'>
                 <button class='px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-500' 
                 onclick='verDetallesSocio(" . $row['id'] . ")'>Ver</button>

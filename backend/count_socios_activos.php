@@ -1,12 +1,12 @@
 <?php
-// Conexión a la base de datos
-include 'db_connection.php'; // Asegúrate de que la conexión esté incluida
+include_once 'verificar_seccion.php';
+include 'db_connection.php'; 
 
-$total_activos = 0; // Inicializar
+$total_activos = 0; 
 
 // Contar socios activos
-$query = "SELECT COUNT(*) AS total_activos FROM socios WHERE estado = 'activo';"; // Agregar comillas
-// Ajusta el nombre de la tabla y la columna según tu esquema
+$query = "SELECT COUNT(*) AS total_activos FROM socios WHERE estado = 'activo';"; 
+
 $result = $conn->query($query);
 
 if ($result) {
