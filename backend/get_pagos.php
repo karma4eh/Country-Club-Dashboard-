@@ -19,12 +19,15 @@ if ($result) {
             echo "<tr>";
             echo "<td class='px-6 py-4 border-b border-gray-700 text-sm'>" . htmlspecialchars($row['nombre_socio']) . "</td>";
             echo "<td class='px-6 py-4 border-b border-gray-700 text-sm'>" . htmlspecialchars($row['descripcion']) . "</td>";
-            echo "<td class='px-6 py-4 border-b border-gray-700 text-sm'>" . htmlspecialchars($row['monto']) . " $</td>"; // Concatenar $$ al monto
+            echo "<td class='px-6 py-4 border-b border-gray-700 text-sm text-green-500'>" . htmlspecialchars($row['monto']) . " $$</td>"; // Concatenar $$ al monto
             echo "<td class='px-6 py-4 border-b border-gray-700 text-sm'>" . htmlspecialchars($row['fecha_pago']) . "</td>";
+            echo "<td class='px-6 py-4 border-b border-gray-700 text-sm'>
+                    <button class='px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700'>Factura</button>
+                  </td>";
             echo "</tr>"; 
         }
     } else {
-        echo "<tr><td colspan='4' class='px-6 py-4 text-center text-sm text-gray-400'>No hay pagos registrados.</td></tr>";
+        echo "<tr><td colspan='5' class='px-6 py-4 text-center text-sm text-gray-400'>No hay pagos registrados.</td></tr>";
     }
 } else {
     echo "Error en la consulta: " . $conn->error;
