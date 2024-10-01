@@ -1,5 +1,5 @@
 <?php
-include_once '../backend/verificar_seccion.php';
+
 include_once '../backend/count_socios_activos.php';
 ?>
 <!DOCTYPE html>
@@ -14,19 +14,21 @@ include_once '../backend/count_socios_activos.php';
 </head>
 <body class="bg-gray-900 text-gray-100">
 
+<!-- Modal -->
 <div id="modal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 hidden">
-    <div class="bg-gray-800 rounded-lg shadow-lg p-6 w-1/3 relative">
+    <div class="bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md relative">
         <!-- Botón "X" para cerrar el modal -->
         <button onclick="cerrarModal()" class="absolute top-2 right-2 text-gray-300 hover:text-white text-2xl">&times;</button>
+        
+
         <!-- Contenido del Modal -->
-        <div id="modal-content" class="text-gray-200 mb-4 flex flex-col bg-gray-700 p-4 rounded-lg">
+        <div id="modal-content" class="text-gray-200 bg-gray-700 p-4 rounded-lg mb-4">
             <!-- Aquí irán los datos específicos del socio -->
         </div>
-        
+
         <!-- Botón Cerrar en la parte inferior -->
         <div class="flex justify-center mt-4">
-        <button class='px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-500' 
-        onclick='cerrarModal()'>Cerrar</button>
+            <button class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500" onclick="cerrarModal()">Cerrar</button>
         </div>
     </div>
 </div>
@@ -124,33 +126,28 @@ include_once '../backend/count_socios_activos.php';
                     <button class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg">Ver Más</button>
                 </div>
 
-                <!-- Payment History Section -->
-                <div class="mt-8">
-                    <h2 class="text-2xl font-semibold text-gray-100 mb-4">Historial de Pagos</h2>
-                    <div class="overflow-x-auto bg-gray-800 rounded-lg shadow-lg p-4">
-                        <table class="min-w-full bg-gray-900">
-                            <thead>
-                                <tr>
-                                    <th class="px-6 py-3 border-b border-gray-700 text-left text-sm font-semibold text-gray-400">ID Pago</th>
-                                    <th class="px-6 py-3 border-b border-gray-700 text-left text-sm font-semibold text-gray-400">Descripción</th>
-                                    <th class="px-6 py-3 border-b border-gray-700 text-left text-sm font-semibold text-gray-400">Fecha</th>
-                                    <th class="px-6 py-3 border-b border-gray-700 text-left text-sm font-semibold text-gray-400">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="px-6 py-4 border-b border-gray-700 text-sm">1</td>
-                                    <td class="px-6 py-4 border-b border-gray-700 text-sm">Pago mensual</td>
-                                    <td class="px-6 py-4 border-b border-gray-700 text-sm">20/09/2024</td>
-                                    <td class="px-6 py-4 border-b border-gray-700 text-sm">
-                                        <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">Ver Detalles</button>
-                                    </td>
-                                </tr>
-                                <!-- Add more rows as necessary -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+            <!-- Payment History Section -->
+<div class="mt-8">
+    <h2 class="text-2xl font-semibold text-gray-100 mb-4">Historial de Pagos</h2>
+    <div class="overflow-x-auto bg-gray-800 rounded-lg shadow-lg p-4">
+        <table class="min-w-full bg-gray-900">
+            <thead>
+                <tr>
+                    <th class="px-6 py-3 border-b border-gray-700 text-left text-sm font-semibold text-gray-400">Socio</th>
+                    <th class="px-6 py-3 border-b border-gray-700 text-left text-sm font-semibold text-gray-400">Descripción</th>
+                    <th class="px-6 py-3 border-b border-gray-700 text-left text-sm font-semibold text-gray-400">Monto</th>
+                    <th class="px-6 py-3 border-b border-gray-700 text-left text-sm font-semibold text-gray-400">Fecha de Pago</th>
+                    <th class="px-6 py-3 border-b border-gray-700 text-left text-sm font-semibold text-gray-400">Factura</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php include '../backend/get_pagos.php'; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
             </main>
         </div>
     </div>
