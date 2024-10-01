@@ -5,8 +5,8 @@ include 'db_connection.php';
 $sql = "
     SELECT p.descripcion, p.monto, p.fecha_pago, CONCAT(s.nombre, ' ', s.apellido) AS nombre_socio
     FROM pagos p
-    JOIN socios s ON p.socios_id = s.id  -- Asegúrate de que el ID de la tabla socios es correcto
-    WHERE DATE(p.fecha_pago) = CURDATE()  -- Solo pagos del día actual
+    JOIN socios s ON p.socios_id = s.id  -- 
+    WHERE DATE(p.fecha_pago) = CURDATE()  -- Solo pagos del día 
     ORDER BY p.fecha_pago DESC
 ";
 
