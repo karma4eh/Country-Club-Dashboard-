@@ -48,7 +48,7 @@ include_once '../backend/count_socios_activos.php';
                     <span class="material-icons">list</span>
                     <span class="ml-3">Inicio</span>
                 </a>
-                <a href="#" class="flex items-center px-6 py-2 text-gray-200 hover:bg-gray-700">
+                <a href="active_partners.php" class="flex items-center px-6 py-2 text-gray-200 hover:bg-gray-700">
                     <span class="material-icons">group</span>
                     <span class="ml-3">Socios Activos</span>
                 </a>
@@ -123,7 +123,10 @@ include_once '../backend/count_socios_activos.php';
                 
                 <!-- Load more button -->
                 <div class="mt-4 text-center">
-                    <button class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg">Ver Más</button>
+                <a href="active_partners.php">
+                <button class='px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700'>Ver más</button>
+                 </a>
+
                 </div>
 
             <!-- Payment History Section -->
