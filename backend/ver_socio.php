@@ -1,6 +1,6 @@
 <?php
 include 'db_connection.php';
-include_once 'verificar_seccion.php';
+
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
     

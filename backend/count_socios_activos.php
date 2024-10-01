@@ -1,5 +1,5 @@
 <?php
-include_once 'verificar_seccion.php';
+
 include 'db_connection.php'; 
 
 $total_activos = 0; 

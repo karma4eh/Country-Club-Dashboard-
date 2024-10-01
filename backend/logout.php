@@ -1,6 +1,6 @@
 <?php
 // Iniciar la sesión
-include_once 'verificar_seccion.php';
+
 session_start();
 // Destruir todas las variables de sesión
 $_SESSION = array();
