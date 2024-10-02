@@ -72,64 +72,36 @@ $conn->close();
 
     <!-- Main content -->
     <div class="flex-1 flex flex-col">
-        <header class="bg-gray-800 shadow-lg h-16 flex items-center justify-between px-6">
-            <div class="flex items-center">
-                <img src="../img/logo.png" alt="Logo Country Club" class="h-9 mr-4">
-                <h1 class="text-xl font-bold text-gray-100">Country Club</h1>
-            </div>
-            <div class="flex items-center space-x-4">
-                <span class="text-gray-400">Bienvenido, Admin</span>
-                <a href="../backend/logout.php" class="text-red-500">Cerrar Sesión</a>
-                <span class="material-icons">logout</span>
-            </div>
-        </header>
-
-        <main class="flex-1 overflow-y-auto p-6">
-            <!-- Display de datos -->
-            <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-                    <h2 class="text-xl font-semibold">Socios Activos</h2>
-                    <p class="text-4xl mt-4"><?php echo $total_activos; ?></p>
+            <header class="bg-gray-800 shadow-lg h-16 flex items-center justify-between px-6">
+                <div class="flex items-center">
+                    <img src="../img/logo.png" alt="Logo Country Club" class="h-8 mr-3">
+                    <h1 class="text-lg font-bold text-gray-100">Country Club</h1>
                 </div>
-                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-                    <h2 class="text-xl font-semibold">Socios Inactivos</h2>
-                    <p class="text-4xl mt-4"><?php echo $total_inactivos; ?></p>
+                <div class="flex items-center space-x-3">
+                    <span class="text-gray-400">Bienvenido, Admin</span>
+                    <a href="../backend/logout.php" class="text-red-500">Cerrar Sesión</a>
+                    <span class="material-icons">logout</span>
                 </div>
-            </div>
+            </header>
 
-            <!-- Gráfico -->
-            <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-                <h2 class="text-xl font-semibold mb-4">Distribución de Socios</h2>
-                <canvas id="myChart" width="400" height="150"></canvas>
-            </div>
-
-            <!-- Tabla de Socios Activos -->
-            <div class="mt-8">
-                <h2 class="text-2xl font-semibold text-gray-100 mb-4">Lista de Socios Activos</h2>
-                <div class="overflow-x-auto bg-gray-800 rounded-lg shadow-lg p-4">
-                    <table class="min-w-full bg-gray-900">
-                        <thead>
-                            <tr>
-                                <th class="px-6 py-3 border-b border-gray-700 text-left text-sm font-semibold text-gray-400">Nombre Completo</th>
-                                <th class="px-6 py-3 border-b border-gray-700 text-left text-sm font-semibold text-gray-400">Cédula</th>
-                                <th class="px-6 py-3 border-b border-gray-700 text-left text-sm font-semibold text-gray-400">Estado</th>
-                                <th class="px-6 py-3 border-b border-gray-700 text-left text-sm font-semibold text-gray-400">Vencimiento</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php include '../backend/get_socios.php'; ?>
-                        </tbody>
-                    </table>
+            <main class="flex-1 overflow-y-auto p-4">
+                <!-- Display de datos -->
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-gray-800 p-4 rounded-lg shadow-lg">
+                        <h2 class="text-lg font-semibold">Socios Activos</h2>
+                        <p class="text-3xl mt-2"><?php echo $total_activos; ?></p>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-lg shadow-lg">
+                        <h2 class="text-lg font-semibold">Socios Inactivos</h2>
+                        <p class="text-3xl mt-2"><?php echo $total_inactivos; ?></p>
+                    </div>
                 </div>
 
-                <!-- Load more button -->
-                <div class="mt-4 text-center">
-                    <a href="active_partners.php">
-                        <button class='px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700'>Ver más</button>
-                    </a>
-                </div>
-            </div>
-        </main>
+    <!-- Gráfico -->
+<div class="bg-gray-800 p-4 rounded-lg shadow-lg">
+    <h2 class="text-lg font-semibold mb-2 text-center">Gráfico</h2> <!-- Título centrado -->
+    <div class="w-full flex justify-center" style="height: 300px;"> <!-- Flexbox para centrar el gráfico -->
+        <canvas id="myChart"></canvas>
     </div>
 </div>
 
@@ -146,20 +118,38 @@ $conn->close();
             labels: ['Activos', 'Inactivos'],
             datasets: [{
                 data: [totalActivos, totalInactivos],
-                backgroundColor: ['#4CAF50', '#F44336'],
-                borderWidth: 1
+                backgroundColor: ['#4CAF50', '#F44336'], // Colores de las secciones del gráfico
+                borderColor: '#111827', // Un borde oscuro para resaltar los datos
+                borderWidth: 2
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'top',
+                    labels: {
+                        color: '#FFFFFF' // Colores blancos para las etiquetas
+                    },
+                    position: 'bottom'
+                }
+            },
+            scales: {
+                y: {
+                    ticks: {
+                        color: '#FFFFFF' // Color de los números del eje Y en blanco
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#FFFFFF' // Color de los números del eje X en blanco
+                    }
                 }
             }
         }
     });
 </script>
+
 
 </body>
 </html>
