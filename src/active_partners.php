@@ -1,17 +1,6 @@
 <?php
 include '../backend/db_connection.php';
 
-// Consulta para contar socios activos
-$sql_activos = "SELECT COUNT(*) AS total_activos FROM socios WHERE estado = 'activo'";
-$result_activos = $conn->query($sql_activos);
-$total_activos = $result_activos->fetch_assoc()['total_activos'];
-
-// Consulta para contar socios inactivos
-$sql_inactivos = "SELECT COUNT(*) AS total_inactivos FROM socios WHERE estado = 'inactivo'";
-$result_inactivos = $conn->query($sql_inactivos);
-$total_inactivos = $result_inactivos->fetch_assoc()['total_inactivos'];
-
-$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -23,6 +12,8 @@ $conn->close();
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 </head>
 <body class="bg-gray-900 text-gray-100">
 
@@ -89,67 +80,73 @@ $conn->close();
                 <div class="grid grid-cols-2 gap-3 mb-4">
                     <div class="bg-gray-800 p-4 rounded-lg shadow-lg">
                         <h2 class="text-lg font-semibold">Socios Activos</h2>
-                        <p class="text-3xl mt-2"><?php echo $total_activos; ?></p>
+                        <p id="total_activos" class="text-3xl mt-2">Cargando...</p>
                     </div>
                     <div class="bg-gray-800 p-4 rounded-lg shadow-lg">
                         <h2 class="text-lg font-semibold">Socios Inactivos</h2>
-                        <p class="text-3xl mt-2"><?php echo $total_inactivos; ?></p>
+                        <p id="total_inactivos" class="text-3xl mt-2">Cargando...</p>
                     </div>
                 </div>
 
-    <!-- Gráfico -->
-<div class="bg-gray-800 p-4 rounded-lg shadow-lg">
-    <h2 class="text-lg font-semibold mb-2 text-center">Gráfico</h2> <!-- Título centrado -->
-    <div class="w-full flex justify-center" style="height: 300px;"> <!-- Flexbox para centrar el gráfico -->
-        <canvas id="myChart"></canvas>
+                <!-- Gráfico -->
+                <div class="bg-gray-800 p-4 rounded-lg shadow-lg">
+                    <h2 class="text-lg font-semibold mb-2 text-center">Gráfico</h2>
+                    <div class="w-full flex justify-center" style="height: 300px;">
+                        <canvas id="myChart"></canvas>
+                    </div>
+                </div>
+
+                <script>
+                    // Llamada AJAX
+                    $.getJSON('../backend/get_partner_stats.php', function(data) {
+                        // Mostrar los totales
+                        $('#total_activos').text(data.total_activos);
+                        $('#total_inactivos').text(data.total_inactivos);
+
+                        //  gráfico con Chart.js
+                        const ctx = document.getElementById('myChart').getContext('2d');
+                        const myChart = new Chart(ctx, {
+                            type: 'pie',
+                            data: {
+                                labels: ['Activos', 'Inactivos'],
+                                datasets: [{
+                                    data: [data.total_activos, data.total_inactivos],
+                                    backgroundColor: ['#4CAF50', '#F44336'],
+                                    borderColor: '#111827',
+                                    borderWidth: 2
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        labels: {
+                                            color: '#FFFFFF'
+                                        },
+                                        position: 'bottom'
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        ticks: {
+                                            color: '#FFFFFF'
+                                        }
+                                    },
+                                    x: {
+                                        ticks: {
+                                            color: '#FFFFFF'
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    });
+                </script>
+
+            </main>
+        </div>
     </div>
-</div>
-
-<script>
-    // Datos desde PHP
-    const totalActivos = <?php echo $total_activos; ?>;
-    const totalInactivos = <?php echo $total_inactivos; ?>;
-
-    // Crear gráfico con Chart.js
-    const ctx = document.getElementById('myChart').getContext('2d');
-    const myChart = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: ['Activos', 'Inactivos'],
-            datasets: [{
-                data: [totalActivos, totalInactivos],
-                backgroundColor: ['#4CAF50', '#F44336'], // Colores de las secciones del gráfico
-                borderColor: '#111827', // Un borde oscuro para resaltar los datos
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    labels: {
-                        color: '#FFFFFF' // Colores blancos para las etiquetas
-                    },
-                    position: 'bottom'
-                }
-            },
-            scales: {
-                y: {
-                    ticks: {
-                        color: '#FFFFFF' // Color de los números del eje Y en blanco
-                    }
-                },
-                x: {
-                    ticks: {
-                        color: '#FFFFFF' // Color de los números del eje X en blanco
-                    }
-                }
-            }
-        }
-    });
-</script>
-
 
 </body>
 </html>
