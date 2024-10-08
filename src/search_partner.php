@@ -3,22 +3,30 @@ include '../backend/db_connection.php';
 
 // Inicializa el término de búsqueda vacío
 $search_term = '';
+$search_success = null; // Variable para almacenar el éxito o fracaso de la búsqueda
 if (isset($_GET['search_term'])) {
     $search_term = $_GET['search_term'];
+
+    // Consulta SQL para buscar coincidencias
+    $query = "SELECT * FROM socios WHERE 
+              nombre LIKE ? OR 
+              apellido LIKE ? OR 
+              cedula = ? OR 
+              accion = ?";
+
+    $stmt = $conn->prepare($query);
+    $search_param = "%" . $search_term . "%";
+    $stmt->bind_param("ssss", $search_param, $search_param, $search_term, $search_term);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    // Si hay resultados, la búsqueda tuvo éxito
+    if ($result->num_rows > 0) {
+        $search_success = true;
+    } else {
+        $search_success = false;
+    }
 }
-
-// Consulta SQL para buscar coincidencias
-$query = "SELECT * FROM socios WHERE 
-          nombre LIKE ? OR 
-          apellido LIKE ? OR 
-          cedula = ? OR 
-          accion = ?";
-
-$stmt = $conn->prepare($query);
-$search_param = "%" . $search_term . "%";
-$stmt->bind_param("ssss", $search_param, $search_param, $search_term, $search_term);
-$stmt->execute();
-$result = $stmt->get_result();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -92,53 +100,67 @@ $result = $stmt->get_result();
                 </div>
             </header>
             <main class="flex-1 overflow-y-auto p-4">
-            <!-- Search Form -->
-            <div class="p-6">
-                <h2 class="text-3xl font-semibold mb-6">Buscar Socio</h2>
-                <form action="search_partner.php" method="GET" class="bg-gray-800 p-6 rounded-lg shadow-md">
-                    <input type="text" name="search_term" placeholder="Buscar por nombre, apellido, cédula o acción" 
-                           class="bg-gray-700 text-gray-200 p-4 w-full mb-4 rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500">
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg w-full">
-                        Buscar
-                    </button>
-                </form>
-            </div>
+                <!-- Search Form -->
+                <div class="flex justify-center items-center">
+                    <div class="p-6 bg-gray-800 rounded-lg shadow-md w-full max-w-lg">
+                        <h2 class="text-3xl font-semibold mb-6 text-center">Buscar Socio</h2>
+                        <form action="search_partner.php" method="GET" class="flex flex-col items-center space-y-4">
+                            <div class="relative w-full">
+                                <label for="search_term" class="block mb-2 text-sm font-medium text-gray-300">Buscar</label>
+                                <input type="text" id="search_term" name="search_term"
+                                    value="<?php echo htmlspecialchars($search_term); ?>" 
+                                    class="bg-gray-700 border border-gray-500 text-white text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-3 pl-10" 
+                                    placeholder="Ingrese cédula, nombre, apellido o acción">
+                                
+                            </div>
 
-            <!-- Results Section -->
-            <div class="p-6">
-                <?php if ($result->num_rows > 0): ?>
-                    <table class="table-auto w-full bg-gray-800 text-gray-100 rounded-lg shadow-lg">
-                        <thead>
-                            <tr class="bg-gray-700">
-                                <th class="px-4 py-2">Nombre</th>
-                                <th class="px-4 py-2">Apellido</th>
-                                <th class="px-4 py-2">Cédula</th>
-                                <th class="px-4 py-2">Número</th>
-                                <th class="px-4 py-2">Correo</th>
-                                <th class="px-4 py-2">Acción</th>
-                                <th class="px-4 py-2">Estado</th>
-                                <th class="px-4 py-2">Vencimiento</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php while ($row = $result->fetch_assoc()): ?>
-                                <tr class="bg-gray-800 hover:bg-gray-700">
-                                    <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['nombre']); ?></td>
-                                    <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['apellido']); ?></td>
-                                    <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['cedula']); ?></td>
-                                    <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['numero']); ?></td>
-                                    <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['correo']); ?></td>
-                                    <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['accion']); ?></td>
-                                    <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['estado']); ?></td>
-                                    <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['vencimiento']); ?></td>
-                                </tr>
-                            <?php endwhile; ?>
-                        </tbody>
-                    </table>
-                <?php else: ?>
-                    <p class="text-red-500">No se encontraron resultados.</p>
-                <?php endif; ?>
-            </div>
+                            <button type="submit" class="bg-gray-700 hover:bg-gray-800 text-white p-3 rounded-lg w-full flex justify-center items-center space-x-2">
+                                <span class="material-icons">search</span>
+                                <span>Buscar</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div class="p-6 text-center">
+                    <?php if ($search_term): ?>
+                        <?php if ($search_success): ?>
+                            <p class="text-green-500">Socio encontrado.</p>
+                            <table class="table-auto w-full bg-gray-800 text-gray-100 rounded-lg shadow-lg mt-4">
+                                <thead>
+                                    <tr class="bg-gray-700">
+                                        <th class="px-4 py-2">Nombre</th>
+                                        <th class="px-4 py-2">Apellido</th>
+                                        <th class="px-4 py-2">Cédula</th>
+                                        <th class="px-4 py-2">Número</th>
+                                        <th class="px-4 py-2">Correo</th>
+                                        <th class="px-4 py-2">Acción</th>
+                                        <th class="px-4 py-2">Estado</th>
+                                        <th class="px-4 py-2">Vencimiento</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php while ($row = $result->fetch_assoc()): ?>
+                                        <tr class="bg-gray-800 hover:bg-gray-700">
+                                            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['nombre']); ?></td>
+                                            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['apellido']); ?></td>
+                                            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['cedula']); ?></td>
+                                            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['numero']); ?></td>
+                                            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['correo']); ?></td>
+                                            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['accion']); ?></td>
+                                            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['estado']); ?></td>
+                                            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['vencimiento']); ?></td>
+                                        </tr>
+                                    <?php endwhile; ?>
+                                </tbody>
+                            </table>
+                        <?php else: ?>
+                            <p class="text-red-500">No se encontraron resultados para "<?php echo htmlspecialchars($search_term); ?>"</p>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </div>
+            </main>
         </div>
     </div>
 </body>
