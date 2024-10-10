@@ -123,45 +123,51 @@ if (isset($_GET['search_term'])) {
                     </div>
                 </div>
 
-                <!-- Results Section -->
-                <div class="p-6 text-center">
-                    <?php if ($search_term): ?>
-                        <?php if ($search_success): ?>
-                            <p class="text-green-500">Socio encontrado.</p>
-                            <table class="table-auto w-full bg-gray-800 text-gray-100 rounded-lg shadow-lg mt-4">
+               <!-- Results Section -->
+            <div class="p-6 text-center">
+                <?php if ($search_term): ?>
+                    <?php if ($search_success): ?>
+                        <p class="text-green-500">Socio encontrado.</p>
+                        <table class="table-auto w-full bg-gray-800 text-gray-100 rounded-lg shadow-lg mt-4">
                             <thead>
-    <tr class="bg-gray-700">
-        <th class="px-4 py-2">Nombre Completo</th>
-        <th class="px-4 py-2">Cédula</th>
-        <th class="px-4 py-2">Número</th>
-        <th class="px-4 py-2">Correo</th>
-        <th class="px-4 py-2">Acción</th>
-        <th class="px-4 py-2">Estado</th>
-        <th class="px-4 py-2">Vencimiento</th>
-    </tr>
-</thead>
-<tbody>
-    <?php while ($row = $result->fetch_assoc()): ?>
-        <tr class="bg-gray-800 hover:bg-gray-700">
-            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['nombre_completo']); ?></td>
-            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['cedula']); ?></td>
-            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['numero']); ?></td>
-            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['correo']); ?></td>
-            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['accion']); ?></td>
-            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['estado']); ?></td>
-            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['vencimiento']); ?></td>
-        </tr>
-    <?php endwhile; ?>
-</tbody>
-
-                            </table>
-                        <?php else: ?>
-                            <p class="text-red-500">No se encontraron resultados para "<?php echo htmlspecialchars($search_term); ?>"</p>
-                        <?php endif; ?>
+                                <tr class="bg-gray-700">
+                                    <th class="px-4 py-2">Nombre Completo</th>
+                                    <th class="px-4 py-2">Cédula</th>
+                                    <th class="px-4 py-2">Número</th>
+                                    <th class="px-4 py-2">Correo</th>
+                                    <th class="px-4 py-2">Acción</th>
+                                    <th class="px-4 py-2">Estado</th>
+                                    <th class="px-4 py-2">Vencimiento</th>
+                                    <th class="px-4 py-2">Acción</th> <!-- Nueva columna -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php while ($row = $result->fetch_assoc()): ?>
+                                    <tr class="bg-gray-800 hover:bg-gray-700">
+                                        <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['nombre_completo']); ?></td>
+                                        <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['cedula']); ?></td>
+                                        <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['numero']); ?></td>
+                                        <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['correo']); ?></td>
+                                        <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['accion']); ?></td>
+                                        <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['estado']); ?></td>
+                                        <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['vencimiento']); ?></td>
+                                        <td class="border border-gray-700 px-4 py-2">
+                                           <!-- Botón "Ver Perfil" en modo oscuro -->
+                <a href="ver_perfil.php?cedula=<?php echo urlencode($row['cedula']); ?>" class="bg-gray-700 hover:bg-gray-600 text-gray-100 px-4 py-2 rounded-lg transition-colors duration-200">
+                     Perfil
+                </a>
+                                        </td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            </tbody>
+                        </table>
+                    <?php else: ?>
+                        <p class="text-red-500">No se encontraron resultados para "<?php echo htmlspecialchars($search_term); ?>"</p>
                     <?php endif; ?>
-                </div>
-            </main>
-        </div>
+                <?php endif; ?>
+            </div>
+        </main>
+    </div>
     </div>
 </body>
 </html>
