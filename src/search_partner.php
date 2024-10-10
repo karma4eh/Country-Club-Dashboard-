@@ -8,11 +8,11 @@ if (isset($_GET['search_term'])) {
     $search_term = $_GET['search_term'];
 
     // Consulta SQL para buscar coincidencias
-    $query = "SELECT * FROM socios WHERE 
-              nombre LIKE ? OR 
-              apellido LIKE ? OR 
-              cedula = ? OR 
-              accion = ?";
+    $query = "SELECT CONCAT(nombre, ' ', apellido) AS nombre_completo, cedula, numero, correo, accion, estado, vencimiento FROM socios WHERE 
+          nombre LIKE ? OR 
+          apellido LIKE ? OR 
+          cedula = ? OR 
+          accion = ?";
 
     $stmt = $conn->prepare($query);
     $search_param = "%" . $search_term . "%";
@@ -38,6 +38,7 @@ if (isset($_GET['search_term'])) {
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="../js/search_partner.js"></script>
 
 </head>
 <body class="bg-gray-900 text-gray-100">
@@ -104,7 +105,7 @@ if (isset($_GET['search_term'])) {
                 <div class="flex justify-center items-center">
                     <div class="p-6 bg-gray-800 rounded-lg shadow-md w-full max-w-lg">
                         <h2 class="text-3xl font-semibold mb-6 text-center">Buscar Socio</h2>
-                        <form action="search_partner.php" method="GET" class="flex flex-col items-center space-y-4">
+                        <form action="search_partner.php" method="GET" class="flex flex-col items-center space-y-4" onsubmit="return validateSearch()">
                             <div class="relative w-full">
                                 <label for="search_term" class="block mb-2 text-sm font-medium text-gray-300">Buscar</label>
                                 <input type="text" id="search_term" name="search_term"
@@ -128,32 +129,31 @@ if (isset($_GET['search_term'])) {
                         <?php if ($search_success): ?>
                             <p class="text-green-500">Socio encontrado.</p>
                             <table class="table-auto w-full bg-gray-800 text-gray-100 rounded-lg shadow-lg mt-4">
-                                <thead>
-                                    <tr class="bg-gray-700">
-                                        <th class="px-4 py-2">Nombre</th>
-                                        <th class="px-4 py-2">Apellido</th>
-                                        <th class="px-4 py-2">Cédula</th>
-                                        <th class="px-4 py-2">Número</th>
-                                        <th class="px-4 py-2">Correo</th>
-                                        <th class="px-4 py-2">Acción</th>
-                                        <th class="px-4 py-2">Estado</th>
-                                        <th class="px-4 py-2">Vencimiento</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php while ($row = $result->fetch_assoc()): ?>
-                                        <tr class="bg-gray-800 hover:bg-gray-700">
-                                            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['nombre']); ?></td>
-                                            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['apellido']); ?></td>
-                                            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['cedula']); ?></td>
-                                            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['numero']); ?></td>
-                                            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['correo']); ?></td>
-                                            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['accion']); ?></td>
-                                            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['estado']); ?></td>
-                                            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['vencimiento']); ?></td>
-                                        </tr>
-                                    <?php endwhile; ?>
-                                </tbody>
+                            <thead>
+    <tr class="bg-gray-700">
+        <th class="px-4 py-2">Nombre Completo</th>
+        <th class="px-4 py-2">Cédula</th>
+        <th class="px-4 py-2">Número</th>
+        <th class="px-4 py-2">Correo</th>
+        <th class="px-4 py-2">Acción</th>
+        <th class="px-4 py-2">Estado</th>
+        <th class="px-4 py-2">Vencimiento</th>
+    </tr>
+</thead>
+<tbody>
+    <?php while ($row = $result->fetch_assoc()): ?>
+        <tr class="bg-gray-800 hover:bg-gray-700">
+            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['nombre_completo']); ?></td>
+            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['cedula']); ?></td>
+            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['numero']); ?></td>
+            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['correo']); ?></td>
+            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['accion']); ?></td>
+            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['estado']); ?></td>
+            <td class="border border-gray-700 px-4 py-2"><?php echo htmlspecialchars($row['vencimiento']); ?></td>
+        </tr>
+    <?php endwhile; ?>
+</tbody>
+
                             </table>
                         <?php else: ?>
                             <p class="text-red-500">No se encontraron resultados para "<?php echo htmlspecialchars($search_term); ?>"</p>
