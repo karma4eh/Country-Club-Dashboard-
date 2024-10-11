@@ -138,7 +138,7 @@ if (isset($_GET['search_term'])) {
                                     <th class="px-4 py-2">Acción</th>
                                     <th class="px-4 py-2">Estado</th>
                                     <th class="px-4 py-2">Vencimiento</th>
-                                    <th class="px-4 py-2">Acción</th> <!-- Nueva columna -->
+                                    <th class="px-4 py-2">Acción</th> 
                                 </tr>
                             </thead>
                             <tbody>
