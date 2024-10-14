@@ -11,6 +11,7 @@ include '../backend/db_connection.php';
     <title>Country Club Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="../js/search_socios.js"></script>
     <script src="../js/ver_socios.js"></script>
 </head>
 <body class="bg-gray-900 text-gray-100">
@@ -103,13 +104,14 @@ include '../backend/db_connection.php';
            <h2 class="text-2xl font-semibold text-gray-100 mb-4 flex items-center">
     Socios Activos: <span class="text-yellow-500 ml-2"><?php echo $total_activos; ?></span>
 
-    <form action="../backend/get_socios.php" method="GET" class="ml-auto flex items-center space-x-2">
+    <form id="searchForm" class="ml-auto flex items-center space-x-2">
     <input type="text" id="search" name="search" placeholder="Ingresa nombre, apellido, cédula o acción" 
            class="bg-gray-700 border border-gray-600 text-gray-300 placeholder-gray-400 text-sm rounded-lg focus:ring-yellow-500 focus:border-yellow-500 p-2.5 w-80">
     
-    <button type="submit" class="bg-yellow-500 text-gray-900 p-2 rounded-lg hover:bg-yellow-600 focus:outline-none flex items-center justify-center" style="height: 40px; width: 40px;">
-        <span class="material-icons text-base">search</span>
-    </button>
+           <button type="submit" id="searchButton" class="bg-yellow-500 text-gray-900 p-2 rounded-lg hover:bg-yellow-600 focus:outline-none flex items-center justify-center" style="height: 40px; width: 40px;">
+    <span class="material-icons text-base">search</span>
+</button>
+
 </form>
 </h2>
 
