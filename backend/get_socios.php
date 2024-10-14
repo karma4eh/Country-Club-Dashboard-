@@ -1,9 +1,20 @@
 <?php
-
 include 'db_connection.php';
 
+// Obtener el término de búsqueda de la consulta
+$searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
 
-$sql = "SELECT id, nombre, apellido, cedula, accion, estado, vencimiento FROM socios LIMIT 100"; 
+// Escapar el término de búsqueda para evitar inyecciones SQL
+$searchTerm = $conn->real_escape_string($searchTerm);
+
+// Crear la consulta SQL
+$sql = "SELECT id, nombre, apellido, cedula, accion, estado, vencimiento FROM socios 
+        WHERE nombre LIKE '%$searchTerm%' OR 
+              apellido LIKE '%$searchTerm%' OR 
+              cedula LIKE '%$searchTerm%' OR 
+              accion LIKE '%$searchTerm%' 
+        LIMIT 100";
+
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {

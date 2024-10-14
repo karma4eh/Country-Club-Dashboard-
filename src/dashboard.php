@@ -1,6 +1,7 @@
 <?php
-
 include_once '../backend/count_socios_activos.php';
+include '../backend/db_connection.php';
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -99,21 +100,18 @@ include_once '../backend/count_socios_activos.php';
             </header>
 
             <main class="flex-1 overflow-y-auto p-6">
-            <h2 class="text-2xl font-semibold text-gray-100 mb-4 flex items-center">
+           <h2 class="text-2xl font-semibold text-gray-100 mb-4 flex items-center">
     Socios Activos: <span class="text-yellow-500 ml-2"><?php echo $total_activos; ?></span>
+
+    <form action="../backend/get_socios.php" method="GET" class="ml-auto flex items-center space-x-2">
+    <input type="text" id="search" name="search" placeholder="Ingresa nombre, apellido, cédula o acción" 
+           class="bg-gray-700 border border-gray-600 text-gray-300 placeholder-gray-400 text-sm rounded-lg focus:ring-yellow-500 focus:border-yellow-500 p-2.5 w-80">
     
-    <!-- Input y Botón de Búsqueda al lado de Socios Activos -->
-    <div class="ml-auto flex items-center space-x-2">
-        <!-- Input de búsqueda más largo con placeholder blanco -->
-        <input type="text" id="search" placeholder="Ingresa nombre, apellido, cédula o acción" 
-               class="bg-gray-700 border border-gray-600 text-gray-300 placeholder-gray text-sm rounded-lg focus:ring-yellow-500 focus:border-yellow-500 p-2.5 w-80">
-        
-        <!-- Botón de búsqueda más pequeño y alineado -->
-           <button class="bg-yellow-500 text-gray-900 p-2 rounded-lg hover:bg-yellow-600 focus:outline-none flex items-center justify-center" style="height: 40px; width: 40px;">
-            <span class="material-icons text-base">search</span>
-          </button>
-           </div>
-           </h2>
+    <button type="submit" class="bg-yellow-500 text-gray-900 p-2 rounded-lg hover:bg-yellow-600 focus:outline-none flex items-center justify-center" style="height: 40px; width: 40px;">
+        <span class="material-icons text-base">search</span>
+    </button>
+</form>
+</h2>
 
 
 
