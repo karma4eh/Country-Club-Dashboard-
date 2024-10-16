@@ -1,7 +1,10 @@
 <?php
 include_once '../backend/count_socios_activos.php';
 include '../backend/db_connection.php';
+session_start();
 
+// Verifica si el usuario ha iniciado sesión
+include_once '../backend/verificar_seccion.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">

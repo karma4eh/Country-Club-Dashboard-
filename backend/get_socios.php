@@ -8,12 +8,12 @@ $searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
 $searchTerm = $conn->real_escape_string($searchTerm);
 
 // Crear la consulta SQL
-$sql = "SELECT id, nombre, apellido, cedula, accion, estado, vencimiento FROM socios 
+$sql = "SELECT id, nombre, apellido, cedula, accion, estado FROM socios 
         WHERE nombre LIKE '%$searchTerm%' OR 
               apellido LIKE '%$searchTerm%' OR 
               cedula LIKE '%$searchTerm%' OR 
               accion LIKE '%$searchTerm%' 
-        LIMIT 100";
+        LIMIT 50";
 
 $result = $conn->query($sql);
 
