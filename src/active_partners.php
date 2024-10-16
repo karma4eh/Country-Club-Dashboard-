@@ -83,7 +83,7 @@ include '../backend/db_connection.php';
                         <p id="total_activos" class="text-3xl mt-2">Cargando...</p>
                     </div>
                     <div class="bg-gray-800 p-4 rounded-lg shadow-lg">
-                        <h2 class="text-lg font-semibold">Socios Inactivos</h2>
+                        <h2 class="text-lg font-semibold">Socios Rezagados</h2>
                         <p id="total_inactivos" class="text-3xl mt-2">Cargando...</p>
                     </div>
                 </div>

@@ -8,7 +8,7 @@ $searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
 $searchTerm = $conn->real_escape_string($searchTerm);
 
 // Crear la consulta SQL
-$sql = "SELECT id, nombre, apellido, cedula, accion, estado FROM socios 
+$sql = "SELECT id, nombre, apellido, cedula, accion, estado,deuda FROM socios 
         WHERE nombre LIKE '%$searchTerm%' OR 
               apellido LIKE '%$searchTerm%' OR 
               cedula LIKE '%$searchTerm%' OR 
@@ -28,7 +28,7 @@ if ($result->num_rows > 0) {
         $estado_clase = ($row['estado'] == 'activo') ? 'text-green-500' : 'text-red-500';
         $estado_texto = ($row['estado'] == 'activo') ? 'Activo' : 'Inactivo';
         echo "<td class='px-6 py-4 border-b border-gray-700 text-sm $estado_clase'>" . $estado_texto . "</td>";
-        echo "<td class='px-6 py-4 border-b border-gray-700 text-sm'>" . $row['vencimiento'] . "</td>";
+        echo "<td class='px-6 py-4 border-b border-gray-700 text-sm'>$" . $row['deuda'] . "</td>";
         
         // Botón para abrir el modal 
         echo "<td class='px-6 py-4 border-b border-gray-700 text-sm'>

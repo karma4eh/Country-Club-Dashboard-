@@ -26,15 +26,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             // Contraseña incorrecta
             $error = "Contraseña incorrecta.";
-            echo "<script>alert('$error');</script>";
-            header("Location: ../src/index.html");
+            header("Location: ../src/index.php?error=" . urlencode($error));
             exit();
         }
     } else {
         // Usuario no encontrado
         $error = "Usuario no encontrado.";
-        echo "<script>alert('$error');</script>";
-        header("Location: ../src/index.html");
+        header("Location: ../src/index.php?error=" . urlencode($error));
         exit();
     }
 

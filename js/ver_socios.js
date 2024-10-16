@@ -16,7 +16,7 @@ function verDetallesSocio(socioId) {
                 <p><strong>Correo:</strong> ${data.correo}</p>
                 <p><strong>Acción:</strong> ${data.accion}</p>
                 <p><strong>Estado:</strong> ${data.estado == 'activo' ? 'Activo' : 'Inactivo'}</p>
-                <p><strong>Vencimiento:</strong> ${data.vencimiento}</p>
+                <p><strong>Vencimiento:</strong> ${data.deuda}</p>
             `;
         })
         .catch(error => console.error('Error al cargar los datos del socio:', error));
