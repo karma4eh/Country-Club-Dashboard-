@@ -1,7 +1,5 @@
 <?php
 session_start();
-
-// Aquí puedes manejar la lógica de errores o cualquier otra lógica de inicio de sesión.
 $error_message = "";
 if (isset($_GET['error'])) {
     $error_message = htmlspecialchars($_GET['error']); // Captura el mensaje de error

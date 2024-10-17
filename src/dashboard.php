@@ -57,11 +57,7 @@ include_once '../backend/verificar_seccion.php';
                     <span class="material-icons">group</span>
                     <span class="ml-3">Socios Activos</span>
                 </a>
-                <a href="search_partner.php" class="flex items-center px-6 py-2 text-gray-200 hover:bg-gray-700">
-                    <span class="material-icons">search</span>
-                    <span class="ml-3">Buscar Socio</span>
-                </a>
-                <a href="#" class="flex items-center px-6 py-2 text-gray-200 hover:bg-gray-700">
+                <a href="register_partner.php" class="flex items-center px-6 py-2 text-gray-200 hover:bg-gray-700">
                     <span class="material-icons">person_add</span>
                     <span class="ml-3">Registrar Socio</span>
                 </a>
