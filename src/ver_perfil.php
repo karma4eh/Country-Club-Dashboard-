@@ -1,7 +1,9 @@
 <?php
+session_start();
 // Conexión a la base de datos
 include '../backend/db_connection.php'; // Asegúrate de que este archivo tiene la conexión correctamente
 include_once '../backend/verificar_seccion.php';
+
 // Verificamos que se haya pasado la cédula por la URL o por otro método (GET o POST)
 if (isset($_GET['cedula'])) {
     $cedula = $_GET['cedula'];

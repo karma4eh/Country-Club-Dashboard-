@@ -12,10 +12,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $correo = trim($_POST['correo']);
     $accion = trim($_POST['accion']);
     $estado = trim($_POST['estado']);
+    $deuda = 0.00; // Valor de deuda inicial
 
     // Validar que todos los campos están llenos
     if (empty($nombre) || empty($apellido) || empty($direccion) || empty($cedula) || empty($numero) || empty($correo) || empty($accion) || empty($estado)) {
-        echo "Todos los campos son obligatorios. Por favor, verifica e intenta nuevamente.";
+        echo json_encode(["error" => "Todos los campos son obligatorios. Por favor, verifica e intenta nuevamente."]);
         exit;
     }
 
@@ -28,24 +29,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($result_check->num_rows > 0) {
         // Si hay resultados, significa que ya existe una acción, cédula o correo duplicado
-        echo "Error: La acción, cédula o correo ya está registrado en la base de datos.";
+        echo json_encode(["error" => "Error: La acción, cédula o correo ya está registrado en la base de datos."]);
     } else {
         // Insertar nuevo socio en la base de datos
-        $sql = "INSERT INTO socios (nombre, apellido, direccion, cedula, numero, correo, accion, estado) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO socios (nombre, apellido, direccion, cedula, numero, correo, accion, estado, deuda) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param('ssssssss', $nombre, $apellido, $direccion, $cedula, $numero, $correo, $accion, $estado);
+        $stmt->bind_param('sssssssss', $nombre, $apellido, $direccion, $cedula, $numero, $correo, $accion, $estado, $deuda);
 
         if ($stmt->execute()) {
-            echo "El socio ha sido registrado exitosamente.";
+            echo json_encode(["success" => "El socio ha sido registrado exitosamente."]);
         } else {
-            echo "Error al registrar el socio: " . $conn->error;
+            echo json_encode(["error" => "Error al registrar el socio: " . $conn->error]);
         }
     }
 
     // Cerrar la conexión
     $stmt_check->close();
-    $stmt->close();
     $conn->close();
 }
 ?>
