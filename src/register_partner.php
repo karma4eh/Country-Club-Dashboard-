@@ -1,5 +1,4 @@
 <?php
-include_once '../backend/count_socios_activos.php';
 include '../backend/db_connection.php';
 session_start();
 include_once '../backend/verificar_seccion.php';
@@ -68,96 +67,88 @@ include_once '../backend/verificar_seccion.php';
             </div>
         </header>
 
-        <main class="flex-1 overflow-y-auto p-6">
-            <div class="max-w-md mx-auto bg-gray-800 shadow-md rounded-lg p-6 text-white">
-                <h2 class="text-2xl font-semibold mb-6 text-center">Registro de Socios</h2>
-
-                <form action="../backend/register_socio.php" method="POST" class="w-full max-w-lg" id="registerForm">
-                    <div class="flex flex-wrap -mx-3 mb-6">
-                        <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                            <label class="block uppercase tracking-wide text-white text-xs font-bold mb-2" for="nombre">
-                                Nombres
+      <main class="flex-1 overflow-y-auto p-6">
+            <!-- Contenedor del formulario -->
+            <div class="max-w-lg mx-auto bg-gray-800 shadow-md rounded-lg p-4 text-white">
+                <form action="../backend/register_socio.php" method="POST" class="w-full" id="registerForm">
+                    <!-- Nombres y Apellidos -->
+                    <div class="flex flex-wrap mb-3">
+                        <div class="w-1/2 pr-2">
+                            <label class="block uppercase tracking-wide text-white text-xs font-bold mb-1" for="nombre">
+                                <span class="material-icons">person</span> Nombres
                             </label>
-                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" id="nombre" name="nombre" type="text" placeholder="Maria" required>
-                            <p class="text-red-500 text-xs italic hidden" id="nombre-error">Por favor complete este campo.</p>
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-2 px-3 leading-tight focus:outline-none focus:bg-white" id="nombre" name="nombre" type="text" placeholder="Maria" required>
                         </div>
-                        <div class="w-full md:w-1/2 px-3">
-                            <label class="block uppercase tracking-wide text-white text-xs font-bold mb-2" for="apellido">
-                                Apellidos
+                        <div class="w-1/2 pl-2">
+                            <label class="block uppercase tracking-wide text-white text-xs font-bold mb-1" for="apellido">
+                                <span class="material-icons">person</span> Apellidos
                             </label>
-                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white" id="apellido" name="apellido" type="text" placeholder="Rodriguez" required>
-                            <p class="text-red-500 text-xs italic hidden" id="apellido-error">Por favor complete este campo.</p>
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-2 px-3 leading-tight focus:outline-none focus:bg-white" id="apellido" name="apellido" type="text" placeholder="Rodriguez" required>
                         </div>
                     </div>
 
-                    <div class="flex flex-wrap -mx-3 mb-6">
-                        <div class="w-full px-3">
-                            <label class="block uppercase tracking-wide text-white text-xs font-bold mb-2" for="direccion">
-                                Dirección
+                    <!-- Dirección -->
+                    <div class="mb-3">
+                        <label class="block uppercase tracking-wide text-white text-xs font-bold mb-1" for="direccion">
+                            <span class="material-icons">home</span> Dirección
+                        </label>
+                        <input class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-2 px-3 leading-tight focus:outline-none focus:bg-white" id="direccion" name="direccion" type="text" placeholder="Calle, sector, ciudad" required>
+                    </div>
+
+                    <!-- Cédula y Teléfono -->
+                    <div class="flex flex-wrap mb-3">
+                        <div class="w-1/2 pr-2">
+                            <label class="block uppercase tracking-wide text-white text-xs font-bold mb-1" for="cedula">
+                                <span class="material-icons">badge</span> Cédula
                             </label>
-                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white" id="direccion" name="direccion" type="text" placeholder="Calle, carrera, sector, ciudad, código postal" required>
-                            <p class="text-red-500 text-xs italic hidden" id="direccion-error">Por favor complete este campo.</p>
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-2 px-3 leading-tight focus:outline-none focus:bg-white" id="cedula" name="cedula" type="text" placeholder="Ingresa la cédula" required>
+                        </div>
+                        <div class="w-1/2 pl-2">
+                            <label class="block uppercase tracking-wide text-white text-xs font-bold mb-1" for="numero">
+                                <span class="material-icons">phone</span> Teléfono
+                            </label>
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-2 px-3 leading-tight focus:outline-none focus:bg-white" id="numero" name="numero" type="tel" placeholder="Ingresa el número" required>
                         </div>
                     </div>
 
-                    <div class="flex flex-wrap -mx-3 mb-6">
-                        <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                            <label class="block uppercase tracking-wide text-white text-xs font-bold mb-2" for="cedula">
-                                Cédula
-                            </label>
-                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white" id="cedula" name="cedula" type="text" placeholder="Ingresa la cédula" required>
-                            <p class="text-red-500 text-xs italic hidden" id="cedula-error">Por favor complete este campo.</p>
-                        </div>
-                        <div class="w-full md:w-1/2 px-3">
-                            <label class="block uppercase tracking-wide text-white text-xs font-bold mb-2" for="numero">
-                                Teléfono
-                            </label>
-                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white" id="numero" name="numero" type="tel" placeholder="Ingresa el número" required>
-                            <p class="text-red-500 text-xs italic hidden" id="numero-error">Por favor complete este campo.</p>
-                        </div>
+                    <!-- Acción del socio y correo -->
+                    <div class="mb-3">
+                        <label class="block uppercase tracking-wide text-white text-xs font-bold mb-1" for="accion_socio">
+                            <span class="material-icons">assignment</span> Acción del Socio
+                        </label>
+                        <input class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-2 px-3 leading-tight focus:outline-none focus:bg-white" id="accion_socio" name="accion" type="text" placeholder="Ingresa la acción del socio" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block uppercase tracking-wide text-white text-xs font-bold mb-1" for="correo">
+                            <span class="material-icons">email</span> Correo Electrónico
+                        </label>
+                        <input class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-2 px-3 leading-tight focus:outline-none focus:bg-white" id="correo" name="correo" type="email" placeholder="Ingresa el correo" required>
                     </div>
 
-                    <div class="flex flex-wrap -mx-3 mb-6">
-                        <div class="w-full px-3">
-                            <label class="block uppercase tracking-wide text-white text-xs font-bold mb-2" for="accion_socio">
-                                Acción del socio
-                            </label>
-                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white" id="accion_socio" name="accion" type="text" placeholder="Ingresa la acción del socio" required>
-                            <p class="text-red-500 text-xs italic hidden" id="accion-error">Por favor complete este campo.</p>
-                        </div>
+                    <!-- Estado del socio -->
+                    <div class="mb-3">
+                        <label class="block uppercase tracking-wide text-white text-xs font-bold mb-1" for="estado">
+                            <span class="material-icons">toggle_on</span> Estado del Socio
+                        </label>
+                        <select class="block appearance-none w-full bg-gray-200 border text-gray-700 py-2 px-3 pr-8 rounded leading-tight focus:outline-none focus:bg-white" id="estado" name="estado" required>
+                            <option value="" disabled selected>Selecciona el estado</option>
+                            <option value="activo">Activo</option>
+                            <option value="inactivo">Inactivo</option>
+                        </select>
                     </div>
 
-                    <div class="flex flex-wrap -mx-3 mb-6">
-                        <div class="w-full px-3">
-                            <label class="block uppercase tracking-wide text-white text-xs font-bold mb-2" for="correo">
-                                Correo Electrónico
-                            </label>
-                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white" id="correo" name="correo" type="email" placeholder="Ingresa el correo" required>
-                            <p class="text-red-500 text-xs italic hidden" id="correo-error">Por favor complete este campo.</p>
-                        </div>
+                    <!-- Mensaje de respuesta -->
+                    <div id="response-message" class="hidden p-2 mt-2 text-sm"></div>
+                    <div class="flex justify-center">
+                        <button id="submit-btn" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+                            Registrar Socio
+                        </button>
                     </div>
-
-<div class="flex flex-wrap -mx-3 mb-6">
-        <div class="w-full px-3">
-            <label class="block uppercase tracking-wide text-white text-xs font-bold mb-2" for="estado">
-                Estado del Socio
-            </label>
-            <select class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="estado" name="estado" required>
-                <option value="" disabled selected>Selecciona el estado</option>
-                <option value="activo">Activo</option>
-                <option value="inactivo">Inactivo</option>
-            </select>
-            <p class="text-red-500 text-xs italic hidden" id="estado-error">Por favor seleccione el estado.</p>
-        </div>
+                </form>
+            </div>
+        </main>
     </div>
-
-    <div id="response-message" class="hidden p-4 mt-4 text-sm"></div>
-    <div class="flex justify-center">
-        <button id="submit-btn" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
-            Registrar Socio
-        </button>
-    </div>
-</form>
+</div>
 <script>
     const form = document.getElementById('registerForm');
 const responseMessage = document.getElementById('response-message');
