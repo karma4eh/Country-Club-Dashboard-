@@ -121,13 +121,42 @@ include '../backend/bcv_rate.php';
         </div>
     </div>
 </div>
+<script>
+document.getElementById('cedula').addEventListener('input', function() {
+    const cedula = this.value;
+
+    if (cedula.length >= 8) { // Validación mínima para evitar consultas innecesarias
+        // Enviar solicitud AJAX para obtener la deuda del socio
+        fetch('../backend/Debt_calculation.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'cedula=' + encodeURIComponent(cedula),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                // Mostrar los datos del socio y su deuda
+                document.getElementById('nombre_socio').textContent = data.nombre;
+                document.getElementById('deuda_socio').textContent = '$' + data.deuda_total.toFixed(2);
+                document.getElementById('tasa_bcv').textContent = data.tasa_bcv.toFixed(4);
+                document.getElementById('monto_bolivares').textContent = 'Bs ' + data.deuda_bolivares.toFixed(2);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+});
+</script>
 
 <script>
     // Obtener la tasa BCV desde PHP
     const tasaBCV = <?php echo obtenerTasaDolarBCV(); ?>;
 
     // Mostrar la tasa del BCV en el div
-    document.getElementById('tasa_bcv').textContent = tasaBCV.toFixed(2);
+    document.getElementById('tasa_bcv').textContent = tasaBCV.toFixed(4);
 
     // Función para calcular el monto en bolívares
     function calcularBolivares() {
