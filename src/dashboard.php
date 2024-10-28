@@ -125,7 +125,7 @@ include_once '../backend/verificar_seccion.php';
                                 <th class="px-6 py-3 border-b border-gray-700 text-left text-sm font-semibold text-gray-400">Cédula</th>
                                 <th class="px-6 py-3 border-b border-gray-700 text-left text-sm font-semibold text-gray-400">Acción</th>
                                 <th class="px-6 py-3 border-b border-gray-700 text-left text-sm font-semibold text-gray-400">Estado</th>
-                                <th class="px-6 py-3 border-b border-gray-700 text-left text-sm font-semibold text-gray-400">Deuda</th>
+                                <th class="px-6 py-3 border-b border-gray-700 text-left text-sm font-semibold text-gray-400">Saldo</th>
                                 <th class="px-6 py-3 border-b border-gray-700 text-left text-sm font-semibold text-gray-400">Acciones</th>
                             </tr>
                         </thead>

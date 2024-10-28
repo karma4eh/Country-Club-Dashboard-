@@ -5,7 +5,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $cedula = $_POST['cedula'];
 
     // Consulta para obtener datos del socio en base a su cédula
-    $query = "SELECT id, nombre, deuda, ultimo_mes_pagado FROM socios WHERE cedula = ?";
+    $query = "SELECT id, nombre, saldo, ultimo_mes_pagado FROM socios WHERE cedula = ?";
     $stmt = $conn->prepare($query);
     $stmt->bind_param('s', $cedula);
     $stmt->execute();
@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $socio = $result->fetch_assoc();
         $id = $socio['id'];
         $nombre = $socio['nombre'];
-        $deuda = $socio['deuda'];
+        $deuda = $socio['saldo'];
         $ultimo_mes_pagado = new DateTime($socio['ultimo_mes_pagado']);
 
         // Calcular los meses adeudados desde la última fecha de pago

@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo json_encode(["error" => "Error: La acción, cédula o correo ya está registrado en la base de datos."]);
     } else {
         // Insertar nuevo socio en la base de datos
-        $sql = "INSERT INTO socios (nombre, apellido, direccion, cedula, numero, correo, accion, estado, deuda) 
+        $sql = "INSERT INTO socios (nombre, apellido, direccion, cedula, numero, correo, accion, estado, saldo) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param('sssssssss', $nombre, $apellido, $direccion, $cedula, $numero, $correo, $accion, $estado, $deuda);
