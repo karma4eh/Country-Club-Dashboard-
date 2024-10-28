@@ -82,8 +82,13 @@ include '../backend/bcv_rate.php';
 
                         <div>
                             <label for="monto_dolares" class="block text-sm">Monto en Dólares</label>
-                            <input type="number" id="monto_dolares" name="monto_dolares" step="0.01" required class="w-full px-3 py-2 bg-gray-700 text-white rounded" placeholder="Ingrese el monto en dólares" oninput="calcularBolivares()">
+                            <input type="number" id="monto_dolares" name="monto_dolares" step="0.01" min="0" required class="w-full px-3 py-2 bg-gray-700 text-white rounded" placeholder="Ingrese el monto en dólares" oninput="calcularBolivares()">
+
                         </div>
+                        <div>
+                         <label for="descripcion" class="block text-sm">Descripción del Pago</label>
+                          <input type="text" id="descripcion" name="descripcion" required class="w-full px-3 py-2 bg-gray-700 text-white rounded" placeholder="Descripción del pago">
+                                 </div>
 
                         <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">Registrar Pago</button>
                     </form>
@@ -122,36 +127,6 @@ include '../backend/bcv_rate.php';
     </div>
 </div>
 <script>
-document.getElementById('cedula').addEventListener('input', function() {
-    const cedula = this.value;
-
-    if (cedula.length >= 8) { // Validación mínima para evitar consultas innecesarias
-        // Enviar solicitud AJAX para obtener la deuda del socio
-        fetch('../backend/Debt_calculation.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'cedula=' + encodeURIComponent(cedula),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error);
-            } else {
-                // Mostrar los datos del socio y su deuda
-                document.getElementById('nombre_socio').textContent = data.nombre;
-                document.getElementById('deuda_socio').textContent = '$' + data.deuda_total.toFixed(2);
-                document.getElementById('tasa_bcv').textContent = data.tasa_bcv.toFixed(4);
-                document.getElementById('monto_bolivares').textContent = 'Bs ' + data.deuda_bolivares.toFixed(2);
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
-});
-</script>
-
-<script>
     // Obtener la tasa BCV desde PHP
     const tasaBCV = <?php echo obtenerTasaDolarBCV(); ?>;
 
@@ -164,6 +139,68 @@ document.getElementById('cedula').addEventListener('input', function() {
         const montoBolivares = montoDolares * tasaBCV;
         document.getElementById('monto_bolivares').textContent = montoBolivares.toFixed(2);
     }
+
+    // Evento para obtener los datos del socio
+    document.getElementById('cedula').addEventListener('input', function() {
+        const cedula = this.value;
+
+        if (cedula.length >= 8) { // Validación mínima para evitar consultas innecesarias
+            // Enviar solicitud AJAX para obtener la deuda del socio
+            fetch('../backend/Debt_calculation.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'cedula=' + encodeURIComponent(cedula),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    // Mostrar los datos del socio y su deuda
+                    document.getElementById('nombre_socio').textContent = data.nombre;
+                    document.getElementById('deuda_socio').textContent = '$' + data.deuda_total.toFixed(2);
+                    document.getElementById('monto_bolivares').textContent = 'Bs ' + data.deuda_bolivares.toFixed(2);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        } else {
+            // Limpiar datos si la cédula es menor a 8 caracteres
+            document.getElementById('nombre_socio').textContent = 'N/A';
+            document.getElementById('deuda_socio').textContent = 'N/A';
+            document.getElementById('monto_bolivares').textContent = '0.00';
+        }
+    });
+
+    // Evento para manejar el envío del formulario
+    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const cedula = document.getElementById('cedula').value;
+        const monto_dolares = document.getElementById('monto_dolares').value;
+        const descripcion = document.getElementById('descripcion').value;
+
+        fetch('../backend/register_payment.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `cedula=${encodeURIComponent(cedula)}&monto_dolares=${encodeURIComponent(monto_dolares)}&descripcion=${encodeURIComponent(descripcion)}`,
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.success);
+                document.getElementById('paymentForm').reset();
+                document.getElementById('nombre_socio').textContent = 'N/A';
+                document.getElementById('deuda_socio').textContent = 'N/A';
+                document.getElementById('tasa_bcv').textContent = tasaBCV.toFixed(4); // Reestablecer tasa BCV
+                document.getElementById('monto_bolivares').textContent = '0.00';
+            } else {
+                alert(data.error);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
 </script>
 
 </body>

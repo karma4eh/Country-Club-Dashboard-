@@ -1,57 +1,45 @@
 <?php
 include 'db_connection.php';
-include 'bcv_rate.php';
-$tasa_bcv = obtenerTasaDolarBCV();
 
-if (isset($_POST['cedula'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $cedula = $_POST['cedula'];
 
-    // Buscar el socio en la base de datos por cédula.
-    $sql_socio = "SELECT id, nombre, apellido, ultimo_mes_pagado, deuda FROM socios WHERE cedula = ?";
-    $stmt_socio = $conn->prepare($sql_socio);
-    $stmt_socio->bind_param("s", $cedula);
-    $stmt_socio->execute();
-    $resultado_socio = $stmt_socio->get_result();
+    // Consulta para obtener datos del socio en base a su cédula
+    $query = "SELECT id, nombre, deuda, ultimo_mes_pagado FROM socios WHERE cedula = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param('s', $cedula);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-    if ($resultado_socio->num_rows > 0) {
-        $socio = $resultado_socio->fetch_assoc();
-        $socio_id = $socio['id'];
-        $nombre_socio = $socio['nombre'] . " " . $socio['apellido'];
-        $ultimo_mes_pagado = $socio['ultimo_mes_pagado'];  // Nuevo campo
-        $deuda_actual = $socio['deuda'];  // Columna existente de deuda
+    if ($result->num_rows > 0) {
+        $socio = $result->fetch_assoc();
+        $id = $socio['id'];
+        $nombre = $socio['nombre'];
+        $deuda = $socio['deuda'];
+        $ultimo_mes_pagado = new DateTime($socio['ultimo_mes_pagado']);
 
-        // Obtener la fecha actual y la fecha del último pago
+        // Calcular los meses adeudados desde la última fecha de pago
         $fecha_actual = new DateTime();
-        $fecha_ultimo_pago = new DateTime($ultimo_mes_pagado);
+        $meses_adeudados = $fecha_actual->diff($ultimo_mes_pagado)->m;
+        $meses_adeudados += 12 * $fecha_actual->diff($ultimo_mes_pagado)->y;
 
-        // Calcular la diferencia de meses
-        $diferencia_meses = $fecha_ultimo_pago->diff($fecha_actual)->m + ($fecha_ultimo_pago->diff($fecha_actual)->y * 12);
+        // Calcula la deuda en función de los meses adeudados
+        $monto_mensual = 70; // Define el monto mensual
+        $deuda_total = $deuda + ($meses_adeudados * $monto_mensual);
 
-        // Costo mensual (por ejemplo, $70)
-        $costo_mensual = 70;
-        
-        // Deuda total: meses sin pagar * costo mensual
-        $deuda_calculada = $diferencia_meses * $costo_mensual;
+        // Obtener la tasa del BCV
+        include 'bcv_rate.php';
+        $tasa_bcv = obtenerTasaDolarBCV();
+        $deuda_bolivares = $deuda_total * $tasa_bcv;
 
-        // Actualizar la deuda si es diferente a la calculada
-        if ($deuda_calculada != $deuda_actual) {
-            $sql_actualizar_deuda = "UPDATE socios SET deuda = ? WHERE id = ?";
-            $stmt_actualizar_deuda = $conn->prepare($sql_actualizar_deuda);
-            $stmt_actualizar_deuda->bind_param("di", $deuda_calculada, $socio_id);
-            $stmt_actualizar_deuda->execute();
-        }
-
-        // Devolver los datos en formato JSON para el frontend
-        $response = [
-            'nombre' => $nombre_socio,
-            'deuda_total' => $deuda_calculada,
-            'meses_morosos' => $diferencia_meses,
+        echo json_encode([
+            'nombre' => $nombre,
+            'deuda_total' => $deuda_total,
             'tasa_bcv' => $tasa_bcv,
-            'deuda_bolivares' => $deuda_calculada * $tasa_bcv
-        ];
-        echo json_encode($response);
+            'deuda_bolivares' => $deuda_bolivares
+        ]);
     } else {
-        echo json_encode(['error' => 'Socio no encontrado.']);
+        echo json_encode(['error' => 'Socio no encontrado']);
     }
 }
 ?>
