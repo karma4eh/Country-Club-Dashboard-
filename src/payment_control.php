@@ -10,7 +10,7 @@ include '../backend/bcv_rate.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrar Socio - Country Club</title>
+    <title>Registrar pago - Country Club</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
@@ -99,12 +99,13 @@ include '../backend/bcv_rate.php';
                     
 
                     <div class="mb-2 flex items-center justify-between">
-                        <span class="text-white-400">Nombre del Socio:</span>
-                        <span id="nombre_socio" class="text-white">N/A</span> <!-- Aquí se mostrará el nombre del socio -->
-                    </div>
+                   <span class="text-white-400">Socio:</span>
+                   <span id="nombre_socio" class="text-white text-right flex-grow">N/A</span> <!-- Aquí se mostrará el nombre del socio -->
+                   </div>
+
 
                     <div class="mb-2 flex items-center justify-between">
-                        <span class="text-white-400">Deuda del Socio:</span>
+                        <span class="text-white-400">Saldo:</span>
                         <span id="deuda_socio" class="text-white">N/A</span> <!-- Aquí se mostrará la deuda del socio -->
                     </div>
 
@@ -159,9 +160,10 @@ include '../backend/bcv_rate.php';
                     alert(data.error);
                 } else {
                     // Mostrar los datos del socio y su deuda
-                    document.getElementById('nombre_socio').textContent = data.nombre;
+                    document.getElementById('nombre_socio').textContent = data.nombre + ' ' + data.apellido;
                     document.getElementById('deuda_socio').textContent = '$' + data.deuda_total.toFixed(2);
                     document.getElementById('monto_bolivares').textContent = 'Bs ' + data.deuda_bolivares.toFixed(2);
+
                 }
             })
             .catch(error => console.error('Error:', error));

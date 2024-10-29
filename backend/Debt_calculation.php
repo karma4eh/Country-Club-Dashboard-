@@ -5,7 +5,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $cedula = $_POST['cedula'];
 
     // Consulta para obtener datos del socio en base a su cédula
-    $query = "SELECT id, nombre, saldo, ultimo_mes_pagado FROM socios WHERE cedula = ?";
+    $query = "SELECT id, nombre, apellido, saldo FROM socios WHERE cedula = ?";
     $stmt = $conn->prepare($query);
     $stmt->bind_param('s', $cedula);
     $stmt->execute();
@@ -14,29 +14,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($result->num_rows > 0) {
         $socio = $result->fetch_assoc();
         $id = $socio['id'];
-        $nombre = $socio['nombre'];
-        $deuda = $socio['saldo'];
-        $ultimo_mes_pagado = new DateTime($socio['ultimo_mes_pagado']);
+        $nombre = $socio['nombre']; // Obtener primer nombre
+        $apellido = $socio['apellido']; // Obtener primer apellido
+        $saldo = $socio['saldo'];
 
-        // Calcular los meses adeudados desde la última fecha de pago
-        $fecha_actual = new DateTime();
-        $meses_adeudados = $fecha_actual->diff($ultimo_mes_pagado)->m;
-        $meses_adeudados += 12 * $fecha_actual->diff($ultimo_mes_pagado)->y;
+        // Inicializa la deuda en bolívares
+        $deuda_bolivares = 0;
 
-        // Calcula la deuda en función de los meses adeudados
-        $monto_mensual = 70; // Define el monto mensual
-        $deuda_total = $deuda + ($meses_adeudados * $monto_mensual);
+        // Solo calcular deuda en bolívares si el saldo es negativo
+        if ($saldo < 0) {
+            // Obtener la tasa del BCV
+            include 'bcv_rate.php';
+            $tasa_bcv = obtenerTasaDolarBCV();
+            
+            // Calcular la deuda total en bolívares usando el saldo negativo
+            $deuda_total = abs($saldo); // Usar el valor absoluto del saldo para la deuda total
+            $deuda_bolivares = $deuda_total * $tasa_bcv; // Esto ahora debería dar el valor correcto
+        } else {
+            // Si el saldo es positivo, no hay deuda
+            $deuda_total = 0; // La deuda total es 0 si no hay deuda
+        }
 
-        // Obtener la tasa del BCV
-        include 'bcv_rate.php';
-        $tasa_bcv = obtenerTasaDolarBCV();
-        $deuda_bolivares = $deuda_total * $tasa_bcv;
-
+        // Devolver la información en formato JSON
         echo json_encode([
             'nombre' => $nombre,
-            'deuda_total' => $deuda_total,
-            'tasa_bcv' => $tasa_bcv,
-            'deuda_bolivares' => $deuda_bolivares
+            'apellido' => $apellido,
+            'saldo' => $saldo, // Mostrar saldo como negativo si hay deuda
+            'deuda_total' => ($saldo < 0) ? $deuda_total : 0, // Mostrar la deuda total si hay deuda
+            'tasa_bcv' => ($saldo < 0) ? $tasa_bcv : null, // Mostrar la tasa solo si hay deuda
+            'deuda_bolivares' => $deuda_bolivares // Mostrar la deuda en bolívares como un valor positivo
         ]);
     } else {
         echo json_encode(['error' => 'Socio no encontrado']);

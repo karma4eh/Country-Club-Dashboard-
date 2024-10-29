@@ -23,8 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bind_param('isd', $socio_id, $descripcion, $monto_dolares);
 
         if ($stmt->execute()) {
-            // Actualizar el último mes pagado y deuda
-            $query_update = "UPDATE socios SET deuda = deuda - ?, ultimo_mes_pagado = NOW() WHERE id = ?";
+            // Actualizar el último mes pagado y saldo
+            $query_update = "UPDATE socios SET saldo = saldo + ?, ultimo_mes_pagado = NOW() WHERE id = ?";
             $stmt_update = $conn->prepare($query_update);
             $stmt_update->bind_param('di', $monto_dolares, $socio_id);
             $stmt_update->execute();
