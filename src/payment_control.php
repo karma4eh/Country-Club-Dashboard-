@@ -122,11 +122,11 @@ include '../backend/bcv_rate.php';
                     </div>
 
                     <div class="mb-2 flex items-center justify-between">
-    <span class="text-white-400">Estado:</span>
-    <span id="estado_socio" class="text-red-500 font-bold">N/A</span> <!-- Aquí se mostrará el estado del socio -->
-</div>
+                      <span class="text-white-400">Estado:</span>
+                      <span id="estado_socio" class="text-red-500 font-bold">N/A</span> <!-- Aquí se mostrará el estado del socio -->
+                        </div>
 
-<div class="mb-2 flex items-center justify-between">
+                <div class="mb-2 flex items-center justify-between">
     <span class="text-white-400">Meses Adeudados:</span>
     <span id="meses_debe" class="text-red-500">0</span> <!-- Aquí se mostrará la cantidad de meses adeudados -->
 </div>
@@ -142,94 +142,93 @@ include '../backend/bcv_rate.php';
     </div>
 </div>
 <script>
-    // Obtener la tasa BCV desde PHP
-    const tasaBCV = <?php echo obtenerTasaDolarBCV(); ?>;
+        // Obtener la tasa BCV desde PHP
+        const tasaBCV = <?php echo obtenerTasaDolarBCV(); ?>;
 
-    // Mostrar la tasa del BCV en el div
-    document.getElementById('tasa_bcv').textContent = tasaBCV.toFixed(4);
+        // Mostrar la tasa del BCV en el div
+        document.getElementById('tasa_bcv').textContent = tasaBCV.toFixed(4);
 
-    // Función para calcular el monto en bolívares
-    function calcularBolivares() {
-        const montoDolares = document.getElementById('monto_dolares').value;
-        const montoBolivares = montoDolares * tasaBCV;
-        document.getElementById('monto_bolivares').textContent = montoBolivares.toFixed(2);
-    }
-
-    // Evento para obtener los datos del socio
-    document.getElementById('cedula').addEventListener('input', function() {
-        const cedula = this.value;
-
-        if (cedula.length >= 7) { // Validación mínima para evitar consultas innecesarias
-            // Enviar solicitud AJAX para obtener la deuda del socio
-            fetch('../backend/Debt_calculation.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: 'cedula=' + encodeURIComponent(cedula),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    alert(data.error);
-                    limpiarDatosSocio(); // Limpiar datos si hay un error
-                } else {
-                    // Mostrar los datos del socio y su deuda
-                    document.getElementById('nombre_socio').textContent = data.nombre + ' ' + data.apellido;
-                    document.getElementById('deuda_socio').textContent = data.saldo + ' $$';
-                    document.getElementById('estado_socio').textContent = data.estado;
-                    document.getElementById('meses_debe').textContent = data.meses_deuda; // Asegúrate de que el ID sea correcto
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        } else {
-            limpiarDatosSocio(); // Limpiar datos si la cédula no es válida
+        // Función para calcular el monto en bolívares
+        function calcularBolivares() {
+            const montoDolares = document.getElementById('monto_dolares').value;
+            const montoBolivares = montoDolares * tasaBCV;
+            document.getElementById('monto_bolivares').textContent = montoBolivares.toFixed(2);
         }
-    });
 
-    // Función para limpiar los datos del socio
-    function limpiarDatosSocio() {
-        document.getElementById('nombre_socio').textContent = 'N/A';
-        document.getElementById('deuda_socio').textContent = 'N/A';
-        document.getElementById('estado_socio').textContent = 'N/A';
-        document.getElementById('meses_debe').textContent = '0';
-        document.getElementById('monto_bolivares').textContent = '0.00';
-    }
+        // Evento para obtener los datos del socio
+        document.getElementById('cedula').addEventListener('input', function() {
+            const cedula = this.value;
 
-    // Enviar el formulario de pago
-    document.getElementById('paymentForm').addEventListener('submit', function(event) {
-        event.preventDefault(); // Evitar el envío normal del formulario
+            if (cedula.length >= 7) { // Validación mínima para evitar consultas innecesarias
+                // Enviar solicitud AJAX para obtener la deuda del socio
+                fetch('../backend/Debt_calculation.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'cedula=' + encodeURIComponent(cedula),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        limpiarDatosSocio(); // Limpiar datos si hay un error
+                    } else {
+                        // Mostrar los datos del socio y su deuda
+                        document.getElementById('nombre_socio').textContent = data.nombre + ' ' + data.apellido;
+                        document.getElementById('deuda_socio').textContent = data.saldo + ' $$';
+                        document.getElementById('estado_socio').textContent = data.estado;
+                        document.getElementById('meses_debe').textContent = data.meses_deuda;
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            } else {
+                limpiarDatosSocio(); // Limpiar datos si la cédula no es válida
+            }
+        });
 
-        const cedula = document.getElementById('cedula').value;
-        const montoDolares = document.getElementById('monto_dolares').value;
-        const descripcion = document.getElementById('descripcion').value;
-
-        // Validar que los campos no estén vacíos
-        if (cedula && montoDolares && descripcion) {
-            fetch('../backend/register_payment.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: 'cedula=' + encodeURIComponent(cedula) + '&monto_dolares=' + encodeURIComponent(montoDolares) + '&descripcion=' + encodeURIComponent(descripcion),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Pago registrado exitosamente');
-                    // Reiniciar el formulario
-                    document.getElementById('paymentForm').reset();
-                    limpiarDatosSocio(); // Limpiar datos del socio después de registrar el pago
-                } else {
-                    alert(data.error);
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        } else {
-            alert('Por favor, complete todos los campos.');
+        // Función para limpiar los datos del socio
+        function limpiarDatosSocio() {
+            document.getElementById('nombre_socio').textContent = 'N/A';
+            document.getElementById('deuda_socio').textContent = 'N/A';
+            document.getElementById('estado_socio').textContent = 'N/A';
+            document.getElementById('meses_debe').textContent = '0';
+            document.getElementById('monto_bolivares').textContent = '0.00';
         }
-    });
-</script>
 
+        // Enviar el formulario de pago
+        document.getElementById('paymentForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Evitar el envío normal del formulario
+
+            const cedula = document.getElementById('cedula').value;
+            const montoDolares = document.getElementById('monto_dolares').value;
+            const descripcion = document.getElementById('descripcion').value;
+
+            // Validar que los campos no estén vacíos
+            if (cedula && montoDolares && descripcion) {
+                fetch('../backend/register_payment.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'cedula=' + encodeURIComponent(cedula) + '&monto_dolares=' + encodeURIComponent(montoDolares) + '&descripcion=' + encodeURIComponent(descripcion),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Pago registrado exitosamente');
+                        // Reiniciar el formulario
+                        document.getElementById('paymentForm').reset();
+                        limpiarDatosSocio(); // Limpiar datos del socio después de registrar el pago
+                    } else {
+                        alert(data.error);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            } else {
+                alert('Por favor, complete todos los campos.');
+            }
+        });
+    </script>
 </body>
 </html>

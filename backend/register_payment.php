@@ -7,7 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $descripcion = $_POST['descripcion'];
 
     // Obtener el ID del socio
-    $query = "SELECT id FROM socios WHERE cedula = ?";
+    $query = "SELECT id, nombre, apellido, saldo FROM socios WHERE cedula = ?";
     $stmt = $conn->prepare($query);
     $stmt->bind_param('s', $cedula);
     $stmt->execute();
@@ -16,6 +16,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($result->num_rows > 0) {
         $socio = $result->fetch_assoc();
         $socio_id = $socio['id'];
+        $nombre_socio = $socio['nombre'];
+        $apellido_socio = $socio['apellido'];
+        $saldo_actual = $socio['saldo'];
 
         // Registrar el pago
         $query = "INSERT INTO pagos (socios_id, descripcion, monto) VALUES (?, ?, ?)";
@@ -29,12 +32,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt_update->bind_param('di', $monto_dolares, $socio_id);
             $stmt_update->execute();
 
-            echo json_encode(['success' => 'Pago registrado correctamente']);
+            // Calcular nuevo saldo
+            $nuevo_saldo = $saldo_actual + $monto_dolares;
+
+            // Generar la factura
+            $factura = [
+                'nombre' => $nombre_socio,
+                'apellido' => $apellido_socio,
+                'cedula' => $cedula,
+                'descripcion' => $descripcion,
+                'monto_dolares' => number_format($monto_dolares, 2, '.', ''),
+                'nuevo_saldo' => number_format($nuevo_saldo, 2, '.', ''),
+                'fecha_pago' => date('Y-m-d H:i:s'),
+            ];
+
+            // Devolver la respuesta como JSON
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true, 'factura' => $factura]);
+            exit(); // Asegúrate de salir después de devolver la respuesta
         } else {
-            echo json_encode(['error' => 'Error al registrar el pago']);
+            echo json_encode(['success' => false, 'error' => 'Error al registrar el pago']);
         }
     } else {
-        echo json_encode(['error' => 'Socio no encontrado']);
+        echo json_encode(['success' => false, 'error' => 'Socio no encontrado']);
     }
+} else {
+    echo json_encode(['success' => false, 'error' => 'Método de solicitud no válido']);
 }
 ?>

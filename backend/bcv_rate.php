@@ -4,8 +4,9 @@ include_once 'db_connection.php';
 function obtenerTasaDolarBCV() {
     global $conn;
 
-    // Obtener la fecha de hoy, la hora actual, y el día de la semana
+    // Obtener la fecha y hora actual
     $hoy = date('Y-m-d');
+    $fecha_hora_actual = date('Y-m-d H:i:s');
     $hora_actual = date('H:i');
     $dia_semana = date('N'); // 1 = Lunes, ..., 5 = Viernes, 6 = Sábado, 7 = Domingo
 
@@ -33,7 +34,7 @@ function obtenerTasaDolarBCV() {
     $scraped_today = $ultima_tasa['scraped_today'] ?? 0;
 
     // Solo realizar scraping si es después de las 5 PM y no se ha hecho ya hoy
-    if ($hora_actual < "17:00" || ($fecha_ultima_actualizacion === $hoy && $scraped_today)) {
+    if ($hora_actual < "17:00" || ($fecha_ultima_actualizacion >= $hoy && $scraped_today)) {
         return $tasa;
     }
 
@@ -64,10 +65,10 @@ function obtenerTasaDolarBCV() {
         $tasa_dolar = (float)$tasa_dolar;
 
         // Guardar la nueva tasa en la base de datos si ha cambiado o si no se ha registrado hoy
-        if ($tasa === null || $tasa != $tasa_dolar || $fecha_ultima_actualizacion !== $hoy) {
+        if ($tasa === null || $tasa != $tasa_dolar || $fecha_ultima_actualizacion < $hoy) {
             $stmt = $conn->prepare("INSERT INTO tasa_dolar (tasa, fecha_actualizacion, scraped_today) VALUES (?, ?, ?)");
             $scraped = 1; // Indicar que se ha hecho scraping hoy
-            $stmt->bind_param("dsi", $tasa_dolar, $hoy, $scraped);
+            $stmt->bind_param("dsi", $tasa_dolar, $fecha_hora_actual, $scraped);
             $stmt->execute();
             $stmt->close();
         }
