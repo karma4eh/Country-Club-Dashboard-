@@ -1,60 +1,49 @@
 <?php
-require('path/to/fpdf.php');
+require('../fpd186/fpdf.php');
+include 'db_connection.php';
 
-// Obtener la tasa del BCV
-$bcv_data = file_get_contents('bcv_rate.php');
-$bcv_data = json_decode($bcv_data, true);
-$tasa_bcv = $bcv_data['tasa'] ?? 0; // Si no se obtiene la tasa, se establece en 0
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Obtener los datos del formulario
+    $cedula = $_POST['cedula'];
+    $montoDolares = $_POST['monto_dolares'];
+    $descripcion = $_POST['descripcion'];
+    $tasaBCV = obtenerTasaDolarBCV(); // Asegúrate de tener definida esta función
 
-$fecha = date('d/m/Y H:i:s'); // Formato de fecha: día/mes/año hora
+    // Calcular el monto en bolívares
+    $montoBolivares = $montoDolares * $tasaBCV;
 
-class PDF extends FPDF {
-    // Cabecera de página
-    function Header() {
-        // Logo del Country Club
-        $this->Image('img/logo.png', 10, 8, 33); // Ajusta la posición y el tamaño según sea necesario
-        $this->SetFont('Arial', 'B', 12);
-        $this->Cell(0, 10, 'Factura', 0, 1, 'C');
-        $this->Ln(10);
+    // Generar el PDF de la factura
+    $pdf = new FPDF();
+    $pdf->AddPage();
+    $pdf->SetFont('Arial', 'B', 16);
+    $pdf->Cell(0, 10, 'Factura de Pago - Country Club', 0, 1, 'C');
+    $pdf->Ln(10);
+
+    $pdf->SetFont('Arial', '', 12);
+    $pdf->Cell(0, 10, 'Cédula: ' . $cedula, 0, 1);
+    $pdf->Cell(0, 10, 'Monto en Dólares: $' . number_format($montoDolares, 2), 0, 1);
+    $pdf->Cell(0, 10, 'Monto en Bolívares: Bs ' . number_format($montoBolivares, 2), 0, 1);
+    $pdf->Cell(0, 10, 'Descripción: ' . $descripcion, 0, 1);
+    $pdf->Cell(0, 10, 'Tasa BCV: ' . number_format($tasaBCV, 4), 0, 1);
+
+    // Guardar el PDF en un directorio y obtener la ruta
+    $pdfFilePath = '../invoices/factura_' . $cedula . '_' . time() . '.pdf';
+    $pdf->Output('F', $pdfFilePath);
+
+    // Leer el contenido del PDF para almacenarlo en la base de datos
+    $pdfContent = file_get_contents($pdfFilePath);
+
+    // Guardar el PDF en la base de datos
+    $stmt = $conn->prepare("INSERT INTO facturas (cedula, monto_dolares, monto_bolivares, descripcion, tasa_bcv, pdf_factura) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("sddsss", $cedula, $montoDolares, $montoBolivares, $descripcion, $tasaBCV, $pdfContent);
+
+    if ($stmt->execute()) {
+        echo "Factura generada y guardada exitosamente.";
+    } else {
+        echo "Error al guardar la factura: " . $stmt->error;
     }
 
-    // Pie de página
-    function Footer() {
-        $this->SetY(-15);
-        $this->SetFont('Arial', 'I', 8);
-        $this->Cell(0, 10, 'Página ' . $this->PageNo() . '/{nb}', 0, 0, 'C');
-    }
+    $stmt->close();
+    $conn->close();
 }
-
-// Datos de la factura
-$nombre = $_GET['nombre'] ?? 'Nombre no disponible';
-$apellido = $_GET['apellido'] ?? 'Apellido no disponible';
-$monto = $_GET['monto_dolares'] ?? '0.00';
-$descripcion = $_GET['descripcion'] ?? 'Sin descripción';
-
-// Crear un nuevo PDF
-$pdf = new PDF();
-$pdf->AliasNbPages();
-$pdf->AddPage();
-$pdf->SetFont('Arial', '', 12);
-
-// Añadir contenido
-$pdf->Cell(0, 10, 'Nombre: ' . $nombre . ' ' . $apellido, 0, 1);
-$pdf->Cell(0, 10, 'Monto: $' . number_format((float)$monto, 2, '.', ''), 0, 1);
-$pdf->Cell(0, 10, 'Descripción: ' . $descripcion, 0, 1);
-$pdf->Cell(0, 10, 'Tasa del BCV: ' . $tasa_bcv, 0, 1);
-$pdf->Cell(0, 10, 'Fecha: ' . $fecha, 0, 1);
-
-// Guardar el PDF como "factura.pdf"
-$pdfFilePath = 'factura_' . uniqid() . '.pdf'; // Generar un nombre único para el archivo
-$pdf->Output('F', $pdfFilePath); // Guardar el archivo en el servidor
-
-// Enviar el PDF al navegador para descarga
-header('Content-Type: application/pdf');
-header('Content-Disposition: attachment; filename="' . basename($pdfFilePath) . '"');
-readfile($pdfFilePath);
-
-// Borrar el archivo después de enviarlo (opcional)
-unlink($pdfFilePath); // Eliminar el archivo del servidor si no lo necesitas guardar
-exit; // Asegúrate de salir después de enviar el archivo
 ?>

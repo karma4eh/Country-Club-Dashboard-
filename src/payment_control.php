@@ -13,9 +13,9 @@ include '../backend/bcv_rate.php';
     <title>Registrar pago - Country Club</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="../js/modalpayment.js"></script>
 </head>
 <body class="bg-gray-900 text-gray-100">
-
 <!-- Sidebar -->
 <div class="flex h-screen">
     <div class="w-64 bg-gray-800 shadow-lg">
@@ -69,6 +69,26 @@ include '../backend/bcv_rate.php';
             </div>
         </header>
        <!-- Contenedor centrado -->
+        <!-- Ventana Modal -->
+<div id="popup-modal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 flex items-center justify-center w-full h-full">
+    <div class="relative p-4 w-full max-w-md">
+        <div class="relative bg-gray-700 rounded-lg shadow-lg p-6">
+            <button class="absolute top-2 right-2 text-gray-300 hover:text-white" onclick="cerrarModal()">
+                <span class="material-icons">close</span>
+            </button>
+            <h3 class="text-lg font-bold text-white">Confirmar Pago</h3>
+            <p class="text-sm text-gray-300 mt-2">Por favor, confirme los datos a continuación:</p>
+            <p class="text-sm text-gray-300 mt-2">Cédula: <span id="confirm_cedula"></span></p>
+            <p class="text-sm text-gray-300">Monto en Dólares: <span id="confirm_monto_dolares"></span></p>
+            <p class="text-sm text-gray-300">Descripción: <span id="confirm_descripcion"></span></p>
+            <div class="mt-4 flex justify-center">
+                <button id="confirm_button" class="text-white bg-green-600 hover:bg-green-700 font-bold py-2 px-4 rounded">Confirmar</button>
+                <button id="cancel_button" class="text-white bg-red-600 hover:bg-red-700 font-bold py-2 px-4 rounded ml-4" data-modal-hide="popup-modal" onclick="cerrarModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
        <div class="flex-grow flex items-center justify-center mt-10"> <!-- Agregar mt-10 para separar del header -->
             <div class="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-2xl flex">
                 <!-- Formulario de pago -->
@@ -142,93 +162,124 @@ include '../backend/bcv_rate.php';
     </div>
 </div>
 <script>
-        // Obtener la tasa BCV desde PHP
-        const tasaBCV = <?php echo obtenerTasaDolarBCV(); ?>;
+      // Obtener la tasa BCV desde PHP
+const tasaBCV = <?php echo obtenerTasaDolarBCV(); ?>;
 
-        // Mostrar la tasa del BCV en el div
-        document.getElementById('tasa_bcv').textContent = tasaBCV.toFixed(4);
+// Mostrar la tasa del BCV en el div
+document.getElementById('tasa_bcv').textContent = tasaBCV.toFixed(4);
 
-        // Función para calcular el monto en bolívares
-        function calcularBolivares() {
-            const montoDolares = document.getElementById('monto_dolares').value;
-            const montoBolivares = montoDolares * tasaBCV;
-            document.getElementById('monto_bolivares').textContent = montoBolivares.toFixed(2);
-        }
+// Función para calcular el monto en bolívares
+function calcularBolivares() {
+    const montoDolares = document.getElementById('monto_dolares').value;
+    const montoBolivares = montoDolares * tasaBCV;
+    document.getElementById('monto_bolivares').textContent = montoBolivares.toFixed(2);
+}
 
-        // Evento para obtener los datos del socio
-        document.getElementById('cedula').addEventListener('input', function() {
-            const cedula = this.value;
+// Evento para obtener los datos del socio
+document.getElementById('cedula').addEventListener('input', function() {
+    const cedula = this.value;
 
-            if (cedula.length >= 7) { // Validación mínima para evitar consultas innecesarias
-                // Enviar solicitud AJAX para obtener la deuda del socio
-                fetch('../backend/Debt_calculation.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: 'cedula=' + encodeURIComponent(cedula),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        alert(data.error);
-                        limpiarDatosSocio(); // Limpiar datos si hay un error
-                    } else {
-                        // Mostrar los datos del socio y su deuda
-                        document.getElementById('nombre_socio').textContent = data.nombre + ' ' + data.apellido;
-                        document.getElementById('deuda_socio').textContent = data.saldo + ' $$';
-                        document.getElementById('estado_socio').textContent = data.estado;
-                        document.getElementById('meses_debe').textContent = data.meses_deuda;
-                    }
-                })
-                .catch(error => console.error('Error:', error));
+    if (cedula.length >= 7) { // Validación mínima para evitar consultas innecesarias
+        // Enviar solicitud AJAX para obtener la deuda del socio
+        fetch('../backend/Debt_calculation.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'cedula=' + encodeURIComponent(cedula),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                limpiarDatosSocio(); // Limpiar datos si hay un error
             } else {
-                limpiarDatosSocio(); // Limpiar datos si la cédula no es válida
+                // Mostrar los datos del socio y su deuda en la ventana modal
+                document.getElementById('nombre_socio').textContent = data.nombre + ' ' + data.apellido;
+                document.getElementById('deuda_socio').textContent = data.saldo + ' $$';
+                document.getElementById('estado_socio').textContent = data.estado;
+                document.getElementById('meses_debe').textContent = data.meses_deuda;
+
+                // Abrir la ventana modal
+                abrirModal();
             }
-        });
+        })
+        .catch(error => console.error('Error:', error));
+    } else {
+        limpiarDatosSocio(); // Limpiar datos si la cédula no es válida
+    }
+});
 
-        // Función para limpiar los datos del socio
-        function limpiarDatosSocio() {
-            document.getElementById('nombre_socio').textContent = 'N/A';
-            document.getElementById('deuda_socio').textContent = 'N/A';
-            document.getElementById('estado_socio').textContent = 'N/A';
-            document.getElementById('meses_debe').textContent = '0';
-            document.getElementById('monto_bolivares').textContent = '0.00';
-        }
+// Función para limpiar los datos del socio
+function limpiarDatosSocio() {
+    document.getElementById('nombre_socio').textContent = 'N/A';
+    document.getElementById('deuda_socio').textContent = 'N/A';
+    document.getElementById('estado_socio').textContent = 'N/A';
+    document.getElementById('meses_debe').textContent = '0';
+    document.getElementById('monto_bolivares').textContent = '0.00';
+}
 
-        // Enviar el formulario de pago
-        document.getElementById('paymentForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Evitar el envío normal del formulario
+// Función para abrir la ventana modal
+function abrirModal() {
+    document.getElementById('modal').style.display = 'block';
+}
 
-            const cedula = document.getElementById('cedula').value;
-            const montoDolares = document.getElementById('monto_dolares').value;
-            const descripcion = document.getElementById('descripcion').value;
+// Función para cerrar la ventana modal
+function cerrarModal() {
+    document.getElementById('modal').style.display = 'none';
+}
 
-            // Validar que los campos no estén vacíos
-            if (cedula && montoDolares && descripcion) {
-                fetch('../backend/register_payment.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: 'cedula=' + encodeURIComponent(cedula) + '&monto_dolares=' + encodeURIComponent(montoDolares) + '&descripcion=' + encodeURIComponent(descripcion),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Pago registrado exitosamente');
-                        // Reiniciar el formulario
-                        document.getElementById('paymentForm').reset();
-                        limpiarDatosSocio(); // Limpiar datos del socio después de registrar el pago
-                    } else {
-                        alert(data.error);
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-            } else {
-                alert('Por favor, complete todos los campos.');
-            }
-        });
+// Enviar el formulario de pago
+document.getElementById('paymentForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Evitar el envío normal del formulario
+
+    const cedula = document.getElementById('cedula').value;
+    const montoDolares = document.getElementById('monto_dolares').value;
+    const descripcion = document.getElementById('descripcion').value;
+
+    // Validar que los campos no estén vacíos
+    if (cedula && montoDolares && descripcion) {
+        // Mostrar la ventana modal con los datos del pago
+        document.getElementById('confirm_cedula').textContent = cedula;
+        document.getElementById('confirm_monto_dolares').textContent = montoDolares;
+        document.getElementById('confirm_descripcion').textContent = descripcion;
+
+        // Mostrar modal
+        document.getElementById('popup-modal').classList.remove('hidden');
+
+        // Confirmar el pago
+        document.getElementById('confirm_button').onclick = function() {
+            fetch('../backend/register_payment.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'cedula=' + encodeURIComponent(cedula) + '&monto_dolares=' + encodeURIComponent(montoDolares) + '&descripcion=' + encodeURIComponent(descripcion),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Pago registrado exitosamente');
+                    // Reiniciar el formulario
+                    document.getElementById('paymentForm').reset();
+                    limpiarDatosSocio(); // Limpiar datos del socio después de registrar el pago
+                    document.getElementById('popup-modal').classList.add('hidden'); // Cerrar modal
+                } else {
+                    alert(data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        };
+    } else {
+        alert('Por favor, complete todos los campos.');
+    }
+});
+
+// Cancelar el pago
+document.getElementById('cancel_button').onclick = function() {
+    document.getElementById('popup-modal').classList.add('hidden'); // Cerrar modal
+};
+
     </script>
 </body>
 </html>
