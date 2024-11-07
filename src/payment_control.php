@@ -36,7 +36,7 @@ include '../backend/bcv_rate.php';
                 <span class="material-icons">payment</span>
                 <span class="ml-3">Control de Pagos</span>
             </a>
-            <a href="#" class="flex items-center px-6 py-2 text-gray-200 hover:bg-gray-700">
+            <a href="movements.php" class="flex items-center px-6 py-2 text-gray-200 hover:bg-gray-700">
                 <span class="material-icons">history</span>
                 <span class="ml-3">Historial de Movimientos</span>
             </a>
@@ -162,10 +162,10 @@ include '../backend/bcv_rate.php';
     </div>
 </div>
 <script>
-      // Obtener la tasa BCV desde PHP
+      // Obtener la tasa BCV
 const tasaBCV = <?php echo obtenerTasaDolarBCV(); ?>;
 
-// Mostrar la tasa del BCV en el div
+// Mostrar la tasa en el div
 document.getElementById('tasa_bcv').textContent = tasaBCV.toFixed(4);
 
 // Función para calcular el monto en bolívares
