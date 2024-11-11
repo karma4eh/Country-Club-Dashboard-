@@ -44,14 +44,11 @@ include '../backend/bcv_rate.php';
                 <span class="material-icons">mail</span>
                 <span class="ml-3">Alertas</span>
             </a>
-            <a href="#" class="flex items-center px-6 py-2 text-gray-200 hover:bg-gray-700">
+            <a href="users.php" class="flex items-center px-6 py-2 text-gray-200 hover:bg-gray-700">
                 <span class="material-icons">account_circle</span>
                 <span class="ml-3">Usuarios</span>
             </a>
-            <a href="#" class="flex items-center px-6 py-2 text-gray-200 hover:bg-gray-700">
-                <span class="material-icons">settings</span>
-                <span class="ml-3">Ajustes</span>
-            </a>
+            
         </nav>
     </div>
 
