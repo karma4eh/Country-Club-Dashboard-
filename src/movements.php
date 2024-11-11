@@ -68,23 +68,28 @@ include '../backend/verificar_seccion.php';
             </div>
         </header>
 
-        <!-- Tabla de movimientos -->
-        <div class="flex-grow flex items-center justify-center mt-10">
+         <!-- Tabla de movimientos -->
+         <div class="flex-grow flex items-center justify-center mt-10">
             <div class="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-5xl">
-                <h2 class="text-2xl font-bold mb-4 text-center text-white">Historial de Movimientos</h2>
+                <h2 class="text-2xl font-bold mb-4 text-center text-white flex items-center justify-center">
+                    <span class="material-icons mr-2">history</span>
+                    Historial de Movimientos
+                </h2>
+                
                 <!-- Cargando Spinner -->
                 <div id="loading-spinner" class="flex justify-center items-center text-white mb-4">
                     <div class="spinner-border animate-spin h-8 w-8 border-t-4 border-white rounded-full"></div>
                     <span class="ml-2">Cargando...</span>
                 </div>
+                
                 <!-- Tabla de movimientos (inicialmente oculta) -->
-                <table id="movimientos-table" class="min-w-full table-auto text-left text-sm text-gray-400 hidden">
-                    <thead>
+                <table id="movimientos-table" class="min-w-full table-auto text-left text-sm text-gray-400 hidden rounded-lg overflow-hidden">
+                    <thead class="bg-gray-700 text-gray-200">
                         <tr>
-                            <th class="px-4 py-2">Fecha</th>
-                            <th class="px-4 py-2">Usuario</th>
-                            <th class="px-4 py-2">Tipo</th>
-                            <th class="px-4 py-2">Rol</th> <!-- Nueva columna para Rol -->
+                            <th class="px-4 py-3">Fecha</th>
+                            <th class="px-4 py-3">Usuario</th>
+                            <th class="px-4 py-3">Tipo</th>
+                            <th class="px-4 py-3">Rol</th>
                         </tr>
                     </thead>
                     <tbody id="movimientos-table-body">
@@ -97,10 +102,10 @@ include '../backend/verificar_seccion.php';
 </div>
 
 <script>
-// Promesa que asegura un tiempo mínimo de 3 segundos antes de mostrar la tabla
+//  tiempo mínimo de 3 segundos antes de mostrar la tabla
 const minLoadTime = new Promise(resolve => setTimeout(resolve, 3000));
 
-// Obtener movimientos y mostrarlos en la tabla
+// Obtener movimientos
 const fetchData = fetch('../backend/get_movimientos.php')
     .then(response => response.json())
     .then(data => {
@@ -109,13 +114,13 @@ const fetchData = fetch('../backend/get_movimientos.php')
         if (data.length > 0) {
             data.forEach(movimiento => {
                 const row = document.createElement('tr');
-                row.classList.add('border-b', 'border-gray-700');
+                row.classList.add('border-b', 'border-gray-700', 'hover:bg-gray-700', 'cursor-pointer');
 
                 row.innerHTML = `
                     <td class="px-4 py-2">${movimiento.fecha}</td>
                     <td class="px-4 py-2">${movimiento.usuario}</td>
                     <td class="px-4 py-2">${movimiento.tipo}</td>
-                    <td class="px-4 py-2">${movimiento.rol}</td> <!-- Mostrar rol -->
+                    <td class="px-4 py-2">${movimiento.rol}</td>
                 `;
 
                 tableBody.appendChild(row);
@@ -130,7 +135,7 @@ const fetchData = fetch('../backend/get_movimientos.php')
         tableBody.innerHTML = "<tr><td colspan='4' class='text-center py-4'>Error al cargar movimientos.</td></tr>";
     });
 
-// Ocultar el spinner y mostrar la tabla después de que ambos: datos y tiempo mínimo estén listos
+// Ocultar el spinner y mostrar la tabla
 Promise.all([fetchData, minLoadTime]).then(() => {
     const loadingSpinner = document.getElementById('loading-spinner');
     const table = document.getElementById('movimientos-table');
@@ -141,4 +146,4 @@ Promise.all([fetchData, minLoadTime]).then(() => {
 </script>
 
 </body>
-</html> 
+</html>

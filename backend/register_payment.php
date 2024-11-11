@@ -1,10 +1,12 @@
 <?php
 include 'db_connection.php';
+session_start(); // Asegurarse de que la sesión esté iniciada para acceder a $_SESSION
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $cedula = $_POST['cedula'];
     $monto_dolares = $_POST['monto_dolares'];
     $descripcion = $_POST['descripcion'];
+    $usuario_id = $_SESSION['usuario_id']; // Obtener el ID del usuario logueado desde la sesión
 
     // Obtener el ID del socio
     $query = "SELECT id, nombre, apellido, saldo FROM socios WHERE cedula = ?";
@@ -35,6 +37,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Calcular nuevo saldo
             $nuevo_saldo = $saldo_actual + $monto_dolares;
 
+            // Registrar el movimiento en la tabla de movimientos
+            $query_movimiento = "INSERT INTO movimientos (usuarios_id, tipo, fecha) VALUES (?, 'Pago', NOW())";
+            $stmt_movimiento = $conn->prepare($query_movimiento);
+            $stmt_movimiento->bind_param('i', $usuario_id);
+            $stmt_movimiento->execute();
+
             // Generar la factura
             $factura = [
                 'nombre' => $nombre_socio,
@@ -49,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Devolver la respuesta como JSON
             header('Content-Type: application/json');
             echo json_encode(['success' => true, 'factura' => $factura]);
-            exit(); // Asegúrate de salir después de devolver la respuesta
+            exit();
         } else {
             echo json_encode(['success' => false, 'error' => 'Error al registrar el pago']);
         }

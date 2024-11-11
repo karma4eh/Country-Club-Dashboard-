@@ -21,6 +21,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Inicio de sesión exitoso
             $_SESSION['username'] = $user['email'];
             $_SESSION['role'] = $user['role']; // Si tienes roles, los puedes manejar aquí
+            $_SESSION['usuario_id'] = $user['id']; // Almacenar el ID del usuario en la sesión
+
             header("Location: ../src/dashboard.php"); // Redirigir al dashboard
             exit(); 
         } else {
