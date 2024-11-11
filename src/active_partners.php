@@ -42,7 +42,7 @@ include_once '../backend/verificar_seccion.php';
                     <span class="material-icons">history</span>
                     <span class="ml-3">Historial de Movimientos</span>
                 </a>
-                <a href="profile.php" class="flex items-center px-6 py-2 text-gray-200 hover:bg-gray-700">
+                <a href="alerts.php" class="flex items-center px-6 py-2 text-gray-200 hover:bg-gray-700">
                     <span class="material-icons">mail</span>
                     <span class="ml-3">Alertas</span>
                 </a>
