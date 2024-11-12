@@ -76,7 +76,7 @@ include_once '../backend/verificar_seccion.php';
         <p class="text-gray-400 mb-4 text-center">Selecciona una opción y redacta el mensaje para los socios:</p>
 
         <!-- Formulario para enviar alertas por correo -->
-        <form action="send_mail.php" method="POST" class="space-y-4">
+        <form action="../backend/send_mail.php" method="POST" class="space-y-4">
             <!-- Tipo de Alerta -->
             <div>
                 <label class="block text-gray-300 mb-1" for="alert-type">Enviar a</label>

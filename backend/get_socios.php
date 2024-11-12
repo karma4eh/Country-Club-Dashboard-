@@ -7,13 +7,15 @@ $searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
 // Escapar el término de búsqueda para evitar inyecciones SQL
 $searchTerm = $conn->real_escape_string($searchTerm);
 
-// Crear la consulta SQL
-$sql = "SELECT id, nombre, apellido, cedula, accion, estado,saldo FROM socios 
+// Crear la consulta SQL con selección aleatoria y límite de 10 resultados
+$sql = "SELECT id, nombre, apellido, cedula, accion, estado, saldo 
+        FROM socios 
         WHERE nombre LIKE '%$searchTerm%' OR 
               apellido LIKE '%$searchTerm%' OR 
               cedula LIKE '%$searchTerm%' OR 
               accion LIKE '%$searchTerm%' 
-        LIMIT 50";
+        ORDER BY RAND() 
+        LIMIT 10";
 
 $result = $conn->query($sql);
 
