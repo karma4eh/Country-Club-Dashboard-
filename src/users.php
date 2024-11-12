@@ -29,6 +29,79 @@ if (!$result) {
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body class="bg-gray-900 text-gray-100">
+<!-- Modal para Registrar Usuario -->
+<div id="registerModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50">
+    <div class="bg-gray-800 text-white rounded-lg shadow-lg w-1/3 p-6">
+        <h2 class="text-xl font-semibold mb-4">Registrar Usuario</h2>
+        <form id="registerUserForm" action="../backend/register_user.php" method="POST">
+            <label class="block text-sm mb-2">Nombre Completo:</label>
+            <input type="text" name="nombre_completo" class="w-full p-2 mb-4 rounded bg-gray-700 text-white" required>
+
+            <label class="block text-sm mb-2">Email:</label>
+            <input type="email" name="email" class="w-full p-2 mb-4 rounded bg-gray-700 text-white" required>
+
+            <label class="block text-sm mb-2">Rol:</label>
+            <select name="rol" class="w-full p-2 mb-4 rounded bg-gray-700 text-white" required>
+                <option value="admin">Admin</option>
+                <option value="secretaria">Secretaria</option>
+                <option value="vigilante">Vigilante</option>
+            </select>
+
+            <label class="block text-sm mb-2">Contraseña:</label>
+            <input type="password" name="password" class="w-full p-2 mb-4 rounded bg-gray-700 text-white" required>
+
+            <label class="block text-sm mb-2">Confirmar Contraseña:</label>
+            <input type="password" name="confirm_password" class="w-full p-2 mb-4 rounded bg-gray-700 text-white" required>
+
+            <div class="flex justify-end gap-4">
+                <button type="button" onclick="closeRegisterModal()" class="px-4 py-2 bg-gray-600 rounded">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 rounded">Registrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- Modal para Editar Usuario -->
+<div id="editModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50">
+    <div class="bg-gray-800 text-white rounded-lg shadow-lg w-1/3 p-6">
+        <h2 class="text-xl font-semibold mb-4">Editar Usuario</h2>
+        <form id="editUserForm" action="../backend/edit_users.php" method="POST">
+            <input type="hidden" name="id" id="editUserId">
+            <label class="block text-sm mb-2">Nombre Completo:</label>
+            <input type="text" name="nombre_completo" id="editNombreCompleto" class="w-full p-2 mb-4 rounded bg-gray-700 text-white" required>
+            
+            <label class="block text-sm mb-2">Email:</label>
+            <input type="email" name="email" id="editEmail" class="w-full p-2 mb-4 rounded bg-gray-700 text-white" required>
+
+            <label class="block text-sm mb-2">Rol:</label>
+                <select name="rol" id="editRol" class="w-full p-2 mb-4 rounded bg-gray-700 text-white" required>
+                <option value="admin">Admin</option>
+                <option value="secretaria">Secretaria</option>
+                <option value="vigilante">Vigilante</option>
+                </select>
+
+
+            <label class="block text-sm mb-2">Nueva Contraseña (opcional):</label>
+            <input type="password" name="new_password" id="editPassword" class="w-full p-2 mb-4 rounded bg-gray-700 text-white">
+
+            <div class="flex justify-end gap-4">
+                <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-gray-600 rounded">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 rounded">Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal para Confirmación de Eliminación -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50">
+    <div class="bg-gray-800 text-white rounded-lg shadow-lg w-1/3 p-6">
+        <h2 class="text-xl font-semibold mb-4">Confirmar Eliminación</h2>
+        <p>¿Estás seguro de que deseas eliminar este usuario?</p>
+        <div class="flex justify-end gap-4 mt-6">
+            <button type="button" onclick="closeDeleteModal()" class="px-4 py-2 bg-gray-600 rounded">Cancelar</button>
+            <a id="confirmDeleteButton" href="#" class="px-4 py-2 bg-red-600 rounded">Eliminar</a>
+        </div>
+    </div>
+</div>
 
 
     <!-- Sidebar -->
@@ -91,6 +164,7 @@ if (!$result) {
                                 Agrega o edita usuarios de la base de datos con sus roles respectivos
                             </p>
                         </div>
+                        
                     </div>
                     <div class="p-6 flex flex-col gap-4">
                         <!-- Aquí comienzan los usuarios -->
@@ -117,30 +191,62 @@ if (!$result) {
                                         </div>
                                     </div>
                                     <div class="flex items-center space-x-2">
-                                        <!-- Editar usuario -->
-                                        <a href="edit_user.php?id=<?php echo $row['id']; ?>" class="text-xs py-2 px-4 rounded-lg text-white hover:bg-gray-900/10 active:bg-gray-900/20">
-                                            Editar usuario
-                                        </a>
+                                       <!-- Editar usuario -->
+                                <a href="javascript:void(0);" onclick="openEditModal('<?php echo $row['id']; ?>', '<?php echo $row['nombre_completo']; ?>', '<?php echo $row['email']; ?>', '<?php echo $row['rol']; ?>')" class="text-xs py-2 px-4 rounded-lg text-white hover:bg-gray-900/10 active:bg-gray-900/20">
+                                Editar usuario
+                                </a>
 
-                                        <!-- Eliminar usuario -->
-                                        <?php if ($row['id'] != $logged_in_user_id) { ?>
-                                            <a href="delete_user.php?id=<?php echo $row['id']; ?>" class="text-xs py-2 px-4 rounded-lg text-red-500 hover:bg-red-500/10 active:bg-red-500/30">
-                                                Eliminar usuario
-                                            </a>
-                                        <?php } else { ?>
-                                            <span class="text-xs py-2 px-4 rounded-lg text-gray-400">
-                                                No se puede eliminar
-                                            </span>
-                                        <?php } ?>
+                            <!-- Eliminar usuario -->
+                            <?php if ($row['id'] != $logged_in_user_id) { ?>
+                              <a href="javascript:void(0);" onclick="openDeleteModal('<?php echo $row['id']; ?>')" class="text-xs py-2 px-4 rounded-lg text-red-500 hover:bg-red-500/10 active:bg-red-500/30">
+                                 Eliminar usuario
+                               </a>
+                            <?php } else { ?>
+                             <span class="text-xs py-2 px-4 rounded-lg text-gray-400">No se puede eliminar</span>
+                                <?php } ?>
                                     </div>
                                 </div>
                             </div>
                         <?php } ?>
                         <!-- Fin de la lista de usuarios -->
                     </div>
+                    <button onclick="openRegisterModal()" class="px-4 py-2 bg-green-600 rounded m-6">Registrar Usuario</button>
                 </div>
             </section>
         </div>
     </div>
 </body>
+<script>
+// Funciones para abrir y cerrar el modal de edición
+function openEditModal(id, nombre, email, rol) {
+    document.getElementById("editUserId").value = id;
+    document.getElementById("editNombreCompleto").value = nombre;
+    document.getElementById("editEmail").value = email;
+    document.getElementById("editRol").value = rol;
+    document.getElementById("editModal").classList.remove("hidden");
+}
+
+function closeEditModal() {
+    document.getElementById("editModal").classList.add("hidden");
+}
+
+// Funciones para abrir y cerrar el modal de eliminación
+function openDeleteModal(id) {
+    const deleteUrl = `../backend/delete_users.php?id=${id}`;
+    document.getElementById("confirmDeleteButton").href = deleteUrl;
+    document.getElementById("deleteModal").classList.remove("hidden");
+}
+
+function closeDeleteModal() {
+    document.getElementById("deleteModal").classList.add("hidden");
+}
+// Funciones para abrir y cerrar el modal de registro
+function openRegisterModal() {
+    document.getElementById("registerModal").classList.remove("hidden");
+}
+
+function closeRegisterModal() {
+    document.getElementById("registerModal").classList.add("hidden");
+}
+</script>
 </html>
