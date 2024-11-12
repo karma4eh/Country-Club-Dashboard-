@@ -32,10 +32,13 @@ if ($result->num_rows > 0) {
         echo "<td class='px-6 py-4 border-b border-gray-700 text-sm $estado_clase'>" . $estado_texto . "</td>";
         echo "<td class='px-6 py-4 border-b border-gray-700 text-sm'>$" . $row['saldo'] . "</td>";
         
-        // Botón para abrir el modal 
-        echo "<td class='px-6 py-4 border-b border-gray-700 text-sm'>
-                <button class='px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-500' 
+        // Botones para abrir el modal y ver perfil
+        echo "<td class='px-6 py-4 border-b border-gray-700 text-sm space-x-2'>
+                <button class='px-4 py-2 bg-yellow-500 text-gray-900 rounded hover:bg-yellow-600' 
                 onclick='verDetallesSocio(" . $row['id'] . ")'>Ver</button>
+                <a href='ver_perfil.php?cedula=" . $row['cedula'] . "' class='px-4 py-2 bg-green-600 text-white rounded hover:bg-green-500'>
+                    Perfil
+                </a>
               </td>";
         echo "</tr>";
     }

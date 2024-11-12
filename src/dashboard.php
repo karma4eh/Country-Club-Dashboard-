@@ -20,19 +20,53 @@ include_once '../backend/verificar_seccion.php';
 <body class="bg-gray-900 text-gray-100">
 
 <!-- Modal -->
-<div id="modal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 hidden">
+<div id="modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 hidden">
     <div class="bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md relative">
         <!-- Botón "X" para cerrar el modal -->
-        <button onclick="cerrarModal()" class="absolute top-2 right-2 text-gray-300 hover:text-white text-2xl">&times;</button>
-        
+        <button onclick="cerrarModal()" class="absolute top-2 right-2 text-gray-400 hover:text-gray-200 text-2xl">&times;</button>
 
         <!-- Contenido del Modal -->
-        <div id="modal-content" class="text-gray-200 bg-gray-700 p-4 rounded-lg mb-4">
-            <!-- Aquí irán los datos específicos del socio -->
+        <div id="modal-content" class="text-gray-200 p-4 rounded-lg">
+            <h2 class="text-3xl font-bold text-yellow-500 text-center mb-4">Detalles del Socio</h2>
+
+            <div class="flex items-center mb-4">
+                <span class="material-icons text-yellow-400 mr-3">person</span>
+                <p><strong>Nombre:</strong> <span id="nombre"></span> <span id="apellido"></span></p>
+            </div>
+
+            <div class="flex items-center mb-4">
+                <span class="material-icons text-yellow-400 mr-3">location_on</span>
+                <p><strong>Dirección:</strong> <span id="direccion"></span></p>
+            </div>
+
+            <div class="flex items-center mb-4">
+                <span class="material-icons text-yellow-400 mr-3">credit_card</span>
+                <p><strong>Cédula:</strong> V-<span id="cedula"></span></p>
+            </div>
+
+            <div class="flex items-center mb-4">
+                <span class="material-icons text-yellow-400 mr-3">phone</span>
+                <p><strong>Teléfono:</strong> <span id="numero"></span></p>
+            </div>
+
+            <div class="flex items-center mb-4">
+                <span class="material-icons text-yellow-400 mr-3">email</span>
+                <p><strong>Correo:</strong> <span id="correo"></span></p>
+            </div>
+
+            <div class="flex items-center mb-4">
+                <span class="material-icons text-yellow-400 mr-3">assignment</span>
+                <p><strong>Acción:</strong> <span id="accion"></span></p>
+            </div>
+
+            <div class="flex items-center mb-4">
+                <span class="material-icons text-yellow-400 mr-3">check_circle</span>
+                <p><strong>Estado:</strong> <span id="estado"></span></p>
+            </div>
         </div>
 
         <!-- Botón Cerrar en la parte inferior -->
-        <div class="flex justify-center mt-4">
+        <div class="flex justify-center mt-6">
             <button class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500" onclick="cerrarModal()">Cerrar</button>
         </div>
     </div>
