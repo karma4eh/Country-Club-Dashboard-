@@ -6,9 +6,11 @@ session_start();
 include_once '../backend/verificar_seccion.php';
 
 // Conexión a la base de datos
+// Obtén el ID del usuario logeado desde la sesión
+$logged_in_user_id = $_SESSION['usuario_id']; // Asegúrate de que 'user_id' esté en la sesión
 
 // Consulta para obtener los usuarios
-$query = "SELECT id,email, rol FROM usuarios"; // Modifica según la estructura de tu base de datos
+$query = "SELECT id, nombre_completo, email, rol FROM usuarios";
 $result = mysqli_query($conn, $query);
 
 // Verificar si la consulta fue exitosa
@@ -16,12 +18,13 @@ if (!$result) {
     die("Error al obtener los usuarios: " . mysqli_error($conn));
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Country Club Alertas</title>
+    <title>Country Club -Usuarios</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
@@ -79,29 +82,32 @@ if (!$result) {
                 </div>
             </header>
 
-            <!-- Section contenido principal -->
-            <section class="flex justify-center items-center max-w-4xl mx-auto px-8 py-20 w-full bg-gray-900">
-                <div class="relative flex flex-col bg-clip-border rounded-xl bg-gray-800 text-white">
-                    <div class="relative bg-clip-border mt-4 mx-4 rounded-xl overflow-hidden bg-gray-800 text-white flex gap-2 flex-col md:flex-row items-start justify-between">
+   <!-- Section contenido principal -->
+   <section class="flex justify-center items-start max-w-4xl mx-auto px-8 py-8 w-full bg-gray-900 overflow-y-auto">
+                <div class="relative flex flex-col bg-clip-border rounded-xl bg-gray-800 text-white w-full">
+                    <div class="relative bg-clip-border mt-4 mx-4 rounded-xl overflow-hidden bg-gray-800 text-white flex flex-col gap-2">
                         <div class="w-full mb-2">
                             <p class="block antialiased font-sans text-sm font-light leading-normal text-inherit mt-1 font-normal text-gray-400">
                                 Agrega o edita usuarios de la base de datos con sus roles respectivos
                             </p>
                         </div>
                     </div>
-                    <div class="p-6 flex flex-col gap-4 p-4">
+                    <div class="p-6 flex flex-col gap-4">
                         <!-- Aquí comienzan los usuarios -->
                         <?php while ($row = mysqli_fetch_assoc($result)) { ?>
-                            <div class="relative flex flex-col bg-clip-border rounded-xl bg-gray-700 text-white rounded-lg border border-gray-600 p-4">
+                            <div class="relative flex flex-col bg-clip-border rounded-xl bg-gray-700 text-white border border-gray-600 p-4">
                                 <div class="mb-4 flex items-start justify-between">
                                     <div class="flex items-center gap-3">
                                         <div class="border border-gray-500 p-2.5 rounded-lg">
                                             <!-- Icono de usuario -->
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="h-6 w-6 text-gray-300">
-                                                <path fill-rule="evenodd" d="M7.5 5.25a3 3 0 013-3h3a3 3 0 013 3v.205c.933.085 1.857.197 2.774.334 1.454.218 2.476 1.483 2.476 2.917v3.033c0 1.211-.734 2.352-1.936 2.752A24.726 24.726 0 0112 15.75c-2.73 0-5.357-.442-7.814-1.259-1.202-.4-1.936-1.541-1.936-2.752V8.706c0-1.434 1.022-2.7 2.476-2.917A48.814 48.814 0 017.5 5.455V5.25zm7.5 0v.09a49.488 49.488 0 00-6 0v-.09a1.5 1.5 0 011.5-1.5h3a1.5 1.5 0 011.5 1.5zm-3 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"></path>
+                                                <path fill-rule="evenodd" d="M7.5 5.25a3 3 0 013-3h3a3 3 0 013 3v.205c.933.085 1.857.197 2.774.334 1.454.218 2.476 1.483 2.476 2.917v3.033c0 1.211-.734 2.352-1.936 2.752A24.726 24.726 0="evenodd"></path>
                                             </svg>
                                         </div>
                                         <div>
+                                            <p class="block antialiased font-sans text-sm font-light leading-normal text-blue-gray-200 mb-1 font-bold">
+                                                <?php echo htmlspecialchars($row['nombre_completo']); ?>
+                                            </p>
                                             <p class="block antialiased font-sans text-sm font-light leading-normal text-blue-gray-200 mb-1 font-bold">
                                                 <?php echo htmlspecialchars($row['email']); ?>
                                             </p>
@@ -110,13 +116,22 @@ if (!$result) {
                                             </p>
                                         </div>
                                     </div>
-                                    <div class="flex items-center justify-between">
-                                        <button class="text-xs py-2 px-4 rounded-lg text-white hover:bg-gray-900/10 active:bg-gray-900/20 flex items-center gap-2">
+                                    <div class="flex items-center space-x-2">
+                                        <!-- Editar usuario -->
+                                        <a href="edit_user.php?id=<?php echo $row['id']; ?>" class="text-xs py-2 px-4 rounded-lg text-white hover:bg-gray-900/10 active:bg-gray-900/20">
                                             Editar usuario
-                                        </button>
-                                        <button class="text-xs py-2 px-4 rounded-lg text-red-500 hover:bg-red-500/10 active:bg-red-500/30 flex items-center gap-2">
-                                            Eliminar usuario
-                                        </button>
+                                        </a>
+
+                                        <!-- Eliminar usuario -->
+                                        <?php if ($row['id'] != $logged_in_user_id) { ?>
+                                            <a href="delete_user.php?id=<?php echo $row['id']; ?>" class="text-xs py-2 px-4 rounded-lg text-red-500 hover:bg-red-500/10 active:bg-red-500/30">
+                                                Eliminar usuario
+                                            </a>
+                                        <?php } else { ?>
+                                            <span class="text-xs py-2 px-4 rounded-lg text-gray-400">
+                                                No se puede eliminar
+                                            </span>
+                                        <?php } ?>
                                     </div>
                                 </div>
                             </div>
@@ -127,6 +142,5 @@ if (!$result) {
             </section>
         </div>
     </div>
-
 </body>
 </html>

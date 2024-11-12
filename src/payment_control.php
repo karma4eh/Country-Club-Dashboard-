@@ -13,7 +13,6 @@ include '../backend/bcv_rate.php';
     <title>Registrar pago - Country Club</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <script src="../js/modalpayment.js"></script>
 </head>
 <body class="bg-gray-900 text-gray-100">
 <!-- Sidebar -->
