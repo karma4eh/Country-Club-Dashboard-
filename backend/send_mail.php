@@ -43,7 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($alertType == 'morosos') {
             // Consultar los correos de los socios morosos desde la base de datos
             // Supongamos que la tabla socios tiene un campo 'deuda' para identificar a los morosos
-            $sql = "SELECT correo FROM socios WHERE saldo > 0";
+            $sql = "SELECT correo FROM socios WHERE saldo < 0";
             $result = $conn->query($sql); // Ejecutar la consulta
 
             if ($result->num_rows > 0) {

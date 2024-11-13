@@ -4,12 +4,13 @@ include 'db_connection.php';
 // Establecer el encabezado de respuesta para JSON
 header('Content-Type: application/json');
 
-// Consulta para obtener los movimientos incluyendo el rol
+// Consulta para obtener los últimos 10 movimientos incluyendo el rol
 $sql = "
     SELECT movimientos.fecha, movimientos.tipo, usuarios.email AS usuario, usuarios.rol
     FROM movimientos
     JOIN usuarios ON movimientos.usuarios_id = usuarios.id
     ORDER BY movimientos.fecha DESC
+    LIMIT 10
 ";
 
 $result = $conn->query($sql);
