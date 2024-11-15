@@ -1,4 +1,3 @@
-
 <?php
 include 'db_connection.php';
 
@@ -21,12 +20,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $query = "UPDATE socios SET ";
     $fields = [];
 
-    if ($nombre) $fields[] = "nombre = '$nombre'";
-    if ($apellido) $fields[] = "apellido = '$apellido'";
-    if ($correo) $fields[] = "correo = '$correo'";
-    if ($numero) $fields[] = "numero = '$numero'";
-    if ($estado) $fields[] = "estado = '$estado'";
-    if ($direccion) $fields[] = "direccion = '$direccion'";
+    if ($nombre) $fields[] = "nombre = ?";
+    if ($apellido) $fields[] = "apellido = ?";
+    if ($correo) $fields[] = "correo = ?";
+    if ($numero) $fields[] = "numero = ?";
+    if ($estado) $fields[] = "estado = ?";
+    if ($direccion) $fields[] = "direccion = ?";
 
     if (empty($fields)) {
         echo json_encode(['error' => 'No se han proporcionado datos para actualizar']);
@@ -34,15 +33,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $query .= implode(", ", $fields);
-    $query .= " WHERE cedula = '$cedula'";
+    $query .= " WHERE cedula = ?";
 
-    if ($conn->query($query)) {
-        echo json_encode(['success' => true]);
+    // Preparar la sentencia
+    if ($stmt = $conn->prepare($query)) {
+        $params = [];
+        $types = '';
+
+        // Agregar los parámetros a la lista según los campos proporcionados
+        if ($nombre) { $params[] = $nombre; $types .= 's'; }
+        if ($apellido) { $params[] = $apellido; $types .= 's'; }
+        if ($correo) { $params[] = $correo; $types .= 's'; }
+        if ($numero) { $params[] = $numero; $types .= 's'; }
+        if ($estado) { $params[] = $estado; $types .= 's'; }
+        if ($direccion) { $params[] = $direccion; $types .= 's'; }
+
+        // La última parámetro es la cédula (para la condición WHERE)
+        $params[] = $cedula;
+        $types .= 's'; // Tipo para cédula
+
+        // Asociar los parámetros y ejecutar
+        $stmt->bind_param($types, ...$params);
+        
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['error' => 'Error al actualizar los datos', 'sql_error' => $stmt->error]);
+        }
+
+        $stmt->close();
     } else {
-        echo json_encode(['error' => 'Error al actualizar los datos', 'sql_error' => $conn->error]);
+        echo json_encode(['error' => 'Error al preparar la consulta', 'sql_error' => $conn->error]);
     }
-    
-    
 
     $conn->close();
 } else {
