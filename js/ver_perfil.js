@@ -50,23 +50,7 @@ $(document).ready(function() {
         `);
 
         // Cargar las visitas del socio
-        $.getJSON(`../backend/get_visitas.php?socio_id=${data.id}`, function(visitas) {
-            const visitasDias = visitas.map(v => parseInt(v)); // Los días de visita
-            let calendarioHtml = '';
-
-            // Crear los días del calendario
-            for (let i = 1; i <= 30; i++) {
-                const esVisita = visitasDias.includes(i); // Verifica si el día tiene visita
-                calendarioHtml += `
-                    <div class="w-full h-12 flex justify-center items-center ${esVisita ? 'bg-green-600 text-white border-2 border-yellow-400' : 'bg-gray-700 text-white border border-gray-800'}">
-                        ${i}
-                    </div>
-                `;
-            }
-
-            // Insertar el calendario generado
-            $('#calendario-visitas').html(calendarioHtml);
-        });
+      
     });
 
     // Abrir el modal para editar datos
@@ -110,13 +94,6 @@ $(document).ready(function() {
         $('#input-direccion').val(data.direccion);
 
         // Asignar el valor de 'estado' al select correspondiente
-        if (data.estado == 'activo') {
-            $('#input-estado').val('activo');
-        } else if (data.estado == 'inactivo') {
-            $('#input-estado').val('inactivo');
-        } else {
-            $('#input-estado').val(''); // Si el estado no es reconocido, dejarlo en blanco
-        }
     }
 
     // Actualizar los datos del socio
@@ -128,7 +105,6 @@ $(document).ready(function() {
             apellido: $('#input-apellido').val(),
             correo: $('#input-correo').val(),
             numero: $('#input-numero').val(),
-            estado: $('#input-estado').val(),
             direccion: $('#input-direccion').val(),
             cedula: cedula
         };
@@ -164,4 +140,5 @@ $(document).ready(function() {
         });
         
     });
+    
 });

@@ -2,7 +2,33 @@
 include '../backend/db_connection.php';
 session_start();
 include '../backend/verificar_seccion.php';
+
+// Verificar si la cédula está en la URL
+if (isset($_GET['cedula'])) {
+    $cedula = $_GET['cedula'];
+
+    // Preparar y ejecutar la consulta para obtener el ID del socio
+    $query = "SELECT id FROM socios WHERE cedula = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $cedula); // La cédula se pasa como string
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $socio_id = $row['id'];
+    } else {
+        echo "Error: No se encontró un socio con esa cédula.";
+        exit;
+    }
+
+    $stmt->close();
+} else {
+    echo "Error: Parámetro de cédula no proporcionado en la URL.";
+    exit;
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -64,12 +90,22 @@ include '../backend/verificar_seccion.php';
         </div>
 
         <!-- Calendario de Visitas -->
+        <!-- Calendario de Visitas -->
         <div class="bg-gray-900 p-6 rounded-lg shadow-md mt-8 w-full max-w-4xl">
             <h3 class="text-2xl font-semibold text-yellow-400 mb-4">Visitas del mes</h3>
-            <div class="grid grid-cols-7 gap-2 justify-items-center" id="calendario-visitas">
-                <!-- Los días con visitas se llenarán con JavaScript -->
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                <div class="flex items-center justify-between px-6 py-3 bg-gray-700">
+                    <button id="prevMonth" class="text-white">Anterior</button>
+                    <h2 id="currentMonth" class="text-white"></h2>
+                    <button id="nextMonth" class="text-white">Siguiente</button>
+                </div>
+                <div class="grid grid-cols-7 gap-2 p-4" id="calendar">
+                    <!-- Calendar Days Go Here -->
+                </div>
             </div>
         </div>
+    </main>
+</div>
     </main>
 </div>
 <!-- Modal para editar los datos del socio -->
@@ -100,13 +136,6 @@ include '../backend/verificar_seccion.php';
                 <input type="text" id="input-numero" class="w-full p-2 rounded-md bg-gray-700 text-gray-100" />
             </div>
             <div>
-                <label for="input-estado" class="text-gray-300">Estado</label>
-                <select id="input-estado" class="w-full p-2 rounded-md bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-yellow-400">
-                    <option value="activo">Activo</option>
-                    <option value="inactivo">Inactivo</option>
-                </select>
-            </div>
-            <div>
                 <label for="input-direccion" class="text-gray-300">Dirección</label>
                 <input type="text" id="input-direccion" class="w-full p-2 rounded-md bg-gray-700 text-gray-100" />
             </div>
@@ -130,6 +159,97 @@ include '../backend/verificar_seccion.php';
         </div>
     </div>
 </div>
+<script>
+    $(document).ready(function () {
+        const socioId = <?= $socio_id; ?>; // PHP inyecta el ID del socio// Asegúrate de pasar el ID correcto
+    const currentDate = new Date();
+    currentYear = currentDate.getFullYear();
+    currentMonth = currentDate.getMonth();
+
+    function generateCalendar(year, month, visitasDias) {
+        const calendarElement = document.getElementById('calendar');
+        const currentMonthElement = document.getElementById('currentMonth');
+
+        const firstDayOfMonth = new Date(year, month, 1);
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        calendarElement.innerHTML = '';
+        const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        currentMonthElement.innerText = `${monthNames[month]} ${year}`;
+
+        const firstDayOfWeek = firstDayOfMonth.getDay();
+        const daysOfWeek = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+        // Crear encabezado con los días de la semana
+        daysOfWeek.forEach(day => {
+            const dayElement = document.createElement('div');
+            dayElement.className = 'text-center font-semibold text-black'; // Letras de los días en negro
+            dayElement.innerText = day;
+            calendarElement.appendChild(dayElement);
+        });
+
+        // Espacios vacíos antes del primer día
+        for (let i = 0; i < firstDayOfWeek; i++) {
+            calendarElement.appendChild(document.createElement('div'));
+        }
+
+        // Generar los días del mes
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dayElement = document.createElement('div');
+            dayElement.className = 'text-center py-2 border border-gray-300 text-black cursor-pointer'; // Cuadros y números en negro
+
+            // Días con visitas
+            if (visitasDias.includes(day)) {
+                dayElement.classList.add('bg-green-600', 'text-white', 'border-2', 'border-yellow-400');
+            }
+
+            // Día actual
+            if (year === currentDate.getFullYear() && month === currentDate.getMonth() && day === currentDate.getDate()) {
+                dayElement.classList.add('bg-blue-500', 'text-white');
+            }
+
+            dayElement.innerText = day;
+            calendarElement.appendChild(dayElement);
+        }
+    }
+
+    function loadVisits() {
+        $.getJSON(`../backend/get_visitas.php?socio_id=${socioId}`, function (visitas) {
+            console.log(visitas); // Depuración
+            if (visitas && visitas.length > 0) {
+                const visitasDias = [...new Set(visitas.map(v => parseInt(v)))]; // Elimina duplicados
+                generateCalendar(currentYear, currentMonth, visitasDias);
+            } else {
+                console.error("No se encontraron visitas para este socio.");
+                generateCalendar(currentYear, currentMonth, []);
+            }
+        }).fail(function () {
+            console.error("Error al obtener las visitas.");
+            generateCalendar(currentYear, currentMonth, []);
+        });
+    }
+
+    document.getElementById('prevMonth').addEventListener('click', () => {
+        currentMonth--;
+        if (currentMonth < 0) {
+            currentMonth = 11;
+            currentYear--;
+        }
+        loadVisits();
+    });
+
+    document.getElementById('nextMonth').addEventListener('click', () => {
+        currentMonth++;
+        if (currentMonth > 11) {
+            currentMonth = 0;
+            currentYear++;
+        }
+        loadVisits();
+    });
+
+    loadVisits();
+});
+
+</script>
 
 </body>
 </html>
