@@ -83,8 +83,15 @@ if (isset($_GET['cedula'])) {
                     <a href="#" id="abrir-editar" class="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition duration-200">
                         <span class="material-icons mr-2">edit</span>Editar Datos
                     </a>
-                    
-
+                    <a href="" id="abrir-historial" class="flex items-center justify-center bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg transition duration-200">
+                     <span class="material-icons mr-2">history</span>Historial de pagos
+                    </a>
+                    <a href="#" id="boton-rematar" class="flex items-center justify-center bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-4 py-2 rounded-lg transition duration-200">
+                   <span class="material-icons mr-2">gavel</span>Rematar
+                    </a>
+                    <a href="#" id="boton-eliminar" class="flex items-center justify-center bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg transition duration-200">
+            <span class="material-icons mr-2">delete</span>Eliminar
+        </a>
                 </div>
             </div>
         </div>
@@ -213,20 +220,21 @@ if (isset($_GET['cedula'])) {
     }
 
     function loadVisits() {
-        $.getJSON(`../backend/get_visitas.php?socio_id=${socioId}`, function (visitas) {
-            console.log(visitas); // Depuración
-            if (visitas && visitas.length > 0) {
-                const visitasDias = [...new Set(visitas.map(v => parseInt(v)))]; // Elimina duplicados
-                generateCalendar(currentYear, currentMonth, visitasDias);
-            } else {
-                console.error("No se encontraron visitas para este socio.");
-                generateCalendar(currentYear, currentMonth, []);
-            }
-        }).fail(function () {
-            console.error("Error al obtener las visitas.");
+    $.getJSON(`../backend/get_visitas.php?socio_id=${socioId}&month=${currentMonth + 1}&year=${currentYear}`, function (visitas) {
+        console.log(visitas); // Depuración
+        if (visitas && visitas.length > 0) {
+            const visitasDias = [...new Set(visitas.map(v => parseInt(v)))]; // Elimina duplicados
+            generateCalendar(currentYear, currentMonth, visitasDias);
+        } else {
+            console.error("No se encontraron visitas para este socio.");
             generateCalendar(currentYear, currentMonth, []);
-        });
-    }
+        }
+    }).fail(function () {
+        console.error("Error al obtener las visitas.");
+        generateCalendar(currentYear, currentMonth, []);
+    });
+}
+
 
     document.getElementById('prevMonth').addEventListener('click', () => {
         currentMonth--;

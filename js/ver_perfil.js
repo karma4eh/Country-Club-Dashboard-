@@ -40,14 +40,27 @@ $(document).ready(function() {
                 <p><strong>Estado:</strong> ${data.estado}</p>
             </div>
             <div class="flex items-center space-x-3">
+                <span class="material-icons text-yellow-400">cake</span>
+                <p><strong>Fecha de nacimiento:</strong> ${
+                    data.fecha_nacimiento 
+                    ? new Date(data.fecha_nacimiento).toLocaleDateString('es-ES') 
+                    : 'No disponible'
+                }</p>
+            </div>
+            <div class="flex items-center space-x-3">
                 <span class="material-icons text-yellow-400">calendar_today</span>
-                <p><strong>Socio Desde:</strong> ${data.socio_desde ? new Date(data.socio_desde).toLocaleDateString() : 'No disponible'}</p>
+                <p><strong>Socio Desde:</strong> ${
+                    data.socio_desde 
+                    ? new Date(data.socio_desde).toLocaleDateString('es-ES') 
+                    : 'No disponible'
+                }</p>
             </div>
             <div class="flex items-center space-x-3">
                 <span class="material-icons text-yellow-400">home</span>
                 <p><strong>Dirección:</strong> ${data.direccion}</p>
             </div>
         `);
+        
 
         // Cargar las visitas del socio
       
@@ -64,17 +77,11 @@ $(document).ready(function() {
         });
     });
 
-    // Abrir el modal para historial de pagos
-    $('#abrir-historial').click(function(e) {
-        e.preventDefault();
-        
-        // Cerrar el modal de editar perfil si está abierto
-        $('#modal-editar').addClass('hidden');
-        
-        // Abrir el modal de historial de pagos
-        $('#modal-historial-pagos').removeClass('hidden');
+    $(document).on('click', '#abrir-historial', function (e) {
+        e.preventDefault(); // Evita que el enlace navegue
+        $('#modal-historial-pagos').removeClass('hidden'); // Muestra el modal
     });
-
+    
     // Cerrar el modal de editar perfil
     $('#cerrar-modal').click(function() {
         $('#modal-editar').addClass('hidden');
