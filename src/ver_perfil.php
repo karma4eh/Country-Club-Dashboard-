@@ -95,8 +95,6 @@ if (isset($_GET['cedula'])) {
                 </div>
             </div>
         </div>
-
-        <!-- Calendario de Visitas -->
         <!-- Calendario de Visitas -->
         <div class="bg-gray-900 p-6 rounded-lg shadow-md mt-8 w-full max-w-4xl">
             <h3 class="text-2xl font-semibold text-yellow-400 mb-4">Visitas del mes</h3>
@@ -151,7 +149,6 @@ if (isset($_GET['cedula'])) {
         </form>
     </div>
 </div>
-<!-- Modal para el historial de pagos -->
 <div id="modal-historial-pagos" class="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center hidden">
     <div class="bg-gray-800 p-6 rounded-lg shadow-lg max-w-2xl w-full">
         <div class="flex justify-between items-center">
@@ -160,12 +157,12 @@ if (isset($_GET['cedula'])) {
                 <span class="material-icons">close</span>
             </button>
         </div>
-
         <div class="mt-4 space-y-4" id="historial-pagos">
-            <!-- Los pagos se llenarán con JavaScript -->
+            <!-- Aquí se cargarán los pagos -->
         </div>
     </div>
 </div>
+
 <script>
     $(document).ready(function () {
         const socioId = <?= $socio_id; ?>; // PHP inyecta el ID del socio// Asegúrate de pasar el ID correcto
@@ -221,7 +218,7 @@ if (isset($_GET['cedula'])) {
 
     function loadVisits() {
     $.getJSON(`../backend/get_visitas.php?socio_id=${socioId}&month=${currentMonth + 1}&year=${currentYear}`, function (visitas) {
-        console.log(visitas); // Depuración
+         
         if (visitas && visitas.length > 0) {
             const visitasDias = [...new Set(visitas.map(v => parseInt(v)))]; // Elimina duplicados
             generateCalendar(currentYear, currentMonth, visitasDias);
@@ -255,6 +252,36 @@ if (isset($_GET['cedula'])) {
     });
 
     loadVisits();
+    $('#abrir-historial').click(function (e) {
+        e.preventDefault();
+        $('#modal-historial-pagos').removeClass('hidden');
+
+        // Cargar historial de pagos
+        $.getJSON(`../backend/get_historial_pagos.php?socio_id=${socioId}`, function (data) {
+            const historialPagosContainer = $('#historial-pagos');
+            historialPagosContainer.empty(); // Limpiar contenido previo
+
+            if (data.length > 0) {
+                data.forEach(pago => {
+                    historialPagosContainer.append(`
+                        <div class="bg-gray-700 p-4 rounded-lg shadow-md mb-2">
+                            <p><strong>Fecha de Pago:</strong> ${pago.fecha_pago}</p>
+                            <p><strong>Monto:</strong> ${pago.monto} USD</p>
+                        </div>
+                    `);
+                });
+            } else {
+                historialPagosContainer.html('<p class="text-red-500">No hay pagos registrados para este socio.</p>');
+            }
+        }).fail(function () {
+            $('#historial-pagos').html('<p class="text-red-500">Error al cargar el historial de pagos.</p>');
+        });
+    });
+
+    // Cerrar el modal
+    $('#cerrar-modal-historial').click(function () {
+        $('#modal-historial-pagos').addClass('hidden');
+    });
 });
 
 </script>

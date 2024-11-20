@@ -77,20 +77,13 @@ $(document).ready(function() {
         });
     });
 
-    $(document).on('click', '#abrir-historial', function (e) {
-        e.preventDefault(); // Evita que el enlace navegue
-        $('#modal-historial-pagos').removeClass('hidden'); // Muestra el modal
-    });
     
     // Cerrar el modal de editar perfil
     $('#cerrar-modal').click(function() {
         $('#modal-editar').addClass('hidden');
     });
 
-    // Cerrar el modal de historial de pagos
-    $('#cerrar-modal-historial').click(function() {
-        $('#modal-historial-pagos').addClass('hidden');
-    });
+   
 
     // Función para llenar los campos del modal con los datos actuales del socio
     function llenarModal(data) {
