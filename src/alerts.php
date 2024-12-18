@@ -16,6 +16,13 @@ include_once '../backend/verificar_seccion.php';
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body class="bg-gray-900 text-gray-100">
+<div id="resultModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-gray-800 p-6 rounded-lg max-w-md mx-auto shadow-lg text-center">
+        <h2 id="modalTitle" class="text-lg font-bold text-gray-100 mb-4">Resultado</h2>
+        <p id="modalMessage" class="text-gray-400"></p>
+        <button onclick="closeModal()" class="mt-4 px-4 py-2 bg-blue-600 text-gray-100 rounded hover:bg-blue-700 focus:outline-none">Cerrar</button>
+    </div>
+</div>
 
 
     <!-- Sidebar -->
@@ -76,41 +83,68 @@ include_once '../backend/verificar_seccion.php';
         <p class="text-gray-400 mb-4 text-center">Selecciona una opción y redacta el mensaje para los socios:</p>
 
         <!-- Formulario para enviar alertas por correo -->
-        <form action="send_mail.php" method="POST" class="space-y-4">
-            <!-- Tipo de Alerta -->
-            <div>
-                <label class="block text-gray-300 mb-1" for="alert-type">Enviar a</label>
-                <select name="alert_type" id="alert-type" class="w-full p-2 bg-gray-700 text-gray-100 border border-gray-600 rounded focus:outline-none focus:ring focus:ring-blue-500">
-                    <option value="morosos">Morosos</option>
-                    <option value="todos">Todos los Socios</option>
-                    <option value="especifico">Socio Específico</option>
-                </select>
-            </div>
+        <form id="emailForm" class="space-y-4">
+    <!-- Mantén los mismos campos -->
+    <div>
+        <label class="block text-gray-300 mb-1" for="alert-type">Enviar a</label>
+        <select name="alert_type" id="alert-type" class="w-full p-2 bg-gray-700 text-gray-100 border border-gray-600 rounded focus:outline-none focus:ring focus:ring-blue-500">
+            <option value="morosos">Morosos</option>
+            <option value="todos">Todos los Socios</option>
+            <option value="especifico">Socio Específico</option>
+        </select>
+    </div>
 
-            <!-- Cédula del Socio Específico -->
-            <div id="specific-member" class="hidden">
-                <label class="block text-gray-300 mb-1" for="member-id">Cédula del Socio</label>
-                <input type="text" name="member_id" id="member-id" placeholder="Ingrese la cédula" class="w-full p-2 bg-gray-700 text-gray-100 border border-gray-600 rounded focus:outline-none focus:ring focus:ring-blue-500">
-            </div>
+    <div id="specific-member" class="hidden">
+        <label class="block text-gray-300 mb-1" for="member-id">Cédula del Socio</label>
+        <input type="text" name="member_id" id="member-id" placeholder="Ingrese la cédula" class="w-full p-2 bg-gray-700 text-gray-100 border border-gray-600 rounded focus:outline-none focus:ring focus:ring-blue-500">
+    </div>
 
-            <!-- Asunto del Correo -->
-            <div>
-                <label class="block text-gray-300 mb-1" for="subject">Asunto</label>
-                <input type="text" name="subject" id="subject" placeholder="Asunto del mensaje" class="w-full p-2 bg-gray-700 text-gray-100 border border-gray-600 rounded focus:outline-none focus:ring focus:ring-blue-500">
-            </div>
+    <div>
+        <label class="block text-gray-300 mb-1" for="subject">Asunto</label>
+        <input type="text" name="subject" id="subject" placeholder="Asunto del mensaje" class="w-full p-2 bg-gray-700 text-gray-100 border border-gray-600 rounded focus:outline-none focus:ring focus:ring-blue-500">
+    </div>
 
-            <!-- Cuerpo del Mensaje -->
-            <div>
-                <label class="block text-gray-300 mb-1" for="message">Mensaje</label>
-                <textarea name="message" id="message" rows="4" placeholder="Escribe tu mensaje aquí" class="w-full p-2 bg-gray-700 text-gray-100 border border-gray-600 rounded focus:outline-none focus:ring focus:ring-blue-500"></textarea>
-            </div>
+    <div>
+        <label class="block text-gray-300 mb-1" for="message">Mensaje</label>
+        <textarea name="message" id="message" rows="4" placeholder="Escribe tu mensaje aquí" class="w-full p-2 bg-gray-700 text-gray-100 border border-gray-600 rounded focus:outline-none focus:ring focus:ring-blue-500"></textarea>
+    </div>
 
-            <!-- Botones para enviar o cancelar -->
-            <div class="flex justify-end space-x-2">
-                <button type="reset" class="px-3 py-2 bg-gray-600 text-gray-100 rounded hover:bg-gray-700 focus:outline-none focus:ring focus:ring-blue-500">Cancelar</button>
-                <button type="submit" class="px-3 py-2 bg-blue-600 text-gray-100 rounded hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-500">Enviar</button>
-            </div>
-        </form>
+    <div class="flex justify-end space-x-2">
+        <button type="reset" class="px-3 py-2 bg-gray-600 text-gray-100 rounded hover:bg-gray-700 focus:outline-none focus:ring focus:ring-blue-500">Cancelar</button>
+        <button type="submit" class="px-3 py-2 bg-blue-600 text-gray-100 rounded hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-500">Enviar</button>
+    </div>
+</form><script>
+    document.getElementById('emailForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const response = await fetch('../backend/send_mail.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.text();
+        const modal = document.getElementById('resultModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+
+        if (response.ok) {
+            modalTitle.textContent = 'Correo Enviado';
+            modalMessage.textContent = result; // Mensaje devuelto por PHP
+        } else {
+            modalTitle.textContent = 'Error al Enviar';
+            modalMessage.textContent = 'Hubo un problema al enviar los correos.';
+        }
+
+        modal.classList.remove('hidden');
+    });
+
+    function closeModal() {
+        document.getElementById('resultModal').classList.add('hidden');
+    }
+</script>
+
+
     </div>
 </main>
 

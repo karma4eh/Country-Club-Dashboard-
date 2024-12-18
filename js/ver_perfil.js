@@ -8,7 +8,41 @@ $(document).ready(function() {
             alert(data.error);
             return;
         }
-
+        // Asegurarse de que la fecha se formatee correctamente
+        function formatDate(dateString) {
+            // Asegurarse de que el formato de la fecha sea correcto
+            const date = new Date(dateString);
+            if (!isNaN(date.getTime())) {  // Verifica si la fecha es válida
+                // Devuelve la fecha en formato 'dd/mm/yyyy'
+                return date.toLocaleDateString('es-ES');
+            } else {
+                return 'Fecha no válida';
+            }
+        }
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+        
+            // Verifica si la fecha es válida
+            if (!isNaN(date.getTime())) {
+                // Ajuste para evitar el desfase por zona horaria
+                date.setMinutes(date.getMinutes() - date.getTimezoneOffset());  // Ajusta la fecha a la zona horaria local
+                
+                // Sumar un día a la fecha
+                date.setDate(date.getDate() + 1);  // Suma un día a la fecha
+        
+                // Obtener el año, mes y día
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0'); // Los meses comienzan en 0, por eso sumamos 1
+                const day = String(date.getDate()).padStart(2, '0'); // Asegura que el día tenga dos dígitos
+                
+                return `${day}/${month}/${year}`;  // Devuelve la fecha en formato 'dd/mm/yyyy'
+            } else {
+                return 'Fecha no válida';
+            }
+        }
+        
+        
+        
         // Mostrar el nombre del socio y la foto de perfil
         $('#socio-nombre').text(`${data.nombre} ${data.apellido}`);
         $('#socio-imagen').attr('src', data.imagen_perfil);
@@ -40,27 +74,27 @@ $(document).ready(function() {
                 <p><strong>Estado:</strong> ${data.estado}</p>
             </div>
             <div class="flex items-center space-x-3">
-                <span class="material-icons text-yellow-400">cake</span>
-                <p><strong>Fecha de nacimiento:</strong> ${
-                    data.fecha_nacimiento 
-                    ? new Date(data.fecha_nacimiento).toLocaleDateString('es-ES') 
-                    : 'No disponible'
-                }</p>
-            </div>
-            <div class="flex items-center space-x-3">
-                <span class="material-icons text-yellow-400">calendar_today</span>
-                <p><strong>Socio Desde:</strong> ${
-                    data.socio_desde 
-                    ? new Date(data.socio_desde).toLocaleDateString('es-ES') 
-                    : 'No disponible'
-                }</p>
-            </div>
+        <span class="material-icons text-yellow-400">cake</span>
+        <p><strong>Fecha de nacimiento:</strong> ${
+            data.fecha_nacimiento 
+            ? formatDate(data.fecha_nacimiento) 
+            : 'No disponible'
+        }</p>
+    </div>
+    <div class="flex items-center space-x-3">
+        <span class="material-icons text-yellow-400">calendar_today</span>
+        <p><strong>Socio Desde:</strong> ${
+            data.socio_desde 
+            ? formatDate(data.socio_desde) 
+            : 'No disponible'
+        }</p>
+    </div>
             <div class="flex items-center space-x-3">
                 <span class="material-icons text-yellow-400">home</span>
                 <p><strong>Dirección:</strong> ${data.direccion}</p>
             </div>
         `);
-        
+        console.log(data.fecha_nacimiento);
 
         // Cargar las visitas del socio
       

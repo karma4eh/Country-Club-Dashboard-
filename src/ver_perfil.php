@@ -60,7 +60,7 @@ if (isset($_GET['cedula'])) {
             </a>
         </div>
     </header>
-
+    
     <!-- Contenido Principal -->
     <main class="w-full max-w-4xl bg-gray-800 p-8 rounded-lg shadow-lg">
         <!-- Perfil del Usuario -->
@@ -86,12 +86,6 @@ if (isset($_GET['cedula'])) {
                     <a href="" id="abrir-historial" class="flex items-center justify-center bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg transition duration-200">
                      <span class="material-icons mr-2">history</span>Historial de pagos
                     </a>
-                    <a href="#" id="boton-rematar" class="flex items-center justify-center bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-4 py-2 rounded-lg transition duration-200">
-                   <span class="material-icons mr-2">gavel</span>Rematar
-                    </a>
-                    <a href="#" id="boton-eliminar" class="flex items-center justify-center bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg transition duration-200">
-            <span class="material-icons mr-2">delete</span>Eliminar
-        </a>
                 </div>
             </div>
         </div>
@@ -110,7 +104,9 @@ if (isset($_GET['cedula'])) {
             </div>
         </div>
     </main>
-</div>
+</div> <!-- Agregar el mensaje "REMATADO" en amarillo encima de todo -->
+
+
     </main>
 </div>
 <!-- Modal para editar los datos del socio -->
@@ -122,7 +118,7 @@ if (isset($_GET['cedula'])) {
                 <span class="material-icons">close</span>
             </button>
         </div>
-
+          
         <form id="form-editar" class="mt-4 space-y-4">
             <div>
                 <label for="input-nombre" class="text-gray-300">Nombre</label>
@@ -165,6 +161,7 @@ if (isset($_GET['cedula'])) {
 
 <script>
     $(document).ready(function () {
+        
         const socioId = <?= $socio_id; ?>; // PHP inyecta el ID del socio// Asegúrate de pasar el ID correcto
     const currentDate = new Date();
     currentYear = currentDate.getFullYear();
@@ -282,6 +279,7 @@ if (isset($_GET['cedula'])) {
     $('#cerrar-modal-historial').click(function () {
         $('#modal-historial-pagos').addClass('hidden');
     });
+    
 });
 
 </script>

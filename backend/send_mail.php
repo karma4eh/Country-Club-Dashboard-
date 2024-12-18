@@ -11,24 +11,27 @@ require '../phpmailer/phpmailer/src/Exception.php';
 require '../phpmailer/phpmailer/src/PHPMailer.php';
 require '../phpmailer/phpmailer/src/SMTP.php';
 
+// Definir encabezados para JSON
+header('Content-Type: application/json');
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $alertType = $_POST['alert_type']; // Tipo de alerta: 'morosos', 'todos', o 'especifico'
+    $alertType = $_POST['alert_type']; // Tipo de alerta
     $memberId = $_POST['member_id']; // Cedula del socio
     $subject = $_POST['subject']; // Asunto del correo
     $message = $_POST['message']; // Mensaje del correo
 
     // Cargar la plantilla de correo
-    ob_start(); // Inicia el almacenamiento en búfer de salida
-    include 'email_template.php'; // Incluir la plantilla HTML
-    $bodyContent = ob_get_clean(); // Obtener el contenido generado por la plantilla
+    ob_start();
+    include 'email_template.php';
+    $bodyContent = ob_get_clean();
 
-    // Reemplazar el marcador de lugar de mensaje con el contenido dinámico
-    $bodyContent = str_replace("<?php echo \$message; ?>", $message, $bodyContent);
+    $bodyContent = str_replace("<?php echo \$message; ?>", htmlspecialchars($message), $bodyContent);
 
-    // Establecer la configuración del correo
+    // Configuración del correo
     $mail = new PHPMailer(true);
+    $emailsSent = 0; // Contador de correos enviados
+
     try {
-        $mail->SMTPDebug = 2; // Modo de depuración
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
@@ -38,55 +41,73 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $mail->Port = 587;
 
         $mail->setFrom('countryclub4he@gmail.com', 'Country Club');
-        
-        // Lógica para determinar los destinatarios
+
+        // Lógica para destinatarios
         if ($alertType == 'morosos') {
-            // Consultar los correos de los socios morosos desde la base de datos
-            // Supongamos que la tabla socios tiene un campo 'deuda' para identificar a los morosos
             $sql = "SELECT correo FROM socios WHERE saldo < 0";
-            $result = $conn->query($sql); // Ejecutar la consulta
+            $result = $conn->query($sql);
 
             if ($result->num_rows > 0) {
                 while ($row = $result->fetch_assoc()) {
-                    $mail->addAddress($row['correo']); // Agregar la dirección de correo de cada moroso
+                    $mail->addAddress($row['correo']);
+                    $emailsSent++;
                 }
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'No hay socios morosos.']);
+                exit;
             }
         } elseif ($alertType == 'todos') {
-            // Consultar los correos de todos los socios
             $sql = "SELECT correo FROM socios";
-            $result = $conn->query($sql); // Ejecutar la consulta
+            $result = $conn->query($sql);
 
             if ($result->num_rows > 0) {
                 while ($row = $result->fetch_assoc()) {
-                    $mail->addAddress($row['correo']); // Agregar la dirección de correo de cada socio
+                    $mail->addAddress($row['correo']);
+                    $emailsSent++;
                 }
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'No hay socios registrados.']);
+                exit;
             }
-        } elseif ($alertType == 'especifico' && $memberId != '') {
-            // Enviar correo a un socio específico usando su cédula
+        } elseif ($alertType == 'especifico' && !empty($memberId)) {
             $sql = "SELECT correo FROM socios WHERE cedula = ?";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("s", $memberId); // Si la cédula es un VARCHAR, usa "s" en lugar de "i"
+            $stmt->bind_param("s", $memberId);
             $stmt->execute();
             $result = $stmt->get_result();
-        
+
             if ($result->num_rows > 0) {
                 $row = $result->fetch_assoc();
-                $mail->addAddress($row['correo']); // Agregar el correo del socio específico
+                $mail->addAddress($row['correo']);
+                $emailsSent++;
             } else {
-                echo "No se encontró ningún socio con la cédula especificada.";
-                return; // Detenemos la ejecución si no se encuentra el socio
+                echo json_encode(['status' => 'error', 'message' => 'No se encontró el socio especificado.']);
+                exit;
             }
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Tipo de alerta no válido o faltan datos.']);
+            exit;
         }
 
         $mail->isHTML(true);
         $mail->Subject = $subject;
-        $mail->Body = $bodyContent; // Usar el contenido con la plantilla HTML
+        $mail->Body = $bodyContent;
 
         // Enviar el correo
-        $mail->send();
-        echo 'Correo enviado correctamente';
+        if ($emailsSent > 0) {
+            $mail->send();
+            echo json_encode([
+                'status' => 'success',
+                'message' => "Correos enviados satisfactoriamente a {$emailsSent} destinatarios."
+            ]);
+        } else {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'No se enviaron correos. Verifique los datos e intente nuevamente.'
+            ]);
+        }
     } catch (Exception $e) {
-        echo "El correo no pudo ser enviado. Error: {$mail->ErrorInfo}";
+        echo json_encode(['status' => 'error', 'message' => "Error al enviar los correos: {$mail->ErrorInfo}"]);
     }
 }
 ?>
