@@ -215,6 +215,18 @@ class VisitaController extends Controller
             'fecha' => Carbon::now(),
         ]);
 
+        // Alerta a Administración y Secretaría si un socio con deuda ingresa al club
+        if ($socio->es_moroso) {
+            \App\Models\Notificacion::enviarARoles(['admin', 'secretaria'], [
+                'tipo' => 'alerta_acceso',
+                'titulo' => "⚠️ Acceso de Socio con Deuda ({$socio->meses_deuda} meses)",
+                'mensaje' => "El socio {$socio->nombre_completo} (Acción {$socio->accion}) ingresó por Garita. Saldo en mora: \${$socio->saldo} USD.",
+                'icono' => 'warning',
+                'color' => 'amber',
+                'enlace' => route('socios.show', $socio),
+            ]);
+        }
+
         $mensaje = "¡Ingreso autorizado para {$socio->nombre_completo}! (Acción: {$socio->accion}) — Registrado por el Oficial: {$vigilanteNombre}";
 
         if ($request->wantsJson()) {
@@ -326,6 +338,34 @@ class VisitaController extends Controller
             'usuarios_id' => Auth::id() ?? 1,
             'tipo' => substr("Minuta Garita: [{$novedad->tipo}] {$novedad->titulo} — Oficial: {$vigilanteNombre}", 0, 250),
             'fecha' => Carbon::now(),
+        ]);
+
+        // Enviar notificación instantánea a Secretaria y Administrador
+        $icono = 'shield';
+        $color = 'amber';
+        $prefijo = '🛡️ Novedad de Garita';
+
+        if ($novedad->tipo === 'Cambio de Guardia') {
+            $icono = 'swap_horiz';
+            $color = 'blue';
+            $prefijo = '🔄 Relevo de Guardia';
+        } elseif ($novedad->tipo === 'Incidente') {
+            $icono = 'warning';
+            $color = 'rose';
+            $prefijo = '⚠️ ALERTA: Incidente en Garita';
+        } elseif ($novedad->tipo === 'Entrega / Correspondencia') {
+            $icono = 'inventory_2';
+            $color = 'purple';
+            $prefijo = '📦 Correspondencia para Socio';
+        }
+
+        \App\Models\Notificacion::enviarARoles(['admin', 'secretaria'], [
+            'tipo' => 'novedad_garita',
+            'titulo' => "{$prefijo}: {$novedad->titulo}",
+            'mensaje' => "El Oficial {$vigilanteNombre} reportó: {$novedad->descripcion}",
+            'icono' => $icono,
+            'color' => $color,
+            'enlace' => route('visitas.index'),
         ]);
 
         $msg = "🛡️ Novedad asentada en el libro de garita con éxito por el Oficial {$vigilanteNombre}.";

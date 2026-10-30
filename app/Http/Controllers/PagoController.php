@@ -94,6 +94,16 @@ class PagoController extends Controller
                 'fecha' => Carbon::now(),
             ]);
 
+            // 4. Notificar a Administración
+            \App\Models\Notificacion::enviarARoles(['admin'], [
+                'tipo' => 'pago_recibido',
+                'titulo' => "💵 Cobro Registrado (\${$validated['monto']} USD)",
+                'mensaje' => "Recibido pago de {$socio->nombre_completo} (Acción {$socio->accion}).",
+                'icono' => 'payments',
+                'color' => 'emerald',
+                'enlace' => route('pagos.receipt', $nuevoPago),
+            ]);
+
             return $nuevoPago;
         });
 

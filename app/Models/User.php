@@ -46,6 +46,16 @@ class User extends Authenticatable
         return $this->hasMany(NovedadGarita::class, 'usuarios_id');
     }
 
+    public function notificaciones()
+    {
+        return $this->hasMany(Notificacion::class, 'usuarios_id')->orderBy('created_at', 'desc');
+    }
+
+    public function notificacionesNoLeidas()
+    {
+        return $this->hasMany(Notificacion::class, 'usuarios_id')->where('leida', false)->orderBy('created_at', 'desc');
+    }
+
     public function esAdmin(): bool
     {
         return $this->rol === 'admin';

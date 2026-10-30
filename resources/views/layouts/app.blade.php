@@ -256,6 +256,45 @@
                     </button>
                 </div>
 
+                <!-- Campana de Notificaciones en Vivo -->
+                <div class="relative" id="dropdownNotificacionesContainer">
+                    <button type="button" id="btnToggleNotificaciones" onclick="toggleDropdownNotificaciones()"
+                            class="relative p-2.5 rounded-2xl bg-[#111A2E] hover:bg-[#18233C] border border-[#243352] text-slate-300 hover:text-white transition shadow-lg shadow-black/20 flex items-center justify-center">
+                        <span class="material-icons-round text-xl text-amber-400">notifications</span>
+                        
+                        <!-- Badge Contador de No Leídas -->
+                        <span id="badgeNotificacionesCount" class="hidden absolute -top-1.5 -right-1.5 px-1.5 py-0.5 min-w-[20px] h-5 rounded-full bg-rose-500 text-white font-mono font-black text-[10px] flex items-center justify-center border-2 border-[#0E1526] shadow-md shadow-rose-500/50 animate-pulse">
+                            0
+                        </span>
+                    </button>
+
+                    <!-- Dropdown Flotante de Notificaciones -->
+                    <div id="dropdownNotificaciones" class="hidden absolute right-0 mt-3 w-80 sm:w-96 rounded-3xl bg-[#0D1424] border border-[#243352] shadow-2xl z-50 overflow-hidden backdrop-blur-2xl">
+                        <div class="p-4 border-b border-[#1E293B] flex items-center justify-between bg-[#0A0F1E]">
+                            <div class="flex items-center space-x-2">
+                                <span class="material-icons-round text-amber-400 text-lg">notifications_active</span>
+                                <h4 class="text-xs font-bold text-white uppercase tracking-wider">Centro de Notificaciones</h4>
+                            </div>
+                            <button type="button" onclick="marcarTodasNotificacionesLeidas()" class="text-[10px] font-semibold text-amber-400 hover:text-amber-300 transition">
+                                Marcar todas leídas
+                            </button>
+                        </div>
+
+                        <!-- Lista Scrolleable de Notificaciones -->
+                        <div id="listaNotificaciones" class="max-h-96 overflow-y-auto divide-y divide-[#1A2438]">
+                            <div class="p-8 text-center text-slate-500 text-xs">
+                                <span class="material-icons-round animate-spin text-2xl text-amber-400 block mb-2">sync</span>
+                                <span>Cargando notificaciones...</span>
+                            </div>
+                        </div>
+
+                        <!-- Pie de Dropdown -->
+                        <div class="p-3 bg-[#080D18] border-t border-[#1E293B] text-center">
+                            <span class="text-[10px] text-slate-400">Sincronizado en tiempo real con Garita y Administración</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Fecha Actual -->
                 <div class="hidden md:flex flex-col text-right">
                     <span class="text-[11px] font-bold text-slate-300 capitalize">{{ now()->translatedFormat('l, d F Y') }}</span>
@@ -378,7 +417,171 @@
                 }
             }, 6000);
         }, false);
+
+        // ==========================================
+        // SISTEMA DE NOTIFICACIONES EN TIEMPO REAL
+        // ==========================================
+        let notificacionesConocidasIds = new Set();
+        let esPrimeraCargaNotificaciones = true;
+
+        function toggleDropdownNotificaciones() {
+            const dropdown = document.getElementById('dropdownNotificaciones');
+            dropdown.classList.toggle('hidden');
+            if (!dropdown.classList.contains('hidden')) {
+                consultarNotificaciones();
+            }
+        }
+
+        // Cerrar dropdown al hacer clic fuera
+        document.addEventListener('click', function (e) {
+            const container = document.getElementById('dropdownNotificacionesContainer');
+            const dropdown = document.getElementById('dropdownNotificaciones');
+            if (container && dropdown && !container.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        function consultarNotificaciones() {
+            fetch("{{ route('notificaciones.index') }}")
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.success) return;
+
+                    const badge = document.getElementById('badgeNotificacionesCount');
+                    const lista = document.getElementById('listaNotificaciones');
+
+                    // Actualizar contador del badge
+                    if (data.no_leidas_count > 0) {
+                        badge.textContent = data.no_leidas_count > 99 ? '99+' : data.no_leidas_count;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+
+                    if (!data.notificaciones || data.notificaciones.length === 0) {
+                        lista.innerHTML = `
+                            <div class="p-8 text-center text-slate-500 text-xs">
+                                <span class="material-icons-round text-3xl text-slate-600 block mb-1">notifications_off</span>
+                                <span>No tienes notificaciones pendientes.</span>
+                            </div>
+                        `;
+                        esPrimeraCargaNotificaciones = false;
+                        return;
+                    }
+
+                    let html = '';
+                    data.notificaciones.forEach(n => {
+                        // Si hay una notificación no leída nueva que no teníamos registrada, lanzar Toast flotante
+                        if (!esPrimeraCargaNotificaciones && !n.leida && !notificacionesConocidasIds.has(n.id)) {
+                            lanzarToastNotificacion(n);
+                        }
+                        notificacionesConocidasIds.add(n.id);
+
+                        let bgClass = n.leida ? 'bg-transparent' : 'bg-[#131D33]/70';
+                        let iconColor = 'text-amber-400 bg-amber-500/10 border-amber-500/20';
+                        if (n.color === 'rose') iconColor = 'text-rose-400 bg-rose-500/10 border-rose-500/20';
+                        if (n.color === 'emerald') iconColor = 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+                        if (n.color === 'blue') iconColor = 'text-blue-400 bg-blue-500/10 border-blue-500/20';
+                        if (n.color === 'purple') iconColor = 'text-purple-400 bg-purple-500/10 border-purple-500/20';
+
+                        html += `
+                            <div class="p-3.5 hover:bg-[#16233B] transition flex items-start space-x-3 cursor-pointer ${bgClass}" onclick="abrirNotificacion(${n.id}, '${n.enlace || ''}')">
+                                <div class="w-9 h-9 rounded-xl ${iconColor} border flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <span class="material-icons-round text-base">${n.icono || 'notifications'}</span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between">
+                                        <h5 class="text-xs font-bold text-white truncate">${n.titulo}</h5>
+                                        ${!n.leida ? '<span class="w-2 h-2 rounded-full bg-rose-500 flex-shrink-0 ml-1"></span>' : ''}
+                                    </div>
+                                    <p class="text-[11px] text-slate-300 mt-0.5 line-clamp-2 leading-relaxed">${n.mensaje}</p>
+                                    <span class="text-[9px] font-mono text-slate-500 block mt-1">${n.hace_tiempo}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    lista.innerHTML = html;
+                    esPrimeraCargaNotificaciones = false;
+                })
+                .catch(err => {
+                    console.error("Error al consultar notificaciones:", err);
+                });
+        }
+
+        function abrirNotificacion(id, enlace) {
+            fetch(`/api/notificaciones/${id}/leer`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            }).finally(() => {
+                if (enlace) {
+                    window.location.href = enlace;
+                } else {
+                    consultarNotificaciones();
+                }
+            });
+        }
+
+        function marcarTodasNotificacionesLeidas() {
+            fetch("{{ route('notificaciones.marcar-todas') }}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            }).then(() => {
+                consultarNotificaciones();
+            });
+        }
+
+        function lanzarToastNotificacion(n) {
+            const container = document.getElementById('toastNotificacionesContainer');
+            if (!container) return;
+
+            let iconColor = 'text-amber-400 bg-amber-500/20 border-amber-500/30';
+            if (n.color === 'rose') iconColor = 'text-rose-400 bg-rose-500/20 border-rose-500/30';
+            if (n.color === 'emerald') iconColor = 'text-emerald-400 bg-emerald-500/20 border-emerald-500/30';
+            if (n.color === 'blue') iconColor = 'text-blue-400 bg-blue-500/20 border-blue-500/30';
+
+            const toast = document.createElement('div');
+            toast.className = "pointer-events-auto p-4 rounded-2xl bg-[#0D1424] border border-[#2A3B5C] shadow-2xl shadow-black flex items-start space-x-3.5 transform transition-all duration-300 translate-y-3 opacity-0 cursor-pointer";
+            toast.innerHTML = `
+                <div class="w-10 h-10 rounded-xl ${iconColor} border flex items-center justify-center flex-shrink-0">
+                    <span class="material-icons-round text-lg">${n.icono || 'notifications'}</span>
+                </div>
+                <div class="flex-1 min-w-0" onclick="abrirNotificacion(${n.id}, '${n.enlace || ''}')">
+                    <h5 class="text-xs font-bold text-white">${n.titulo}</h5>
+                    <p class="text-[11px] text-slate-300 mt-0.5 line-clamp-2 leading-relaxed">${n.mensaje}</p>
+                    <span class="text-[9px] font-mono text-slate-400 block mt-1">${n.hace_tiempo || 'Ahora'}</span>
+                </div>
+                <button type="button" onclick="event.stopPropagation(); this.closest('div.pointer-events-auto').remove()" class="text-slate-400 hover:text-white">
+                    <span class="material-icons-round text-sm">close</span>
+                </button>
+            `;
+
+            container.appendChild(toast);
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-3', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-3', 'opacity-0');
+                setTimeout(() => toast.remove(), 400);
+            }, 7000);
+        }
+
+        // Consultar al cargar la página y hacer sondeo periódico cada 15 segundos
+        document.addEventListener('DOMContentLoaded', function () {
+            consultarNotificaciones();
+            setInterval(consultarNotificaciones, 15000);
+        });
     </script>
+
+    <!-- Contenedor Flotante de Toast Emergentes -->
+    <div id="toastNotificacionesContainer" class="fixed top-20 right-6 z-50 space-y-3 pointer-events-none max-w-sm w-full"></div>
 
     @stack('scripts')
 </body>

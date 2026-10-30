@@ -8,6 +8,7 @@ use App\Http\Controllers\SocioController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\MovimientoController;
 use App\Http\Controllers\VisitaController;
+use App\Http\Controllers\NotificacionController;
 
 // Autenticación & Redirección según rol
 Route::get('/', function () {
@@ -66,4 +67,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/visitas/novedades', [VisitaController::class, 'storeNovedad'])->name('visitas.novedades.store');
     Route::get('/api/visitas/buscar-socio', [VisitaController::class, 'buscarSocio'])->name('visitas.buscar');
     Route::delete('/visitas/{visita}', [VisitaController::class, 'destroy'])->name('visitas.destroy');
+
+    // 7. Notificaciones Internas en Tiempo Real
+    Route::get('/api/notificaciones', [NotificacionController::class, 'index'])->name('notificaciones.index');
+    Route::post('/api/notificaciones/{notificacion}/leer', [NotificacionController::class, 'marcarLeida'])->name('notificaciones.leer');
+    Route::post('/api/notificaciones/marcar-todas', [NotificacionController::class, 'marcarTodasLeidas'])->name('notificaciones.marcar-todas');
 });

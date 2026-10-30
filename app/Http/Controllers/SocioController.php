@@ -128,6 +128,16 @@ class SocioController extends Controller
             'fecha' => Carbon::now(),
         ]);
 
+        // Notificar a Administración, Secretaría y Garita (para que el oficial reconozca al nuevo socio)
+        \App\Models\Notificacion::enviarARoles(['admin', 'secretaria', 'vigilante'], [
+            'tipo' => 'socio_nuevo',
+            'titulo' => "👤 Nueva Afiliación: {$socio->nombre_completo}",
+            'mensaje' => "Se ha emitido la Acción #{$socio->accion} (Cédula: V-{$socio->cedula}). Socio autorizado para acceso al club.",
+            'icono' => 'person_add',
+            'color' => 'emerald',
+            'enlace' => route('socios.show', $socio),
+        ]);
+
         return redirect()->route('socios.show', $socio)
             ->with('success', "¡Socio afiliado exitosamente con Acción #{$socio->accion}!" . ($emailEnviado ? " Se ha enviado el mensaje de bienvenida a {$socio->correo}." : ""))
             ->with('wa_url', $waUrl);

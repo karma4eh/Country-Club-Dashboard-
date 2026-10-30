@@ -268,4 +268,55 @@ class SystemFeatureTest extends TestCase
         $movResponse = $this->get('/movimientos');
         $movResponse->assertRedirect(route('visitas.index'));
     }
+
+    public function test_vigilante_novedad_creates_notification_for_admin_and_secretaria()
+    {
+        $vigilante = User::where('rol', 'vigilante')->first();
+        $admin = User::where('rol', 'admin')->first();
+        $secretaria = User::where('rol', 'secretaria')->first();
+
+        $this->actingAs($vigilante);
+
+        // 1. Vigilante registra cambio de guardia
+        $titulo = 'Relevo de puesto Garita Norte ' . uniqid();
+        $res = $this->postJson('/visitas/novedades', [
+            'tipo' => 'Cambio de Guardia',
+            'titulo' => $titulo,
+            'descripcion' => 'Entrega de radio transmisores y llaves de acceso.',
+        ]);
+        $res->assertStatus(200);
+
+        // 2. Comprobar que tanto Admin como Secretaria recibieron la notificación
+        $notifAdmin = \App\Models\Notificacion::where('usuarios_id', $admin->id)
+            ->where('titulo', 'like', "%{$titulo}%")
+            ->first();
+        $this->assertNotNull($notifAdmin);
+        $this->assertEquals('blue', $notifAdmin->color);
+        $this->assertFalse($notifAdmin->leida);
+
+        $notifSecretaria = \App\Models\Notificacion::where('usuarios_id', $secretaria->id)
+            ->where('titulo', 'like', "%{$titulo}%")
+            ->first();
+        $this->assertNotNull($notifSecretaria);
+
+        // 3. Admin consulta sus notificaciones vía API
+        $this->actingAs($admin);
+        $apiRes = $this->getJson('/api/notificaciones');
+        $apiRes->assertStatus(200);
+        $apiRes->assertJsonFragment([
+            'id' => $notifAdmin->id,
+            'leida' => false,
+        ]);
+
+        // 4. Admin marca la notificación como leída
+        $leerRes = $this->postJson("/api/notificaciones/{$notifAdmin->id}/leer");
+        $leerRes->assertStatus(200);
+        $notifAdmin->refresh();
+        $this->assertTrue($notifAdmin->leida);
+
+        // 5. Admin marca todas las notificaciones como leídas
+        $todasRes = $this->postJson('/api/notificaciones/marcar-todas');
+        $todasRes->assertStatus(200);
+        $todasRes->assertJson(['no_leidas_count' => 0]);
+    }
 }
