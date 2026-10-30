@@ -212,10 +212,29 @@
                         </div>
                     </div>
 
+                    <!-- Código QR en el Carnet -->
+                    <div class="p-3 rounded-2xl bg-white flex flex-col items-center justify-center space-y-1">
+                        <div id="previewQrContainer" class="flex items-center justify-center"></div>
+                        <span class="text-[9px] font-mono text-slate-900 font-bold uppercase tracking-wider">
+                            Código QR Oficial para Garita
+                        </span>
+                    </div>
+
                     <div class="pt-3 border-t border-white/10 flex items-center justify-between text-[10px] text-slate-400">
                         <span>Emisión: {{ date('m/Y') }}</span>
-                        <span class="font-mono text-amber-400">SOCIO REGULAR</span>
+                        <span class="font-mono text-amber-400 font-bold">CONTROL DE VISITAS</span>
                     </div>
+                </div>
+
+                <!-- Notificación automática de bienvenida -->
+                <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-1.5 text-xs text-amber-300">
+                    <span class="font-bold flex items-center text-amber-400">
+                        <span class="material-icons-round text-sm mr-1">mark_email_read</span>
+                        Notificación Automática de Bienvenida
+                    </span>
+                    <p class="text-[11px] text-slate-300">
+                        Al afiliar al socio, el sistema le enviará un correo formal con su <strong>Número de Acción asignado</strong>, constancia de membresía e instrucciones para la garita de vigilancia.
+                    </p>
                 </div>
 
                 <!-- Beneficios automáticos -->
@@ -245,6 +264,7 @@
 </div>
 
 @push('scripts')
+<script src="{{ asset('js/qrcode.min.js') }}"></script>
 <script>
     const inputNombre = document.getElementById('inputNombre');
     const inputApellido = document.getElementById('inputApellido');
@@ -254,6 +274,8 @@
     const previewNombre = document.getElementById('previewNombre');
     const previewCedula = document.getElementById('previewCedula');
     const previewAccion = document.getElementById('previewAccion');
+    const qrContainer = document.getElementById('previewQrContainer');
+    let qrInstance = null;
 
     function updatePreview() {
         const nom = inputNombre.value.trim();
@@ -264,12 +286,29 @@
         previewNombre.textContent = (nom || ape) ? `${nom} ${ape}`.trim() : 'Nombre del Titular';
         previewCedula.textContent = ced ? `V-${ced}` : 'V-00.000.000';
         previewAccion.textContent = acc ? acc.toUpperCase() : 'ACC-000';
+
+        // Actualizar QR en vivo
+        qrContainer.innerHTML = '';
+        qrInstance = new QRCode(qrContainer, {
+            text: JSON.stringify({
+                club: "COUNTRY_CLUB",
+                cedula: ced || "00000000",
+                accion: acc ? acc.toUpperCase() : "ACC-000"
+            }),
+            width: 90,
+            height: 90,
+            colorDark: "#0B0F19",
+            colorLight: "#FFFFFF",
+            correctLevel: QRCode.CorrectLevel.M
+        });
     }
 
     inputNombre.addEventListener('input', updatePreview);
     inputApellido.addEventListener('input', updatePreview);
     inputCedula.addEventListener('input', updatePreview);
     inputAccion.addEventListener('input', updatePreview);
+
+    window.addEventListener('DOMContentLoaded', updatePreview);
 </script>
 @endpush
 @endsection

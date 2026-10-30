@@ -2,19 +2,32 @@
 
 @section('title', 'Expediente | ' . $socio->nombre_completo)
 @section('header_title', 'Expediente Oficial del Socio')
-@section('header_subtitle', 'Historial contable, datos de afiliación y estado de solvencia')
+@section('header_subtitle', 'Historial contable, carnet digital con QR y control mensual de visitas')
 
 @section('content')
 <div class="max-w-6xl mx-auto space-y-7">
 
     <!-- Navegación Superior -->
-    <div class="flex items-center justify-between">
+    <div class="flex flex-wrap items-center justify-between gap-4">
         <a href="{{ route('socios.index') }}" class="inline-flex items-center space-x-2 text-xs font-semibold text-slate-400 hover:text-white transition">
             <span class="material-icons-round text-base">arrow_back</span>
             <span>Volver al Directorio de Socios</span>
         </a>
 
         <div class="flex items-center space-x-3">
+            <!-- Botón WhatsApp si vino de registro -->
+            @if(session('wa_url'))
+            <a href="{{ session('wa_url') }}" target="_blank" class="px-4 py-2 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/20 flex items-center space-x-1.5 transition">
+                <span class="material-icons-round text-sm">chat</span>
+                <span>Enviar Carnet por WhatsApp</span>
+            </a>
+            @endif
+
+            <button onclick="abrirModalCarnet()" class="px-4 py-2 rounded-2xl bg-[#18253D] hover:bg-[#203050] text-amber-300 text-xs font-bold border border-amber-500/30 flex items-center space-x-1.5 transition shadow-lg shadow-amber-500/5">
+                <span class="material-icons-round text-sm text-amber-400">qr_code</span>
+                <span>Ver Carnet Digital QR</span>
+            </button>
+
             <button onclick="document.getElementById('modalEditar').classList.remove('hidden')" class="px-4 py-2 rounded-2xl bg-[#141C30] hover:bg-[#1C2742] text-slate-200 text-xs font-semibold border border-[#243352] flex items-center space-x-1.5 transition">
                 <span class="material-icons-round text-sm text-amber-400">edit</span>
                 <span>Editar Expediente</span>
@@ -22,7 +35,7 @@
 
             <a href="{{ route('pagos.create', ['cedula' => $socio->cedula]) }}" class="px-5 py-2 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white text-xs font-extrabold uppercase tracking-wider shadow-lg shadow-emerald-500/20 flex items-center space-x-1.5 transition active:scale-[0.98]">
                 <span class="material-icons-round text-base">point_of_sale</span>
-                <span>Registrar Pago / Abono</span>
+                <span>Cobrar / Abonar</span>
             </a>
         </div>
     </div>
@@ -69,7 +82,7 @@
 
             <!-- Badge de Condición Financiera -->
             <div class="flex items-center md:flex-col md:items-end justify-between border-t md:border-t-0 border-[#1F293D] pt-4 md:pt-0">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Condición Actual</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Condición Contable</span>
                 @if($socio->saldo < 0)
                     <span class="inline-flex items-center space-x-1.5 px-4 py-1.5 rounded-2xl text-xs font-extrabold uppercase bg-rose-500/10 text-rose-400 border border-rose-500/30 shadow-lg shadow-rose-500/10">
                         <span class="w-2 h-2 rounded-full bg-rose-400 animate-pulse"></span>
@@ -88,16 +101,23 @@
     <!-- Ficha de Datos Personales & Tarjeta Financiera -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-7">
 
-        <!-- Columna 1 y 2: Información Personal & de Contacto -->
+        <!-- Columna 1 y 2: Datos Personales & Carnet QR Rápido -->
         <div class="lg:col-span-2 glass-panel rounded-3xl p-7 border border-[#1F293D] shadow-2xl space-y-6">
-            <div class="flex items-center space-x-3 border-b border-[#1F293D] pb-4">
-                <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
-                    <span class="material-icons-round text-lg">person</span>
+            <div class="flex items-center justify-between border-b border-[#1F293D] pb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                        <span class="material-icons-round text-lg">person</span>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-white">Datos de Contacto y Residencia</h3>
+                        <p class="text-[11px] text-slate-400">Ficha censal del socio titular y canales de correspondencia</p>
+                    </div>
                 </div>
-                <div>
-                    <h3 class="text-sm font-bold text-white">Datos de Contacto y Residencia</h3>
-                    <p class="text-[11px] text-slate-400">Ficha censal del socio titular y canales de correspondencia</p>
-                </div>
+
+                <button onclick="abrirModalCarnet()" class="text-xs text-amber-400 hover:text-amber-300 font-semibold flex items-center space-x-1 transition">
+                    <span class="material-icons-round text-sm">print</span>
+                    <span>Imprimir Carnet Oficial</span>
+                </button>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 text-xs">
@@ -123,7 +143,7 @@
 
                 <div class="p-4 rounded-2xl bg-[#0A0F1E] border border-[#243352]/50 space-y-1">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Código de Acción</span>
-                    <p class="font-mono font-bold text-amber-300">{{ $socio->accion }}</p>
+                    <p class="font-mono font-bold text-amber-300 text-sm">{{ $socio->accion }}</p>
                 </div>
             </div>
         </div>
@@ -186,6 +206,162 @@
             </a>
         </div>
 
+    </div>
+
+    <!-- SECCIÓN INTERACTIVA: CONTROL MENSUAL DE VISITAS DEL SOCIO -->
+    <div class="glass-panel rounded-3xl p-7 border border-[#1F293D] shadow-2xl space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[#1F293D] pb-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
+                    <span class="material-icons-round text-lg">door_front</span>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-white">Control Mensual de Visitas al Club</h3>
+                    <p class="text-[11px] text-slate-400">Monitoreo de frecuencia y días de asistencia del socio mes a mes</p>
+                </div>
+            </div>
+
+            <!-- Selector de Mes Interactivo -->
+            <div class="flex items-center space-x-2 text-xs">
+                <a href="{{ route('socios.show', [$socio, 'year' => $mesAnterior->year, 'month' => $mesAnterior->month]) }}" 
+                   class="px-3 py-1.5 rounded-xl bg-[#141C30] hover:bg-[#1E293B] border border-[#243352] text-slate-300 font-semibold transition flex items-center space-x-1">
+                    <span class="material-icons-round text-xs">chevron_left</span>
+                    <span>{{ $mesAnterior->translatedFormat('M Y') }}</span>
+                </a>
+
+                <span class="px-4 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 font-bold font-mono text-xs uppercase">
+                    {{ $fechaSeleccionada->translatedFormat('F Y') }}
+                </span>
+
+                <a href="{{ route('socios.show', [$socio, 'year' => $mesSiguiente->year, 'month' => $mesSiguiente->month]) }}" 
+                   class="px-3 py-1.5 rounded-xl bg-[#141C30] hover:bg-[#1E293B] border border-[#243352] text-slate-300 font-semibold transition flex items-center space-x-1">
+                    <span>{{ $mesSiguiente->translatedFormat('M Y') }}</span>
+                    <span class="material-icons-round text-xs">chevron_right</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Tarjetas Resumen Mensual de Este Socio -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <div class="p-5 rounded-2xl bg-[#0A0F1E] border border-[#243352] flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Visitas en {{ $fechaSeleccionada->translatedFormat('F') }}</span>
+                    <h4 class="text-2xl font-extrabold text-emerald-400 mt-1 font-mono">{{ $totalVisitasMes ?? 0 }}</h4>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Ingresos registrados</p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                    <span class="material-icons-round text-xl">event_available</span>
+                </div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-[#0A0F1E] border border-[#243352] flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Acompañantes / Invitados</span>
+                    <h4 class="text-2xl font-extrabold text-blue-400 mt-1 font-mono">{{ $totalInvitadosMes ?? 0 }}</h4>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Personas invitadas</p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
+                    <span class="material-icons-round text-xl">group</span>
+                </div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-[#0A0F1E] border border-[#243352] flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Días de Asistencia</span>
+                    <h4 class="text-2xl font-extrabold text-purple-400 mt-1 font-mono">{{ count($diasAsistidos ?? []) }} días</h4>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Días distintos en el mes</p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
+                    <span class="material-icons-round text-xl">calendar_today</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Heatmap / Calendario Visual de Asistencia en el Mes -->
+        <div class="space-y-2.5">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    Mapa Visual de Días de Asistencia ({{ $fechaSeleccionada->translatedFormat('F Y') }})
+                </span>
+                <span class="text-[10px] text-slate-400">
+                    🟢 Verde = Asistió al Club ese día
+                </span>
+            </div>
+
+            <div class="grid grid-cols-7 sm:grid-cols-10 md:grid-cols-16 gap-1.5 p-3.5 rounded-2xl bg-[#0A0F1E] border border-[#243352]/40 text-center">
+                @php
+                    $diasTotal = $fechaSeleccionada->daysInMonth;
+                    $diasSet = collect($diasAsistidos ?? []);
+                @endphp
+                @for($d = 1; $d <= $diasTotal; $d++)
+                    @php
+                        $asistio = $diasSet->contains($d);
+                    @endphp
+                    <div class="p-2 rounded-xl border text-xs font-mono transition-all {{ $asistio ? 'bg-emerald-500/25 border-emerald-500/50 text-emerald-300 font-bold shadow-sm shadow-emerald-500/20' : 'bg-[#141C30]/40 border-[#243352]/30 text-slate-600' }}"
+                         title="{{ $asistio ? "Día $d: Asistió al club" : "Día $d: Sin registro" }}">
+                        <span class="block text-[11px]">{{ $d }}</span>
+                        @if($asistio)
+                            <span class="material-icons-round text-[10px] text-emerald-400 leading-none">check</span>
+                        @else
+                            <span class="text-[9px] text-slate-700 leading-none">&bull;</span>
+                        @endif
+                    </div>
+                @endfor
+            </div>
+        </div>
+
+        <!-- Detalle de Visitas de Este Mes -->
+        <div class="overflow-x-auto rounded-2xl border border-[#1B253B]">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-[#0B101D] text-slate-400 font-bold uppercase tracking-wider border-b border-[#1B253B]">
+                    <tr>
+                        <th class="px-6 py-4">Fecha & Hora Exacta</th>
+                        <th class="px-6 py-4">Vigilante / Garita</th>
+                        <th class="px-6 py-4">Invitados / Acompañantes</th>
+                        <th class="px-6 py-4">Observaciones / Vehículo</th>
+                        <th class="px-6 py-4 text-right">Estatus</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[#1B253B] bg-[#0E1526]/50">
+                    @forelse($visitasMes ?? [] as $v)
+                    <tr class="hover:bg-[#162238]/60 transition-colors">
+                        <td class="px-6 py-4 text-slate-300 whitespace-nowrap font-mono text-[11px]">
+                            <span class="text-white font-semibold">{{ $v->fecha_entrada ? $v->fecha_entrada->format('d/m/Y') : '' }}</span>
+                            <span class="text-amber-400 ml-1.5 font-bold">{{ $v->fecha_entrada ? $v->fecha_entrada->format('h:i A') : '' }}</span>
+                        </td>
+                        <td class="px-6 py-4 text-slate-200">
+                            {{ $v->vigilante->nombre_completo ?? 'Garita Principal' }}
+                        </td>
+                        <td class="px-6 py-4 font-mono text-xs text-slate-300">
+                            @if($v->invitados > 0)
+                                <span class="px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold">
+                                    +{{ $v->invitados }} persona(s)
+                                </span>
+                            @else
+                                <span class="text-slate-500">Solo titular</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 text-slate-400 truncate max-w-[220px]">
+                            {{ $v->observaciones ?? '-' }}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <span class="inline-flex items-center space-x-1 text-[10px] text-emerald-400 font-mono font-semibold">
+                                <span class="material-icons-round text-xs">verified</span>
+                                <span>Ingreso Válido</span>
+                            </span>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="px-6 py-8 text-center text-slate-500">
+                            <span class="material-icons-round text-3xl text-slate-600 block mb-1">no_meeting_room</span>
+                            <span>No se registraron ingresos para este socio en {{ $fechaSeleccionada->translatedFormat('F de Y') }}.</span>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- Historial de Pagos y Transacciones del Socio -->
@@ -254,10 +430,81 @@
 
 </div>
 
+<!-- MODAL: CARNET DIGITAL OFICIAL CON QR (IMPRIMIBLE) -->
+<div id="modalCarnet" class="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
+    <div class="glass-panel bg-[#0B0F19] border border-amber-500/40 rounded-3xl p-8 w-full max-w-md shadow-2xl space-y-6 relative overflow-hidden">
+        
+        <div class="flex items-center justify-between pb-3 border-b border-[#1F293D] no-print">
+            <h3 class="text-sm font-bold text-amber-400 flex items-center">
+                <span class="material-icons-round text-base mr-1.5">badge</span>
+                Carnet Digital Oficial
+            </h3>
+            <button onclick="document.getElementById('modalCarnet').classList.add('hidden')" class="w-8 h-8 rounded-xl bg-[#141C30] text-slate-400 hover:text-white flex items-center justify-center transition">
+                <span class="material-icons-round text-base">close</span>
+            </button>
+        </div>
+
+        <!-- TARJETA PVC DEL SOCIO -->
+        <div id="carnetPrintArea" class="rounded-3xl bg-gradient-to-br from-[#1A253D] via-[#0E1526] to-[#0A0E1A] p-6 border-2 border-amber-500/40 shadow-2xl space-y-5 text-white relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-36 h-36 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+            <!-- Cabecera de la Tarjeta -->
+            <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                <div class="flex items-center space-x-2">
+                    <span class="material-icons-round text-amber-400 text-2xl">shield</span>
+                    <div>
+                        <span class="text-xs font-black tracking-widest font-serif block text-amber-200">COUNTRY CLUB</span>
+                        <span class="text-[9px] text-slate-400 uppercase tracking-widest block font-sans">Membresía Oficial</span>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span class="px-2.5 py-1 rounded text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        {{ $socio->accion }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Cuerpo de la Tarjeta: Avatar y Datos -->
+            <div class="flex items-center space-x-4">
+                <img src="{{ $socio->avatar_url }}" alt="avatar" class="w-16 h-16 rounded-2xl border-2 border-amber-400/50 object-cover shadow-lg">
+                <div class="space-y-0.5">
+                    <h4 class="text-base font-extrabold text-white leading-tight">{{ $socio->nombre_completo }}</h4>
+                    <p class="text-xs font-mono text-slate-300">Cédula: V-{{ $socio->cedula }}</p>
+                    <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase {{ $socio->estado === 'activo' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30' }}">
+                        {{ $socio->estado === 'activo' ? 'Habilitado Garita' : 'Membresía Suspendida' }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- CÓDIGO QR GENERADO EN VIVO -->
+            <div class="p-4 rounded-2xl bg-white flex flex-col items-center justify-center space-y-1 shadow-inner">
+                <div id="qrcodeCarnet"></div>
+                <span class="text-[9px] font-mono text-slate-900 font-bold uppercase tracking-wider">
+                    {{ $socio->accion }} • V-{{ $socio->cedula }}
+                </span>
+            </div>
+
+            <!-- Pie del Carnet -->
+            <div class="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-white/10">
+                <span>Miembro desde: {{ $socio->socio_desde ? $socio->socio_desde->format('m/Y') : date('m/Y') }}</span>
+                <span class="font-mono text-amber-400 font-bold">VÁLIDO PARA GARITA</span>
+            </div>
+        </div>
+
+        <!-- Botones de Acción del Modal -->
+        <div class="flex items-center justify-end space-x-3 pt-2 no-print">
+            <button type="button" onclick="window.print()" class="px-5 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center space-x-1.5 transition shadow-lg shadow-amber-500/10">
+                <span class="material-icons-round text-sm">print</span>
+                <span>Imprimir Carnet</span>
+            </button>
+        </div>
+
+    </div>
+</div>
+
 <!-- Modal para Editar Datos del Socio -->
 <div id="modalEditar" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
     <div class="glass-panel bg-[#0E1526] border border-[#23314D] rounded-3xl p-7 w-full max-w-lg shadow-2xl space-y-6 relative">
-        
         <div class="flex items-center justify-between pb-4 border-b border-[#1F293D]">
             <div class="flex items-center space-x-2.5">
                 <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
@@ -326,4 +573,33 @@
         </form>
     </div>
 </div>
+
+@push('scripts')
+<script src="{{ asset('js/qrcode.min.js') }}"></script>
+<script>
+    let qrInstancia = null;
+
+    function abrirModalCarnet() {
+        document.getElementById('modalCarnet').classList.remove('hidden');
+
+        if (!qrInstancia) {
+            const qrContainer = document.getElementById('qrcodeCarnet');
+            qrContainer.innerHTML = '';
+            qrInstancia = new QRCode(qrContainer, {
+                text: JSON.stringify({
+                    club: "COUNTRY_CLUB",
+                    id: {{ $socio->id }},
+                    cedula: "{{ $socio->cedula }}",
+                    accion: "{{ $socio->accion }}"
+                }),
+                width: 140,
+                height: 140,
+                colorDark: "#0B0F19",
+                colorLight: "#FFFFFF",
+                correctLevel: QRCode.CorrectLevel.M
+            });
+        }
+    }
+</script>
+@endpush
 @endsection

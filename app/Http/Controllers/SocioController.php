@@ -4,8 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Socio;
 use App\Models\Movimiento;
+use App\Models\Visita;
+use App\Mail\SocioBienvenidaMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class SocioController extends Controller
@@ -84,20 +88,83 @@ class SocioController extends Controller
 
         $socio = Socio::create($validated);
 
+        // Envío de correo de bienvenida con Número de Acción
+        $emailEnviado = false;
+        try {
+            if (!empty($socio->correo)) {
+                Mail::to($socio->correo)->send(new SocioBienvenidaMail($socio));
+                $emailEnviado = true;
+            }
+        } catch (\Throwable $e) {
+            Log::warning("No se pudo enviar el correo de bienvenida al socio {$socio->id}: " . $e->getMessage());
+        }
+
+        // Enlace para enviar mensaje de bienvenida por WhatsApp
+        $waUrl = null;
+        if (!empty($socio->numero)) {
+            $numLimpio = preg_replace('/[^0-9]/', '', $socio->numero);
+            if (str_starts_with($numLimpio, '0')) {
+                $numLimpio = '58' . substr($numLimpio, 1); // Prefijo Venezuela
+            }
+            $textoWa = "¡Bienvenido a Country Club, {$socio->nombre}! Le confirmamos su afiliación exitosa. Su Número de Acción oficial es: *{$socio->accion}*. Puede ingresar a las instalaciones presentando su cédula V-{$socio->cedula} o su carnet digital.";
+            $waUrl = "https://wa.me/{$numLimpio}?text=" . urlencode($textoWa);
+        }
+
         Movimiento::create([
             'usuarios_id' => Auth::id() ?? 1,
-            'tipo' => 'Registro de Socio: ' . $socio->accion,
+            'tipo' => substr("Registro de Socio: Acción #{$socio->accion}" . ($emailEnviado ? " (Bienvenida enviada a {$socio->correo})" : ""), 0, 250),
             'fecha' => Carbon::now(),
         ]);
 
         return redirect()->route('socios.show', $socio)
-            ->with('success', '¡Socio registrado exitosamente!');
+            ->with('success', "¡Socio afiliado exitosamente con Acción #{$socio->accion}!" . ($emailEnviado ? " Se ha enviado el mensaje de bienvenida a {$socio->correo}." : ""))
+            ->with('wa_url', $waUrl);
     }
 
-    public function show(Socio $socio)
+    public function show(Request $request, Socio $socio)
     {
-        $socio->load(['pagos', 'visitas']);
-        return view('socios.show', compact('socio'));
+        $socio->load(['pagos']);
+
+        // Control Mensual de Visitas Interactivo
+        $year = (int) $request->input('year', Carbon::now()->year);
+        $month = (int) $request->input('month', Carbon::now()->month);
+
+        if ($month < 1 || $month > 12) {
+            $month = Carbon::now()->month;
+        }
+
+        $fechaSeleccionada = Carbon::createFromDate($year, $month, 1);
+        $mesAnterior = (clone $fechaSeleccionada)->subMonth();
+        $mesSiguiente = (clone $fechaSeleccionada)->addMonth();
+
+        // Visitas de este socio en el mes seleccionado
+        $visitasMes = $socio->visitas()
+            ->with('vigilante')
+            ->whereYear('fecha_entrada', $year)
+            ->whereMonth('fecha_entrada', $month)
+            ->orderBy('fecha_entrada', 'desc')
+            ->get();
+
+        $totalVisitasMes = $visitasMes->count();
+        $totalInvitadosMes = $visitasMes->sum('invitados');
+
+        // Días en que el socio asistió al club en este mes (para calendario visual)
+        $diasAsistidos = $visitasMes->pluck('fecha_entrada')->map(function ($date) {
+            return (int) $date->format('j');
+        })->unique()->values()->toArray();
+
+        return view('socios.show', compact(
+            'socio',
+            'visitasMes',
+            'year',
+            'month',
+            'fechaSeleccionada',
+            'mesAnterior',
+            'mesSiguiente',
+            'totalVisitasMes',
+            'totalInvitadosMes',
+            'diasAsistidos'
+        ));
     }
 
     public function update(Request $request, Socio $socio)

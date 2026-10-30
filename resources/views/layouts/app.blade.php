@@ -130,6 +130,18 @@
                     </nav>
                 </div>
 
+                <!-- Sección Control de Acceso & Garita -->
+                <div>
+                    <p class="px-3 text-[10px] font-bold tracking-widest uppercase text-slate-500 mb-2.5">Acceso & Garita</p>
+                    <nav class="space-y-1.5">
+                        <a href="{{ route('visitas.index') }}" 
+                           class="flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('visitas.index') ? 'bg-gradient-to-r from-blue-500/15 to-transparent text-blue-400 border-l-2 border-blue-400 shadow-sm' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
+                            <span class="material-icons-round text-lg mr-3 transition-transform group-hover:scale-110 {{ request()->routeIs('visitas.index') ? 'text-blue-400' : 'text-slate-500 group-hover:text-slate-300' }}">qr_code_scanner</span>
+                            <span>Garita y Control de Visitas</span>
+                        </a>
+                    </nav>
+                </div>
+
                 <!-- Sección Auditoría -->
                 <div>
                     <p class="px-3 text-[10px] font-bold tracking-widest uppercase text-slate-500 mb-2.5">Seguridad & Control</p>

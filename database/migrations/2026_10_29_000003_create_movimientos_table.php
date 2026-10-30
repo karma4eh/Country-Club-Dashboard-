@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('movimientos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('usuarios_id')->constrained('usuarios')->onDelete('cascade');
-            $table->string('tipo', 100);
+            $table->string('tipo', 255);
             $table->timestamp('fecha')->useCurrent();
         });
     }

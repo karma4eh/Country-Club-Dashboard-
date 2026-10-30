@@ -83,4 +83,33 @@ class Socio extends Model
         $nombre = urlencode($this->nombre_completo);
         return "https://ui-avatars.com/api/?name={$nombre}&background=1f2937&color=fbbf24";
     }
+
+    public function getQrCodeDataAttribute(): string
+    {
+        return json_encode([
+            'tipo' => 'SOCIO_COUNTRY_CLUB',
+            'id' => $this->id,
+            'cedula' => $this->cedula,
+            'accion' => $this->accion,
+            'nombre' => $this->nombre_completo,
+            'estado' => $this->estado,
+        ]);
+    }
+
+    public function visitasDelMes(int $year, int $month)
+    {
+        return $this->visitas()
+            ->whereYear('fecha_entrada', $year)
+            ->whereMonth('fecha_entrada', $month)
+            ->orderBy('fecha_entrada', 'desc')
+            ->get();
+    }
+
+    public function totalVisitasMes(int $year, int $month): int
+    {
+        return $this->visitas()
+            ->whereYear('fecha_entrada', $year)
+            ->whereMonth('fecha_entrada', $month)
+            ->count();
+    }
 }

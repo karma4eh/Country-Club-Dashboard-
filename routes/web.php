@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SocioController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\MovimientoController;
+use App\Http\Controllers\VisitaController;
 
 // Autenticación
 Route::get('/', function () {
@@ -38,4 +39,10 @@ Route::middleware('auth')->group(function () {
 
     // Movimientos / Auditoría
     Route::get('/movimientos', [MovimientoController::class, 'index'])->name('movimientos.index');
+
+    // Control de Visitas / Garita
+    Route::get('/visitas', [VisitaController::class, 'index'])->name('visitas.index');
+    Route::post('/visitas', [VisitaController::class, 'store'])->name('visitas.store');
+    Route::get('/api/visitas/buscar-socio', [VisitaController::class, 'buscarSocio'])->name('visitas.buscar');
+    Route::delete('/visitas/{visita}', [VisitaController::class, 'destroy'])->name('visitas.destroy');
 });
