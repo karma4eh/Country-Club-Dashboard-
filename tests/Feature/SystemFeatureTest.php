@@ -179,11 +179,22 @@ class SystemFeatureTest extends TestCase
 
         $socio = Socio::first();
 
-        // Control mensual con mes y año específicos
+        // 1. Control mensual vista completa estándar
         $response = $this->get("/socios/{$socio->id}?year=2026&month=10");
         $response->assertStatus(200);
         $response->assertSee('Control Mensual de Visitas');
         $response->assertSee('Carnet Digital Oficial');
+
+        // 2. Control mensual navegación dinámica AJAX (sin recarga completa de página)
+        $ajaxResponse = $this->get("/socios/{$socio->id}?year=2026&month=9&ajax_control_visitas=1", [
+            'HTTP_X-Requested-With' => 'XMLHttpRequest',
+            'HTTP_X-Partial-Visitas' => '1',
+        ]);
+        $ajaxResponse->assertStatus(200);
+        $ajaxResponse->assertSee('Control Mensual de Visitas');
+        $ajaxResponse->assertSee('septiembre 2026', false);
+        $ajaxResponse->assertDontSee('<html');
+        $ajaxResponse->assertDontSee('<!DOCTYPE html>');
     }
 
     public function test_authenticated_user_can_access_all_modules()

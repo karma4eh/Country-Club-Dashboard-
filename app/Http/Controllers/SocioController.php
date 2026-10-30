@@ -175,6 +175,22 @@ class SocioController extends Controller
             return (int) $date->format('j');
         })->unique()->values()->toArray();
 
+        // Respuesta parcial vía AJAX para cambio de mes sin recargar la página
+        if ($request->has('ajax_control_visitas') || $request->header('X-Partial-Visitas')) {
+            return view('socios.partials.control_visitas', compact(
+                'socio',
+                'visitasMes',
+                'year',
+                'month',
+                'fechaSeleccionada',
+                'mesAnterior',
+                'mesSiguiente',
+                'totalVisitasMes',
+                'totalInvitadosMes',
+                'diasAsistidos'
+            ));
+        }
+
         return view('socios.show', compact(
             'socio',
             'visitasMes',
