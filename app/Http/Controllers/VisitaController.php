@@ -181,6 +181,25 @@ class VisitaController extends Controller
         $vigilante = Auth::user();
         $vigilanteNombre = $vigilante ? $vigilante->nombre_completo : 'Personal de Seguridad';
 
+        // Prevención de doble clic: evitar registrar la misma visita en menos de 20 segundos
+        $visitaReciente = Visita::where('socios_id', $socio->id)
+            ->where('fecha_entrada', '>=', Carbon::now()->subSeconds(20))
+            ->first();
+
+        if ($visitaReciente) {
+            $mensaje = "¡Ingreso autorizado previamente para {$socio->nombre_completo}! (Acción: {$socio->accion}) — Registrado por el Oficial: {$vigilanteNombre}";
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'mensaje' => $mensaje,
+                    'visita_id' => $visitaReciente->id,
+                    'fecha' => $visitaReciente->fecha_entrada ? $visitaReciente->fecha_entrada->format('d/m/Y h:i A') : '',
+                    'vigilante' => $vigilanteNombre,
+                ]);
+            }
+            return redirect()->route('visitas.index')->with('success', $mensaje);
+        }
+
         $visita = Visita::create([
             'socios_id' => $socio->id,
             'usuarios_id' => Auth::id(),
@@ -264,6 +283,34 @@ class VisitaController extends Controller
             'titulo' => 'required|string|max:100',
             'descripcion' => 'required|string|max:1000',
         ]);
+
+        $vigilanteNombre = Auth::user()->nombre_completo ?? 'Personal de Seguridad';
+
+        // Prevención de doble clic / registros duplicados idénticos en menos de 20 segundos
+        $reciente = NovedadGarita::where('usuarios_id', Auth::id())
+            ->where('titulo', $validated['titulo'])
+            ->where('tipo', $validated['tipo'])
+            ->where('fecha', '>=', Carbon::now()->subSeconds(20))
+            ->first();
+
+        if ($reciente) {
+            $msg = "🛡️ Novedad ya registrada previamente en la minuta por el Oficial {$vigilanteNombre}.";
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'mensaje' => $msg,
+                    'novedad' => [
+                        'id' => $reciente->id,
+                        'tipo' => $reciente->tipo,
+                        'titulo' => $reciente->titulo,
+                        'descripcion' => $reciente->descripcion,
+                        'fecha' => $reciente->fecha ? $reciente->fecha->format('d/m/Y h:i A') : '',
+                        'vigilante' => $vigilanteNombre,
+                    ],
+                ]);
+            }
+            return back()->with('success', $msg);
+        }
 
         $novedad = NovedadGarita::create([
             'usuarios_id' => Auth::id(),

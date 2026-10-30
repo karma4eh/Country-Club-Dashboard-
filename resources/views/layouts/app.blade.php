@@ -296,6 +296,43 @@
                 }, 600);
             });
         }
+
+        // Prevención global de envíos múltiples / doble clic
+        document.addEventListener('submit', function (e) {
+            const form = e.target;
+            if (!form || form.tagName !== 'FORM') return;
+
+            if (form.dataset.submitting === 'true') {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return false;
+            }
+
+            form.dataset.submitting = 'true';
+
+            const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+                const textSpan = submitBtn.querySelector('span:last-child');
+                if (textSpan) {
+                    textSpan.dataset.origText = textSpan.textContent;
+                    textSpan.textContent = 'Procesando...';
+                }
+            }
+
+            setTimeout(() => {
+                form.dataset.submitting = 'false';
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                    const textSpan = submitBtn.querySelector('span:last-child');
+                    if (textSpan && textSpan.dataset.origText) {
+                        textSpan.textContent = textSpan.dataset.origText;
+                    }
+                }
+            }, 6000);
+        }, false);
     </script>
 
     @stack('scripts')

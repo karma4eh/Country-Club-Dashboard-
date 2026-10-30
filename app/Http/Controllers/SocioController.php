@@ -71,6 +71,18 @@ class SocioController extends Controller
 
     public function store(Request $request)
     {
+        // Prevención de doble clic en registro de socio
+        $cedulaInput = $request->input('cedula');
+        if ($cedulaInput) {
+            $socioReciente = Socio::where('cedula', $cedulaInput)
+                ->where('created_at', '>=', Carbon::now()->subSeconds(20))
+                ->first();
+            if ($socioReciente) {
+                return redirect()->route('socios.show', $socioReciente)
+                    ->with('info', "¡El socio {$socioReciente->nombre_completo} (Acción {$socioReciente->accion}) ya fue registrado exitosamente!");
+            }
+        }
+
         $validated = $request->validate([
             'nombre' => 'required|string|max:100',
             'apellido' => 'required|string|max:100',

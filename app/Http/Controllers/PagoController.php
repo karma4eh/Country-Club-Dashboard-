@@ -62,6 +62,17 @@ class PagoController extends Controller
             return back()->withErrors(['cedula' => 'Socio no encontrado.'])->withInput();
         }
 
+        // Prevención de doble clic / cobro duplicado en menos de 20 segundos
+        $pagoReciente = Pago::where('socios_id', $socio->id)
+            ->where('monto', $validated['monto'])
+            ->where('fecha_pago', '>=', Carbon::now()->subSeconds(20))
+            ->first();
+
+        if ($pagoReciente) {
+            return redirect()->route('pagos.receipt', $pagoReciente)
+                ->with('info', 'Este cobro ya había sido procesado previamente.');
+        }
+
         $pago = DB::transaction(function () use ($socio, $validated) {
             // 1. Crear el pago
             $nuevoPago = Pago::create([

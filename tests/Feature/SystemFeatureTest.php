@@ -145,6 +145,33 @@ class SystemFeatureTest extends TestCase
         ]);
     }
 
+    public function test_duplicate_submission_protection_prevents_multiple_records()
+    {
+        $admin = User::where('rol', 'admin')->first() ?? User::first();
+        $this->actingAs($admin);
+
+        $payload = [
+            'tipo' => 'Ronda Perimetral',
+            'titulo' => 'Ronda rápida de prueba anti-duplicados ' . uniqid(),
+            'descripcion' => 'Verificando que dos clics consecutivos no generen dos registros.',
+        ];
+
+        // Primer envío
+        $res1 = $this->postJson('/visitas/novedades', $payload);
+        $res1->assertStatus(200);
+
+        // Segundo envío idéntico inmediato (simulando doble clic)
+        $res2 = $this->postJson('/visitas/novedades', $payload);
+        $res2->assertStatus(200);
+        $res2->assertJsonFragment([
+            'success' => true,
+        ]);
+
+        // Debe existir exactamente 1 registro en la base de datos, NO dos
+        $count = \App\Models\NovedadGarita::where('titulo', $payload['titulo'])->count();
+        $this->assertEquals(1, $count);
+    }
+
     public function test_socio_monthly_visits_control_navigation()
     {
         $user = User::first();

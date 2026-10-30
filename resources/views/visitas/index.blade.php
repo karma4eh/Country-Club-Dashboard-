@@ -560,7 +560,7 @@
             </button>
         </div>
 
-        <form action="{{ route('visitas.novedades.store') }}" method="POST" class="space-y-4">
+        <form onsubmit="guardarNovedadMinuta(event)" class="space-y-4">
             @csrf
             <div>
                 <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
@@ -602,8 +602,9 @@
                 <button type="button" onclick="cerrarModalNovedad()" class="px-4 py-2.5 rounded-xl bg-[#141C30] hover:bg-[#1E293B] text-slate-300 text-xs font-semibold transition border border-[#243352]">
                     Cancelar
                 </button>
-                <button type="submit" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 transition active:scale-95">
-                    Guardar en Minuta
+                <button type="submit" id="btnGuardarMinuta" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 transition active:scale-95 flex items-center space-x-1.5">
+                    <span class="material-icons-round text-sm">save</span>
+                    <span>Guardar en Minuta</span>
                 </button>
             </div>
         </form>
@@ -625,6 +626,46 @@
 
     function cerrarModalNovedad() {
         document.getElementById('modalNovedad').classList.add('hidden');
+    }
+
+    // Guardar novedad por AJAX con protección de doble clic
+    function guardarNovedadMinuta(e) {
+        e.preventDefault();
+        const form = e.target;
+        const btn = document.getElementById('btnGuardarMinuta');
+        if (btn.disabled) return;
+
+        btn.disabled = true;
+        btn.classList.add('opacity-75', 'cursor-not-allowed');
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = `
+            <span class="material-icons-round text-sm animate-spin mr-1">sync</span>
+            <span>Guardando en Minuta...</span>
+        `;
+
+        const formData = new FormData(form);
+
+        fetch("{{ route('visitas.novedades.store') }}", {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            cerrarModalNovedad();
+            form.reset();
+            alert(data.mensaje || 'Novedad registrada exitosamente.');
+            window.location.reload();
+        })
+        .catch(err => {
+            alert('Error al registrar la novedad. Por favor verifique.');
+            btn.disabled = false;
+            btn.classList.remove('opacity-75', 'cursor-not-allowed');
+            btn.innerHTML = originalHtml;
+        });
     }
 
     // Búsqueda Manual / Lector de Barra
@@ -775,9 +816,22 @@
         card.classList.remove('hidden');
     }
 
-    // Confirmación y guardado del ingreso
+    // Confirmación y guardado del ingreso con protección contra doble clic
     function registrarVisitaConfirmada(e, socioId) {
         e.preventDefault();
+        const form = e.target;
+        const submitBtn = form.querySelector('button[type="submit"]');
+
+        if (submitBtn && submitBtn.disabled) return;
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            submitBtn.innerHTML = `
+                <span class="material-icons-round text-base animate-spin">sync</span>
+                <span>Autorizando Acceso...</span>
+            `;
+        }
+
         const invitados = document.getElementById('visitaInvitados').value;
         const observaciones = document.getElementById('visitaObservaciones').value;
 
@@ -801,6 +855,14 @@
         })
         .catch(err => {
             alert('Error al registrar la visita.');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                submitBtn.innerHTML = `
+                    <span class="material-icons-round text-base">check_circle</span>
+                    <span>Autorizar e Ingresar al Club</span>
+                `;
+            }
         });
     }
 
