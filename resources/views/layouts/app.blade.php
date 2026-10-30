@@ -228,7 +228,7 @@
     <div class="flex-1 flex flex-col h-screen overflow-hidden z-10">
         
         <!-- NAVBAR SUPERIOR PREMIUM -->
-        <header class="h-20 bg-[#0E1526]/80 backdrop-blur-xl border-b border-[#1B253B] flex items-center justify-between px-8">
+        <header class="h-20 bg-[#0E1526]/95 backdrop-blur-xl border-b border-[#1B253B] flex items-center justify-between px-8 relative z-40">
             <div>
                 <h2 class="text-xl font-extrabold text-white tracking-tight flex items-center">
                     @yield('header_title', 'Dashboard')
@@ -257,9 +257,9 @@
                 </div>
 
                 <!-- Campana de Notificaciones en Vivo -->
-                <div class="relative" id="dropdownNotificacionesContainer">
+                <div class="relative z-50" id="dropdownNotificacionesContainer">
                     <button type="button" id="btnToggleNotificaciones" onclick="toggleDropdownNotificaciones()"
-                            class="relative p-2.5 rounded-2xl bg-[#111A2E] hover:bg-[#18233C] border border-[#243352] text-slate-300 hover:text-white transition shadow-lg shadow-black/20 flex items-center justify-center">
+                            class="relative p-2.5 rounded-2xl bg-[#111A2E] hover:bg-[#18233C] border border-[#243352] hover:border-amber-400/50 text-slate-300 hover:text-white transition shadow-lg shadow-black/20 flex items-center justify-center">
                         <span class="material-icons-round text-xl text-amber-400">notifications</span>
                         
                         <!-- Badge Contador de No Leídas -->
@@ -268,20 +268,20 @@
                         </span>
                     </button>
 
-                    <!-- Dropdown Flotante de Notificaciones -->
-                    <div id="dropdownNotificaciones" class="hidden absolute right-0 mt-3 w-80 sm:w-96 rounded-3xl bg-[#0D1424] border border-[#243352] shadow-2xl z-50 overflow-hidden backdrop-blur-2xl">
-                        <div class="p-4 border-b border-[#1E293B] flex items-center justify-between bg-[#0A0F1E]">
+                    <!-- Dropdown Flotante de Notificaciones con Máxima Elevación -->
+                    <div id="dropdownNotificaciones" class="hidden absolute right-0 top-full mt-2.5 w-80 sm:w-96 rounded-3xl bg-[#0B101D] border-2 border-amber-500/40 shadow-[0_25px_70px_rgba(0,0,0,0.95)] z-[9999] overflow-hidden">
+                        <div class="p-4 border-b border-[#1E293B] flex items-center justify-between bg-[#0F172A]">
                             <div class="flex items-center space-x-2">
                                 <span class="material-icons-round text-amber-400 text-lg">notifications_active</span>
                                 <h4 class="text-xs font-bold text-white uppercase tracking-wider">Centro de Notificaciones</h4>
                             </div>
-                            <button type="button" onclick="marcarTodasNotificacionesLeidas()" class="text-[10px] font-semibold text-amber-400 hover:text-amber-300 transition">
+                            <button type="button" onclick="marcarTodasNotificacionesLeidas()" class="text-[10px] font-semibold text-amber-400 hover:text-amber-300 transition px-2 py-1 rounded-lg hover:bg-amber-500/10">
                                 Marcar todas leídas
                             </button>
                         </div>
 
                         <!-- Lista Scrolleable de Notificaciones -->
-                        <div id="listaNotificaciones" class="max-h-96 overflow-y-auto divide-y divide-[#1A2438]">
+                        <div id="listaNotificaciones" class="max-h-96 overflow-y-auto divide-y divide-[#1A2438] bg-[#0B101D]">
                             <div class="p-8 text-center text-slate-500 text-xs">
                                 <span class="material-icons-round animate-spin text-2xl text-amber-400 block mb-2">sync</span>
                                 <span>Cargando notificaciones...</span>
@@ -580,8 +580,8 @@
         });
     </script>
 
-    <!-- Contenedor Flotante de Toast Emergentes -->
-    <div id="toastNotificacionesContainer" class="fixed top-20 right-6 z-50 space-y-3 pointer-events-none max-w-sm w-full"></div>
+    <!-- Contenedor Flotante de Toast Emergentes con Máxima Elevación -->
+    <div id="toastNotificacionesContainer" class="fixed top-24 right-8 z-[10000] space-y-3 pointer-events-none max-w-sm w-full"></div>
 
     @stack('scripts')
 </body>
