@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Directorio de Socios')
-@section('header_title', 'Registro y Padrón de Miembros')
-@section('header_subtitle', 'Directorio integral de socios titulares, acciones y solvencia')
+@section('title', 'Directorio de Socios & Carnets')
+@section('header_title', 'Directorio de Socios & Carnets Digitales')
+@section('header_subtitle', 'Padrón oficial de miembros titulares, consulta censal y emisión de credenciales')
 
 @section('content')
 <div class="space-y-7">
@@ -141,12 +141,16 @@
                                 </div>
                             @endif
                         </td>
-                        <td class="px-6 py-4 text-right space-x-2">
-                            <a href="{{ route('socios.show', $socio) }}" class="inline-flex items-center px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs transition">
+                        <td class="px-6 py-4 text-right space-x-1.5 whitespace-nowrap">
+                            <a href="{{ route('socios.show', $socio) }}" class="inline-flex items-center px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs transition">
                                 <span class="material-icons-round text-xs mr-1 text-amber-400">visibility</span>
                                 Ficha
                             </a>
-                            <a href="{{ route('pagos.create', ['cedula' => $socio->cedula]) }}" class="inline-flex items-center px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition">
+                            <button type="button" onclick="abrirCarnetRapido({{ $socio->id }}, {{ json_encode($socio->nombre_completo) }}, '{{ $socio->cedula }}', '{{ $socio->accion }}', '{{ $socio->avatar_url }}', '{{ $socio->socio_desde ? $socio->socio_desde->format('m/Y') : date('m/Y') }}')" class="inline-flex items-center px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 font-semibold text-xs transition">
+                                <span class="material-icons-round text-xs mr-1 text-amber-400">qr_code</span>
+                                Carnet
+                            </button>
+                            <a href="{{ route('pagos.create', ['cedula' => $socio->cedula]) }}" class="inline-flex items-center px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition">
                                 <span class="material-icons-round text-xs mr-1">payments</span>
                                 Cobrar
                             </a>
@@ -167,4 +171,93 @@
     </div>
 
 </div>
+
+<!-- MODAL: CARNET DIGITAL OFICIAL DEL SOCIO -->
+<div id="modalCarnet" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-sm rounded-3xl p-6 border border-[#243352] shadow-2xl space-y-4 bg-[#0C1222] relative">
+        <div class="flex items-center justify-between border-b border-[#1F293D] pb-3">
+            <h3 class="text-sm font-bold text-white flex items-center space-x-1.5">
+                <span class="material-icons-round text-amber-400 text-base">badge</span>
+                <span>Carnet Digital Oficial</span>
+            </h3>
+            <button type="button" onclick="cerrarModalCarnet()" class="text-slate-400 hover:text-white">
+                <span class="material-icons-round">close</span>
+            </button>
+        </div>
+
+        <div id="carnetPrintArea" class="rounded-2xl p-5 bg-gradient-to-br from-[#111A2E] via-[#0E1526] to-[#162238] border border-amber-500/30 text-center space-y-4 shadow-xl">
+            <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                <div class="text-left">
+                    <h4 class="text-xs font-extrabold text-white uppercase tracking-wider">Country Club</h4>
+                    <span class="text-[9px] text-amber-400 font-mono block">Miembro Oficial</span>
+                </div>
+                <img src="{{ asset('img/logo.png') }}" alt="Logo" class="h-6 w-auto object-contain">
+            </div>
+
+            <div class="flex flex-col items-center space-y-2">
+                <img id="carnetAvatar" src="" alt="Avatar" class="w-16 h-16 rounded-2xl border-2 border-amber-400/50 object-cover shadow-lg">
+                <h5 id="carnetNombre" class="text-sm font-bold text-white"></h5>
+                <span id="carnetAccion" class="px-3 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 font-mono font-bold text-xs"></span>
+                <span id="carnetCedula" class="text-xs font-mono text-slate-400"></span>
+            </div>
+
+            <div class="p-3 rounded-xl bg-white flex flex-col items-center justify-center space-y-1">
+                <div id="qrcodeCarnet"></div>
+                <span class="text-[9px] font-mono text-slate-900 font-bold uppercase tracking-wider">Código de Acceso Garita</span>
+            </div>
+
+            <div class="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-white/10">
+                <span id="carnetDesde"></span>
+                <span class="font-mono text-emerald-400 font-bold">SOLVENTE</span>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end space-x-3 pt-2">
+            <button type="button" onclick="cerrarModalCarnet()" class="px-4 py-2 rounded-xl bg-[#141C30] hover:bg-[#1E293B] text-slate-300 text-xs font-semibold transition border border-[#243352]">
+                Cerrar
+            </button>
+            <button type="button" onclick="window.print()" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center space-x-1 transition shadow-lg shadow-amber-500/10">
+                <span class="material-icons-round text-sm">print</span>
+                <span>Imprimir</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script src="{{ asset('js/qrcode.min.js') }}"></script>
+<script>
+    let qrCarnetInstance = null;
+
+    function abrirCarnetRapido(id, nombre, cedula, accion, avatarUrl, desde) {
+        document.getElementById('carnetAvatar').src = avatarUrl;
+        document.getElementById('carnetNombre').textContent = nombre;
+        document.getElementById('carnetAccion').textContent = accion;
+        document.getElementById('carnetCedula').textContent = 'Cédula: V-' + cedula;
+        document.getElementById('carnetDesde').textContent = 'Desde: ' + desde;
+
+        const qrContainer = document.getElementById('qrcodeCarnet');
+        qrContainer.innerHTML = '';
+        qrCarnetInstance = new QRCode(qrContainer, {
+            text: JSON.stringify({
+                club: "COUNTRY_CLUB",
+                id: id,
+                cedula: cedula,
+                accion: accion
+            }),
+            width: 130,
+            height: 130,
+            colorDark: "#0B0F19",
+            colorLight: "#FFFFFF",
+            correctLevel: QRCode.CorrectLevel.M
+        });
+
+        document.getElementById('modalCarnet').classList.remove('hidden');
+    }
+
+    function cerrarModalCarnet() {
+        document.getElementById('modalCarnet').classList.add('hidden');
+    }
+</script>
+@endpush
 @endsection

@@ -471,9 +471,15 @@
                             @if($v->socio)
                             <div class="flex items-center space-x-2.5">
                                 <img src="{{ $v->socio->avatar_url }}" alt="avatar" class="w-7 h-7 rounded-lg border border-slate-700 object-cover">
+                                @if(!Auth::user()->esVigilante())
                                 <a href="{{ route('socios.show', $v->socio) }}" class="font-bold text-slate-100 hover:text-amber-400 transition block truncate max-w-[170px]">
                                     {{ $v->socio->nombre_completo }}
                                 </a>
+                                @else
+                                <span class="font-bold text-slate-100 block truncate max-w-[170px]">
+                                    {{ $v->socio->nombre_completo }}
+                                </span>
+                                @endif
                             </div>
                             @else
                                 <span class="text-slate-500 italic">Socio no disponible</span>

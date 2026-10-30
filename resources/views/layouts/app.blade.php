@@ -119,18 +119,6 @@
                             </a>
                         </nav>
                     </div>
-
-                    <!-- CONSULTA DE PADRÓN (SOLO LECTURA PARA VIGILANCIA) -->
-                    <div>
-                        <p class="px-3 text-[10px] font-bold tracking-widest uppercase text-slate-500 mb-2.5">Padrón de Seguridad</p>
-                        <nav class="space-y-1.5">
-                            <a href="{{ route('socios.index') }}" 
-                               class="flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('socios.index', 'socios.show') ? 'bg-gradient-to-r from-amber-500/15 to-transparent text-amber-400 border-l-2 border-amber-400 shadow-sm' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
-                                <span class="material-icons-round text-lg mr-3 transition-transform group-hover:scale-110 {{ request()->routeIs('socios.index', 'socios.show') ? 'text-amber-400' : 'text-slate-500 group-hover:text-slate-300' }}">badge</span>
-                                <span>Directorio & Carnets</span>
-                            </a>
-                        </nav>
-                    </div>
                 @else
                     <!-- MENÚ COMPLETO ADMINISTRATIVO (ADMIN & SECRETARIA) -->
                     <div>
@@ -145,7 +133,10 @@
                             <a href="{{ route('socios.index') }}" 
                                class="flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('socios.index', 'socios.show') ? 'bg-gradient-to-r from-amber-500/15 to-transparent text-amber-400 border-l-2 border-amber-400 shadow-sm' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
                                 <span class="material-icons-round text-lg mr-3 transition-transform group-hover:scale-110 {{ request()->routeIs('socios.index', 'socios.show') ? 'text-amber-400' : 'text-slate-500 group-hover:text-slate-300' }}">badge</span>
-                                <span>Directorio de Socios</span>
+                                <div class="flex-1 flex items-center justify-between">
+                                    <span>Directorio & Carnets</span>
+                                    <span class="px-1.5 py-0.2 rounded text-[9px] font-mono bg-amber-500/10 text-amber-300 border border-amber-500/20 font-bold">QR</span>
+                                </div>
                             </a>
 
                             <a href="{{ route('socios.create') }}" 

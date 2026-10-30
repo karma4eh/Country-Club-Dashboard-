@@ -34,17 +34,15 @@ Route::middleware('auth')->group(function () {
         Route::post('/api/bcv/sync', [DashboardController::class, 'syncBcv'])->name('bcv.sync');
     });
 
-    // 2. Afiliación & Edición de Socios (Admin y Secretaria)
+    // 2. Módulo de Socios: Directorio, Carnets, Afiliación y Edición (Exclusivo Admin y Secretaria)
     Route::middleware('role:admin,secretaria')->group(function () {
+        Route::get('/socios', [SocioController::class, 'index'])->name('socios.index');
         Route::get('/socios/create', [SocioController::class, 'create'])->name('socios.create');
         Route::post('/socios', [SocioController::class, 'store'])->name('socios.store');
+        Route::get('/socios/{socio}', [SocioController::class, 'show'])->name('socios.show');
         Route::put('/socios/{socio}', [SocioController::class, 'update'])->name('socios.update');
+        Route::get('/api/socios/search', [SocioController::class, 'searchJson'])->name('socios.search.json');
     });
-
-    // 3. Directorio & Consulta de Carnets de Socios (Todos: Admin, Secretaria, Vigilante)
-    Route::get('/socios', [SocioController::class, 'index'])->name('socios.index');
-    Route::get('/socios/{socio}', [SocioController::class, 'show'])->name('socios.show');
-    Route::get('/api/socios/search', [SocioController::class, 'searchJson'])->name('socios.search.json');
 
     // 4. Caja, Cobros & Finanzas (Exclusivo Admin y Secretaria - Vigilante bloqueado)
     Route::middleware('role:admin,secretaria')->group(function () {
