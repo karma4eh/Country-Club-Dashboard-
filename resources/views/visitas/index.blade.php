@@ -717,7 +717,13 @@
             AUTORIZADO • ACTIVO
         </span>`;
 
-        if (!s.activo) {
+        if (s.esta_en_club) {
+            borderClass = "border-rose-500/50 bg-[#160D14]";
+            badgeEstado = `<span class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-rose-500/15 text-rose-400 border border-rose-500/30 flex items-center space-x-1">
+                <span class="w-2 h-2 rounded-full bg-rose-400 mr-1.5 animate-ping"></span>
+                ⛔ DENTRO DEL CLUB • SALIDA PENDIENTE
+            </span>`;
+        } else if (!s.activo) {
             borderClass = "border-rose-500/50 bg-[#160D14]";
             badgeEstado = `<span class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-rose-500/10 text-rose-400 border border-rose-500/30 flex items-center space-x-1">
                 <span class="w-2 h-2 rounded-full bg-rose-400 mr-1.5"></span>
@@ -731,27 +737,67 @@
             </span>`;
         }
 
-        let alertaEnClub = '';
+        let panelAccion = '';
         if (s.esta_en_club) {
-            alertaEnClub = `
-                <div class="p-3 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs flex items-center justify-between">
-                    <div class="flex items-center space-x-2">
-                        <span class="material-icons-round text-base text-amber-400">info</span>
-                        <span>Este socio ya se encuentra dentro del club (Ingresó hoy a las ${s.hora_ingreso_hoy}).</span>
+            panelAccion = `
+                <div class="space-y-4 pt-2 border-t border-[#1F293D]">
+                    <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-200 text-xs space-y-2">
+                        <div class="flex items-center space-x-2">
+                            <span class="material-icons-round text-rose-400 text-lg">no_meeting_room</span>
+                            <strong class="text-sm font-bold text-white">⛔ ACCESO DENEGADO: EL SOCIO YA ESTÁ DENTRO</strong>
+                        </div>
+                        <p class="text-slate-300 leading-relaxed">
+                            Este socio ingresó el día de hoy a las <span class="font-bold text-amber-300">${s.hora_ingreso_hoy}</span> y aún no ha registrado su salida.
+                            Por estricta política de control y aforo, <span class="text-rose-300 font-semibold">no se puede autorizar un segundo ingreso</span> sin antes haber marcado la salida correspondiente de las instalaciones.
+                        </p>
                     </div>
-                    <form action="/visitas/${s.visita_activa_id}/salida" method="POST" class="inline">
-                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                        <button type="submit" class="px-3 py-1 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400 transition">
-                            Marcar Salida Ahora
+
+                    <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                        <button type="button" onclick="document.getElementById('socioCardValidation').classList.add('hidden')" class="px-4 py-2.5 rounded-xl bg-[#141C30] hover:bg-[#1E293B] text-slate-300 text-xs font-semibold transition border border-[#243352]">
+                            Cerrar
                         </button>
-                    </form>
+                        <form action="/visitas/${s.visita_activa_id}/salida" method="POST" class="inline" onsubmit="return confirm('¿Confirmar registro de salida para ' + ${JSON.stringify(s.nombre_completo)} + '?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-400 hover:to-rose-500 text-white font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-rose-500/25 flex items-center space-x-1.5 transition active:scale-95">
+                                <span class="material-icons-round text-base">logout</span>
+                                <span>🚪 Registrar Salida del Club Ahora</span>
+                            </button>
+                        </form>
+                    </div>
                 </div>
+            `;
+        } else {
+            panelAccion = `
+                <!-- Formulario de Confirmación de Ingreso -->
+                <form onsubmit="registrarVisitaConfirmada(event, ${s.id})" class="space-y-4 pt-2 border-t border-[#1F293D]">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-slate-300 text-xs font-semibold mb-1">Acompañantes / Invitados</label>
+                            <input type="number" id="visitaInvitados" min="0" max="20" value="0"
+                                   class="w-full bg-[#0A0F1E] border border-[#243352] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400 font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-slate-300 text-xs font-semibold mb-1">Observaciones / Placa vehículo</label>
+                            <input type="text" id="visitaObservaciones" placeholder="Ej: Toyota Fortuner Gris Placa ABC-123"
+                                   class="w-full bg-[#0A0F1E] border border-[#243352] rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end space-x-3 pt-2">
+                        <button type="button" onclick="document.getElementById('socioCardValidation').classList.add('hidden')" class="px-4 py-2.5 rounded-xl bg-[#141C30] hover:bg-[#1E293B] text-slate-300 text-xs font-semibold transition border border-[#243352]">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/20 flex items-center space-x-1.5 transition active:scale-[0.98]">
+                            <span class="material-icons-round text-base">check_circle</span>
+                            <span>Autorizar e Ingresar al Club</span>
+                        </button>
+                    </div>
+                </form>
             `;
         }
 
         card.className = `rounded-3xl p-6 border ${borderClass} space-y-5 shadow-2xl`;
         card.innerHTML = `
-            ${alertaEnClub}
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center space-x-4">
                     <img src="${s.avatar_url}" alt="Avatar" class="w-14 h-14 rounded-2xl border-2 border-amber-400/40 object-cover shadow-lg">
@@ -782,36 +828,12 @@
             <div class="p-3 rounded-xl bg-[#090E1A] border border-[#1E293B] text-[11px] text-slate-300 flex items-center justify-between">
                 <span class="flex items-center space-x-1.5">
                     <span class="material-icons-round text-amber-400 text-sm">shield</span>
-                    <span>Oficial que registrará el acceso:</span>
+                    <span>Oficial en servicio:</span>
                 </span>
                 <strong class="text-amber-300 font-bold">${OFICIAL_ACTUAL}</strong>
             </div>
 
-            <!-- Formulario de Confirmación de Ingreso -->
-            <form onsubmit="registrarVisitaConfirmada(event, ${s.id})" class="space-y-4 pt-2 border-t border-[#1F293D]">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-slate-300 text-xs font-semibold mb-1">Acompañantes / Invitados</label>
-                        <input type="number" id="visitaInvitados" min="0" max="20" value="0"
-                               class="w-full bg-[#0A0F1E] border border-[#243352] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400 font-mono">
-                    </div>
-                    <div>
-                        <label class="block text-slate-300 text-xs font-semibold mb-1">Observaciones / Placa vehículo</label>
-                        <input type="text" id="visitaObservaciones" placeholder="Ej: Toyota Fortuner Gris Placa ABC-123"
-                               class="w-full bg-[#0A0F1E] border border-[#243352] rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400">
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-end space-x-3 pt-2">
-                    <button type="button" onclick="document.getElementById('socioCardValidation').classList.add('hidden')" class="px-4 py-2.5 rounded-xl bg-[#141C30] hover:bg-[#1E293B] text-slate-300 text-xs font-semibold transition border border-[#243352]">
-                        Cancelar
-                    </button>
-                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/20 flex items-center space-x-1.5 transition active:scale-[0.98]">
-                        <span class="material-icons-round text-base">check_circle</span>
-                        <span>Autorizar e Ingresar al Club</span>
-                    </button>
-                </div>
-            </form>
+            ${panelAccion}
         `;
         card.classList.remove('hidden');
     }
@@ -848,13 +870,19 @@
                 observaciones: observaciones
             })
         })
-        .then(res => res.json())
+        .then(async res => {
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.mensaje || data.message || 'No se pudo autorizar el ingreso.');
+            }
+            return data;
+        })
         .then(data => {
             alert(data.mensaje);
             window.location.reload();
         })
         .catch(err => {
-            alert('Error al registrar la visita.');
+            alert(err.message || 'Error al registrar la visita.');
             if (submitBtn) {
                 submitBtn.disabled = false;
                 submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');

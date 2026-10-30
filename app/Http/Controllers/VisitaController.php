@@ -181,23 +181,27 @@ class VisitaController extends Controller
         $vigilante = Auth::user();
         $vigilanteNombre = $vigilante ? $vigilante->nombre_completo : 'Personal de Seguridad';
 
-        // Prevención de doble clic: evitar registrar la misma visita en menos de 20 segundos
-        $visitaReciente = Visita::where('socios_id', $socio->id)
-            ->where('fecha_entrada', '>=', Carbon::now()->subSeconds(20))
+        // REGLA ESTRICTA DE SEGURIDAD: Si el socio ya ingresó hoy y no ha registrado salida, NO puede volver a entrar
+        $visitaActiva = Visita::where('socios_id', $socio->id)
+            ->whereDate('fecha_entrada', Carbon::today())
+            ->whereNull('fecha_salida')
             ->first();
 
-        if ($visitaReciente) {
-            $mensaje = "¡Ingreso autorizado previamente para {$socio->nombre_completo}! (Acción: {$socio->accion}) — Registrado por el Oficial: {$vigilanteNombre}";
+        if ($visitaActiva) {
+            $horaIngreso = $visitaActiva->fecha_entrada ? $visitaActiva->fecha_entrada->format('h:i A') : 'previamente';
+            $msg = "⛔ Acceso Denegado: {$socio->nombre_completo} (Acción {$socio->accion}) ya se encuentra dentro de las instalaciones (Ingreso: {$horaIngreso}). Debe marcar salida antes de registrar un nuevo ingreso.";
+
             if ($request->wantsJson()) {
                 return response()->json([
-                    'success' => true,
-                    'mensaje' => $mensaje,
-                    'visita_id' => $visitaReciente->id,
-                    'fecha' => $visitaReciente->fecha_entrada ? $visitaReciente->fecha_entrada->format('d/m/Y h:i A') : '',
-                    'vigilante' => $vigilanteNombre,
-                ]);
+                    'success' => false,
+                    'ya_en_club' => true,
+                    'mensaje' => $msg,
+                    'visita_activa_id' => $visitaActiva->id,
+                    'hora_ingreso' => $horaIngreso,
+                ], 422);
             }
-            return redirect()->route('visitas.index')->with('success', $mensaje);
+
+            return redirect()->route('visitas.index')->with('error', $msg);
         }
 
         $visita = Visita::create([

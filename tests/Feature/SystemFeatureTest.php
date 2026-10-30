@@ -319,4 +319,79 @@ class SystemFeatureTest extends TestCase
         $todasRes->assertStatus(200);
         $todasRes->assertJson(['no_leidas_count' => 0]);
     }
+
+    public function test_socio_cannot_enter_twice_without_checkout()
+    {
+        $vigilante = User::where('rol', 'vigilante')->first() ?? User::first();
+        $this->actingAs($vigilante);
+
+        // Crear socio exclusivo para esta prueba
+        $cedula = '88' . rand(100000, 999999);
+        $socio = Socio::create([
+            'nombre' => 'Roberto',
+            'apellido' => 'Pérez',
+            'cedula' => $cedula,
+            'accion' => 'ACC-' . rand(1000, 9999),
+            'correo' => "roberto{$cedula}@countryclub.com",
+            'estado' => 'activo',
+            'saldo' => 0,
+        ]);
+
+        // 1. Primer ingreso: Autorizado
+        $res1 = $this->postJson('/visitas', [
+            'socios_id' => $socio->id,
+            'invitados' => 1,
+            'observaciones' => 'Primer ingreso del día',
+        ]);
+        $res1->assertStatus(200);
+        $res1->assertJsonFragment(['success' => true]);
+
+        // 2. Consulta en garita: Debe marcar que YA ESTÁ DENTRO DEL CLUB
+        $buscarRes = $this->getJson('/api/visitas/buscar-socio?query=' . $socio->cedula);
+        $buscarRes->assertStatus(200);
+        $buscarRes->assertJsonFragment([
+            'esta_en_club' => true,
+        ]);
+        $visitaActivaId = $buscarRes->json('visita_activa_id');
+        $this->assertNotNull($visitaActivaId);
+
+        // 3. Intento de SEGUNDO ingreso sin marcar salida: DEBE SER RECHAZADO (422)
+        $res2 = $this->postJson('/visitas', [
+            'socios_id' => $socio->id,
+            'invitados' => 0,
+            'observaciones' => 'Intento de doble ingreso no permitido',
+        ]);
+        $res2->assertStatus(422);
+        $res2->assertJsonFragment([
+            'success' => false,
+            'ya_en_club' => true,
+        ]);
+
+        // Verificar que en base de datos NO se duplicó el ingreso activo
+        $visitasActivasCount = Visita::where('socios_id', $socio->id)
+            ->whereDate('fecha_entrada', \Carbon\Carbon::today())
+            ->whereNull('fecha_salida')
+            ->count();
+        $this->assertEquals(1, $visitasActivasCount);
+
+        // 4. Marcar salida del socio
+        $salidaRes = $this->postJson("/visitas/{$visitaActivaId}/salida");
+        $salidaRes->assertStatus(200);
+
+        // 5. Verificar que ya no está en el club
+        $buscarRes2 = $this->getJson('/api/visitas/buscar-socio?query=' . $socio->cedula);
+        $buscarRes2->assertStatus(200);
+        $buscarRes2->assertJsonFragment([
+            'esta_en_club' => false,
+        ]);
+
+        // 6. Ahora que ya marcó salida, un nuevo ingreso SÍ está permitido
+        $res3 = $this->postJson('/visitas', [
+            'socios_id' => $socio->id,
+            'invitados' => 0,
+            'observaciones' => 'Reingreso en la tarde luego de haber salido',
+        ]);
+        $res3->assertStatus(200);
+        $res3->assertJsonFragment(['success' => true]);
+    }
 }
