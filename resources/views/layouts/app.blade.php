@@ -81,78 +81,123 @@
                             Country Club
                             <span class="ml-2 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                         </h1>
-                        <p class="text-[11px] font-medium text-amber-400/90 tracking-wider uppercase">Portal Administrativo</p>
+                        @if(Auth::check() && Auth::user()->esVigilante())
+                            <p class="text-[11px] font-medium text-emerald-400/90 tracking-wider uppercase">Puesto de Vigilancia</p>
+                        @else
+                            <p class="text-[11px] font-medium text-amber-400/90 tracking-wider uppercase">Portal Administrativo</p>
+                        @endif
                     </div>
                 </div>
             </div>
 
             <!-- Navegación -->
             <div class="py-6 px-4 space-y-6">
-                <!-- Sección General -->
-                <div>
-                    <p class="px-3 text-[10px] font-bold tracking-widest uppercase text-slate-500 mb-2.5">Módulos Principales</p>
-                    <nav class="space-y-1.5">
-                        <a href="{{ route('dashboard') }}" 
-                           class="flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('dashboard') ? 'bg-gradient-to-r from-amber-500/15 to-transparent text-amber-400 border-l-2 border-amber-400 shadow-sm' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
-                            <span class="material-icons-round text-lg mr-3 transition-transform group-hover:scale-110 {{ request()->routeIs('dashboard') ? 'text-amber-400' : 'text-slate-500 group-hover:text-slate-300' }}">dashboard</span>
-                            <span>Dashboard General</span>
-                        </a>
+                @if(Auth::check() && Auth::user()->esVigilante())
+                    <!-- MENÚ EXCLUSIVO DE VIGILANCIA & SEGURIDAD -->
+                    <div>
+                        <p class="px-3 text-[10px] font-bold tracking-widest uppercase text-emerald-400 mb-2.5 flex items-center space-x-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse mr-1"></span>
+                            Seguridad & Garita
+                        </p>
+                        <nav class="space-y-1.5">
+                            <a href="{{ route('visitas.index') }}" 
+                               class="flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('visitas.index') ? 'bg-gradient-to-r from-emerald-500/15 to-transparent text-emerald-400 border-l-2 border-emerald-400 shadow-sm' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
+                                <span class="material-icons-round text-lg mr-3 transition-transform group-hover:scale-110 {{ request()->routeIs('visitas.index') ? 'text-emerald-400' : 'text-slate-500 group-hover:text-slate-300' }}">security</span>
+                                <span>Control de Acceso / Garita</span>
+                            </a>
 
-                        <a href="{{ route('socios.index') }}" 
-                           class="flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('socios.index', 'socios.show') ? 'bg-gradient-to-r from-amber-500/15 to-transparent text-amber-400 border-l-2 border-amber-400 shadow-sm' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
-                            <span class="material-icons-round text-lg mr-3 transition-transform group-hover:scale-110 {{ request()->routeIs('socios.index', 'socios.show') ? 'text-amber-400' : 'text-slate-500 group-hover:text-slate-300' }}">badge</span>
-                            <span>Directorio de Socios</span>
-                        </a>
+                            <a href="{{ route('visitas.index') }}#seccionAforo" 
+                               class="flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group text-slate-400 hover:text-slate-100 hover:bg-slate-800/50">
+                                <span class="material-icons-round text-lg mr-3 text-slate-500 group-hover:text-slate-300">groups</span>
+                                <span>Aforo en Tiempo Real</span>
+                            </a>
 
-                        <a href="{{ route('socios.create') }}" 
-                           class="flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('socios.create') ? 'bg-gradient-to-r from-amber-500/15 to-transparent text-amber-400 border-l-2 border-amber-400 shadow-sm' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
-                            <span class="material-icons-round text-lg mr-3 transition-transform group-hover:scale-110 {{ request()->routeIs('socios.create') ? 'text-amber-400' : 'text-slate-500 group-hover:text-slate-300' }}">person_add</span>
-                            <span>Nueva Afiliación</span>
-                        </a>
-                    </nav>
-                </div>
+                            <a href="{{ route('visitas.index') }}#modalNovedad" onclick="if(typeof abrirModalNovedad === 'function'){ abrirModalNovedad(); return false; } else { window.location.href='{{ route('visitas.index') }}'; }"
+                               class="flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group text-slate-400 hover:text-slate-100 hover:bg-slate-800/50">
+                                <span class="material-icons-round text-lg mr-3 text-slate-500 group-hover:text-slate-300">menu_book</span>
+                                <span>Libro de Novedades</span>
+                            </a>
+                        </nav>
+                    </div>
 
-                <!-- Sección Financiera -->
-                <div>
-                    <p class="px-3 text-[10px] font-bold tracking-widest uppercase text-slate-500 mb-2.5">Caja & Cobranzas</p>
-                    <nav class="space-y-1.5">
-                        <a href="{{ route('pagos.create') }}" 
-                           class="flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('pagos.create') ? 'bg-gradient-to-r from-emerald-500/15 to-transparent text-emerald-400 border-l-2 border-emerald-400 shadow-sm' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
-                            <span class="material-icons-round text-lg mr-3 transition-transform group-hover:scale-110 {{ request()->routeIs('pagos.create') ? 'text-emerald-400' : 'text-slate-500 group-hover:text-slate-300' }}">point_of_sale</span>
-                            <span>Caja y Cobro de Cuota</span>
-                        </a>
+                    <!-- CONSULTA DE PADRÓN (SOLO LECTURA PARA VIGILANCIA) -->
+                    <div>
+                        <p class="px-3 text-[10px] font-bold tracking-widest uppercase text-slate-500 mb-2.5">Padrón de Seguridad</p>
+                        <nav class="space-y-1.5">
+                            <a href="{{ route('socios.index') }}" 
+                               class="flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('socios.index', 'socios.show') ? 'bg-gradient-to-r from-amber-500/15 to-transparent text-amber-400 border-l-2 border-amber-400 shadow-sm' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
+                                <span class="material-icons-round text-lg mr-3 transition-transform group-hover:scale-110 {{ request()->routeIs('socios.index', 'socios.show') ? 'text-amber-400' : 'text-slate-500 group-hover:text-slate-300' }}">badge</span>
+                                <span>Directorio & Carnets</span>
+                            </a>
+                        </nav>
+                    </div>
+                @else
+                    <!-- MENÚ COMPLETO ADMINISTRATIVO (ADMIN & SECRETARIA) -->
+                    <div>
+                        <p class="px-3 text-[10px] font-bold tracking-widest uppercase text-slate-500 mb-2.5">Módulos Principales</p>
+                        <nav class="space-y-1.5">
+                            <a href="{{ route('dashboard') }}" 
+                               class="flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('dashboard') ? 'bg-gradient-to-r from-amber-500/15 to-transparent text-amber-400 border-l-2 border-amber-400 shadow-sm' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
+                                <span class="material-icons-round text-lg mr-3 transition-transform group-hover:scale-110 {{ request()->routeIs('dashboard') ? 'text-amber-400' : 'text-slate-500 group-hover:text-slate-300' }}">dashboard</span>
+                                <span>Dashboard General</span>
+                            </a>
 
-                        <a href="{{ route('pagos.index') }}" 
-                           class="flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('pagos.index') ? 'bg-gradient-to-r from-emerald-500/15 to-transparent text-emerald-400 border-l-2 border-emerald-400 shadow-sm' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
-                            <span class="material-icons-round text-lg mr-3 transition-transform group-hover:scale-110 {{ request()->routeIs('pagos.index') ? 'text-emerald-400' : 'text-slate-500 group-hover:text-slate-300' }}">receipt_long</span>
-                            <span>Historial de Cobros</span>
-                        </a>
-                    </nav>
-                </div>
+                            <a href="{{ route('socios.index') }}" 
+                               class="flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('socios.index', 'socios.show') ? 'bg-gradient-to-r from-amber-500/15 to-transparent text-amber-400 border-l-2 border-amber-400 shadow-sm' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
+                                <span class="material-icons-round text-lg mr-3 transition-transform group-hover:scale-110 {{ request()->routeIs('socios.index', 'socios.show') ? 'text-amber-400' : 'text-slate-500 group-hover:text-slate-300' }}">badge</span>
+                                <span>Directorio de Socios</span>
+                            </a>
 
-                <!-- Sección Control de Acceso & Garita -->
-                <div>
-                    <p class="px-3 text-[10px] font-bold tracking-widest uppercase text-slate-500 mb-2.5">Acceso & Garita</p>
-                    <nav class="space-y-1.5">
-                        <a href="{{ route('visitas.index') }}" 
-                           class="flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('visitas.index') ? 'bg-gradient-to-r from-blue-500/15 to-transparent text-blue-400 border-l-2 border-blue-400 shadow-sm' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
-                            <span class="material-icons-round text-lg mr-3 transition-transform group-hover:scale-110 {{ request()->routeIs('visitas.index') ? 'text-blue-400' : 'text-slate-500 group-hover:text-slate-300' }}">qr_code_scanner</span>
-                            <span>Garita y Control de Visitas</span>
-                        </a>
-                    </nav>
-                </div>
+                            <a href="{{ route('socios.create') }}" 
+                               class="flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('socios.create') ? 'bg-gradient-to-r from-amber-500/15 to-transparent text-amber-400 border-l-2 border-amber-400 shadow-sm' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
+                                <span class="material-icons-round text-lg mr-3 transition-transform group-hover:scale-110 {{ request()->routeIs('socios.create') ? 'text-amber-400' : 'text-slate-500 group-hover:text-slate-300' }}">person_add</span>
+                                <span>Nueva Afiliación</span>
+                            </a>
+                        </nav>
+                    </div>
 
-                <!-- Sección Auditoría -->
-                <div>
-                    <p class="px-3 text-[10px] font-bold tracking-widest uppercase text-slate-500 mb-2.5">Seguridad & Control</p>
-                    <nav class="space-y-1.5">
-                        <a href="{{ route('movimientos.index') }}" 
-                           class="flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('movimientos.index') ? 'bg-gradient-to-r from-amber-500/15 to-transparent text-amber-400 border-l-2 border-amber-400 shadow-sm' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
-                            <span class="material-icons-round text-lg mr-3 transition-transform group-hover:scale-110 {{ request()->routeIs('movimientos.index') ? 'text-amber-400' : 'text-slate-500 group-hover:text-slate-300' }}">verified_user</span>
-                            <span>Bitácora de Auditoría</span>
-                        </a>
-                    </nav>
-                </div>
+                    <!-- Sección Financiera -->
+                    <div>
+                        <p class="px-3 text-[10px] font-bold tracking-widest uppercase text-slate-500 mb-2.5">Caja & Cobranzas</p>
+                        <nav class="space-y-1.5">
+                            <a href="{{ route('pagos.create') }}" 
+                               class="flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('pagos.create') ? 'bg-gradient-to-r from-emerald-500/15 to-transparent text-emerald-400 border-l-2 border-emerald-400 shadow-sm' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
+                                <span class="material-icons-round text-lg mr-3 transition-transform group-hover:scale-110 {{ request()->routeIs('pagos.create') ? 'text-emerald-400' : 'text-slate-500 group-hover:text-slate-300' }}">point_of_sale</span>
+                                <span>Caja y Cobro de Cuota</span>
+                            </a>
+
+                            <a href="{{ route('pagos.index') }}" 
+                               class="flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('pagos.index') ? 'bg-gradient-to-r from-emerald-500/15 to-transparent text-emerald-400 border-l-2 border-emerald-400 shadow-sm' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
+                                <span class="material-icons-round text-lg mr-3 transition-transform group-hover:scale-110 {{ request()->routeIs('pagos.index') ? 'text-emerald-400' : 'text-slate-500 group-hover:text-slate-300' }}">receipt_long</span>
+                                <span>Historial de Cobros</span>
+                            </a>
+                        </nav>
+                    </div>
+
+                    <!-- Sección Control de Acceso & Garita -->
+                    <div>
+                        <p class="px-3 text-[10px] font-bold tracking-widest uppercase text-slate-500 mb-2.5">Acceso & Garita</p>
+                        <nav class="space-y-1.5">
+                            <a href="{{ route('visitas.index') }}" 
+                               class="flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('visitas.index') ? 'bg-gradient-to-r from-blue-500/15 to-transparent text-blue-400 border-l-2 border-blue-400 shadow-sm' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
+                                <span class="material-icons-round text-lg mr-3 transition-transform group-hover:scale-110 {{ request()->routeIs('visitas.index') ? 'text-blue-400' : 'text-slate-500 group-hover:text-slate-300' }}">qr_code_scanner</span>
+                                <span>Garita y Control de Visitas</span>
+                            </a>
+                        </nav>
+                    </div>
+
+                    <!-- Sección Auditoría -->
+                    <div>
+                        <p class="px-3 text-[10px] font-bold tracking-widest uppercase text-slate-500 mb-2.5">Seguridad & Control</p>
+                        <nav class="space-y-1.5">
+                            <a href="{{ route('movimientos.index') }}" 
+                               class="flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('movimientos.index') ? 'bg-gradient-to-r from-amber-500/15 to-transparent text-amber-400 border-l-2 border-amber-400 shadow-sm' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
+                                <span class="material-icons-round text-lg mr-3 transition-transform group-hover:scale-110 {{ request()->routeIs('movimientos.index') ? 'text-amber-400' : 'text-slate-500 group-hover:text-slate-300' }}">verified_user</span>
+                                <span>Bitácora de Auditoría</span>
+                            </a>
+                        </nav>
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -160,12 +205,12 @@
         <div class="p-4 border-t border-[#1B253B] bg-[#0A0E1A]/80">
             <div class="flex items-center justify-between p-2 rounded-xl bg-slate-800/30 border border-slate-800/60">
                 <div class="flex items-center space-x-3 overflow-hidden">
-                    <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold text-xs flex items-center justify-center flex-shrink-0">
+                    <div class="w-8 h-8 rounded-lg {{ Auth::user()->esVigilante() ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-amber-500/10 border-amber-500/30 text-amber-400' }} border font-bold text-xs flex items-center justify-center flex-shrink-0">
                         {{ strtoupper(substr(Auth::user()->nombre_completo ?? 'A', 0, 1)) }}
                     </div>
                     <div class="truncate">
-                        <p class="text-xs font-bold text-slate-200 truncate">{{ Auth::user()->nombre_completo ?? 'Administrador' }}</p>
-                        <p class="text-[10px] text-amber-400 font-mono tracking-wider font-semibold uppercase">{{ Auth::user()->rol ?? 'Admin' }}</p>
+                        <p class="text-xs font-bold text-slate-200 truncate">{{ Auth::user()->nombre_completo ?? 'Usuario' }}</p>
+                        <p class="text-[10px] {{ Auth::user()->esVigilante() ? 'text-emerald-400' : 'text-amber-400' }} font-mono tracking-wider font-semibold uppercase">{{ Auth::user()->rol ?? 'Admin' }}</p>
                     </div>
                 </div>
 

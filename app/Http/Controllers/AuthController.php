@@ -13,6 +13,9 @@ class AuthController extends Controller
     public function showLogin()
     {
         if (Auth::check()) {
+            if (Auth::user()->esVigilante()) {
+                return redirect()->route('visitas.index');
+            }
             return redirect()->route('dashboard');
         }
         $tasa = \App\Models\TasaDolar::tasaActual();
@@ -34,6 +37,10 @@ class AuthController extends Controller
                 'tipo' => 'Inicio de Sesión',
                 'fecha' => Carbon::now(),
             ]);
+
+            if (Auth::user()->esVigilante()) {
+                return redirect()->route('visitas.index');
+            }
 
             return redirect()->intended(route('dashboard'));
         }

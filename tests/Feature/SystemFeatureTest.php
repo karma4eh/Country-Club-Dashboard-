@@ -188,7 +188,7 @@ class SystemFeatureTest extends TestCase
 
     public function test_authenticated_user_can_access_all_modules()
     {
-        $user = User::first();
+        $user = User::where('rol', 'admin')->first() ?? User::first();
         $this->actingAs($user);
 
         // Dashboard
@@ -225,5 +225,47 @@ class SystemFeatureTest extends TestCase
         // Movimientos
         $response = $this->get('/movimientos');
         $response->assertStatus(200);
+    }
+
+    public function test_vigilante_menu_and_restricted_access_isolation()
+    {
+        $vigilante = User::where('rol', 'vigilante')->first();
+        $this->actingAs($vigilante);
+
+        // 1. Acceso a Garita permitido y con menú de seguridad
+        $response = $this->get('/visitas');
+        $response->assertStatus(200);
+        $response->assertSee('Puesto de Vigilancia');
+        $response->assertSee('Seguridad & Garita', false);
+        $response->assertSee('Control de Acceso / Garita');
+        $response->assertSee('Aforo en Tiempo Real');
+        $response->assertSee('Libro de Novedades');
+        $response->assertSee('Directorio & Carnets', false);
+
+        // 2. NO debe ver módulos administrativos ni financieros en su menú
+        $response->assertDontSee('Caja & Cobranzas', false);
+        $response->assertDontSee('Caja y Cobro de Cuota');
+        $response->assertDontSee('Historial de Cobros');
+        $response->assertDontSee('Nueva Afiliación');
+        $response->assertDontSee('Bitácora de Auditoría');
+
+        // 3. Intento de acceso a Dashboard redirige a Visitas
+        $dashResponse = $this->get('/dashboard');
+        $dashResponse->assertRedirect(route('visitas.index'));
+
+        // 4. Intento de acceso a Caja/Cobros redirige a Visitas
+        $pagosResponse = $this->get('/pagos');
+        $pagosResponse->assertRedirect(route('visitas.index'));
+
+        $pagosCreateResponse = $this->get('/pagos/create');
+        $pagosCreateResponse->assertRedirect(route('visitas.index'));
+
+        // 5. Intento de acceso a Nueva Afiliación redirige a Visitas
+        $sociosCreateResponse = $this->get('/socios/create');
+        $sociosCreateResponse->assertRedirect(route('visitas.index'));
+
+        // 6. Intento de acceso a Auditoría redirige a Visitas
+        $movResponse = $this->get('/movimientos');
+        $movResponse->assertRedirect(route('visitas.index'));
     }
 }

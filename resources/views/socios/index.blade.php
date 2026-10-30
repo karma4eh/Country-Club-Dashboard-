@@ -69,10 +69,12 @@
             @endif
         </form>
 
+        @if(!Auth::user()->esVigilante())
         <a href="{{ route('socios.create') }}" class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-500/20 flex items-center transition">
             <span class="material-icons-round text-base mr-1.5">person_add</span>
             Afiliar Nuevo Socio
         </a>
+        @endif
     </div>
 
     <!-- Tabla de Socios -->

@@ -201,9 +201,16 @@
                 </div>
             </div>
 
+            @if(!Auth::user()->esVigilante())
             <a href="{{ route('pagos.create', ['cedula' => $socio->cedula]) }}" class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-extrabold text-xs uppercase tracking-wider text-center shadow-lg shadow-emerald-500/20 transition active:scale-[0.98]">
                 Cobrar / Abonar en Caja
             </a>
+            @else
+            <a href="{{ route('visitas.index') }}" class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-extrabold text-xs uppercase tracking-wider text-center shadow-lg shadow-blue-500/20 transition active:scale-[0.98] flex items-center justify-center space-x-1.5">
+                <span class="material-icons-round text-base">how_to_reg</span>
+                <span>Registrar Ingreso en Garita</span>
+            </a>
+            @endif
         </div>
 
     </div>
