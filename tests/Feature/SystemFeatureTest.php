@@ -89,6 +89,7 @@ class SystemFeatureTest extends TestCase
         $response = $this->get('/visitas');
         $response->assertStatus(200);
         $response->assertSee('Garita');
+        $response->assertSee('Oficial Responsable');
 
         // 2. Búsqueda por cédula / acción o QR
         $socio = Socio::first();
@@ -101,17 +102,46 @@ class SystemFeatureTest extends TestCase
         ]);
 
         // 3. Registrar visita en garita
-        $postResponse = $this->post('/visitas', [
+        $postResponse = $this->postJson('/visitas', [
             'socios_id' => $socio->id,
             'invitados' => 2,
             'observaciones' => 'Vehículo Toyota Fortuner',
         ]);
 
-        $postResponse->assertRedirect('/visitas');
-        $this->assertDatabaseHas('visitas', [
-            'socios_id' => $socio->id,
-            'invitados' => 2,
-            'observaciones' => 'Vehículo Toyota Fortuner',
+        $postResponse->assertStatus(200);
+        $postResponse->assertJsonFragment([
+            'success' => true,
+            'vigilante' => $vigilante->nombre_completo,
+        ]);
+
+        $visita = Visita::where('socios_id', $socio->id)->latest('id')->first();
+        $this->assertNotNull($visita);
+        $this->assertEquals($vigilante->id, $visita->usuarios_id);
+        $this->assertNull($visita->fecha_salida);
+
+        // 4. Marcar salida de la visita
+        $salidaResponse = $this->postJson("/visitas/{$visita->id}/salida");
+        $salidaResponse->assertStatus(200);
+        $salidaResponse->assertJsonFragment([
+            'success' => true,
+            'vigilante' => $vigilante->nombre_completo,
+        ]);
+
+        $visita->refresh();
+        $this->assertNotNull($visita->fecha_salida);
+
+        // 5. Asentar novedad en el libro digital de guardia
+        $novedadResponse = $this->post('/visitas/novedades', [
+            'tipo' => 'Ronda Perimetral',
+            'titulo' => 'Ronda sector tenis y piscinas',
+            'descripcion' => 'Recorrido completado sin novedades ni accesos no autorizados.',
+        ]);
+
+        $novedadResponse->assertRedirect();
+        $this->assertDatabaseHas('novedades_garita', [
+            'usuarios_id' => $vigilante->id,
+            'tipo' => 'Ronda Perimetral',
+            'titulo' => 'Ronda sector tenis y piscinas',
         ]);
     }
 

@@ -36,6 +36,16 @@ class User extends Authenticatable
         return $this->hasMany(Movimiento::class, 'usuarios_id');
     }
 
+    public function visitas()
+    {
+        return $this->hasMany(Visita::class, 'usuarios_id');
+    }
+
+    public function novedadesGarita()
+    {
+        return $this->hasMany(NovedadGarita::class, 'usuarios_id');
+    }
+
     public function esAdmin(): bool
     {
         return $this->rol === 'admin';

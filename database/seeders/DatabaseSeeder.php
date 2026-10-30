@@ -38,7 +38,7 @@ class DatabaseSeeder extends Seeder
         User::firstOrCreate(
             ['email' => 'vigilancia@countryclub.com'],
             [
-                'nombre_completo' => 'Control de Acceso Vigilancia',
+                'nombre_completo' => 'Oficial José Gregorio Colmenares',
                 'password' => Hash::make('password'),
                 'rol' => 'vigilante',
             ]

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Visita;
 use App\Models\Socio;
 use App\Models\Movimiento;
+use App\Models\NovedadGarita;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -12,7 +13,7 @@ use Carbon\Carbon;
 class VisitaController extends Controller
 {
     /**
-     * Centro de Control de Visitas y Registro de Acceso en Garita
+     * Centro de Control de Visitas, Aforo y Garita de Vigilancia
      */
     public function index(Request $request)
     {
@@ -27,8 +28,21 @@ class VisitaController extends Controller
         $mesAnterior = (clone $fechaSeleccionada)->subMonth();
         $mesSiguiente = (clone $fechaSeleccionada)->addMonth();
 
-        // Métricas
         $hoy = Carbon::today();
+
+        // Visitas activas en este instante (personas actualmente dentro del club hoy sin marcar salida)
+        $visitasActivasHoy = Visita::with(['socio', 'vigilante'])
+            ->whereDate('fecha_entrada', $hoy)
+            ->whereNull('fecha_salida')
+            ->orderBy('fecha_entrada', 'desc')
+            ->get();
+
+        $totalSociosDentro = $visitasActivasHoy->count();
+        $totalAforoHoy = $visitasActivasHoy->sum(function ($v) {
+            return 1 + (int) ($v->invitados ?? 0);
+        });
+
+        // Métricas generales
         $visitasHoy = Visita::whereDate('fecha_entrada', $hoy)->count();
 
         $queryMes = Visita::whereYear('fecha_entrada', $year)
@@ -38,7 +52,7 @@ class VisitaController extends Controller
         $totalInvitadosMes = (clone $queryMes)->sum('invitados');
         $sociosUnicosMes = (clone $queryMes)->distinct('socios_id')->count('socios_id');
 
-        // Historial de visitas para la tabla del mes
+        // Historial paginado de visitas para la tabla del mes
         $visitas = Visita::with(['socio', 'vigilante'])
             ->whereYear('fecha_entrada', $year)
             ->whereMonth('fecha_entrada', $month)
@@ -54,6 +68,12 @@ class VisitaController extends Controller
             ->pluck('total', 'dia')
             ->toArray();
 
+        // Libro de Novedades de Guardia (últimos 10 registros)
+        $novedadesRecientes = NovedadGarita::with('vigilante')
+            ->orderBy('fecha', 'desc')
+            ->take(15)
+            ->get();
+
         return view('visitas.index', compact(
             'visitas',
             'year',
@@ -62,10 +82,14 @@ class VisitaController extends Controller
             'mesAnterior',
             'mesSiguiente',
             'visitasHoy',
+            'visitasActivasHoy',
+            'totalSociosDentro',
+            'totalAforoHoy',
             'totalVisitasMes',
             'totalInvitadosMes',
             'sociosUnicosMes',
-            'diasConVisitas'
+            'diasConVisitas',
+            'novedadesRecientes'
         ));
     }
 
@@ -113,6 +137,12 @@ class VisitaController extends Controller
         $visitasEsteMes = $socio->totalVisitasMes($anoActual, $mesActual);
         $ultimaVisita = $socio->visitas()->first();
 
+        // Verificar si el socio se encuentra actualmente en las instalaciones
+        $visitaActiva = Visita::where('socios_id', $socio->id)
+            ->whereDate('fecha_entrada', Carbon::today())
+            ->whereNull('fecha_salida')
+            ->first();
+
         return response()->json([
             'encontrado' => true,
             'id' => $socio->id,
@@ -127,8 +157,12 @@ class VisitaController extends Controller
             'meses_deuda' => $socio->meses_deuda,
             'avatar_url' => $socio->avatar_url,
             'visitas_este_mes' => $visitasEsteMes,
+            'esta_en_club' => !is_null($visitaActiva),
+            'visita_activa_id' => $visitaActiva ? $visitaActiva->id : null,
+            'hora_ingreso_hoy' => $visitaActiva ? $visitaActiva->fecha_entrada->format('h:i A') : null,
             'ultima_visita' => $ultimaVisita ? $ultimaVisita->fecha_entrada->format('d/m/Y h:i A') : 'Primera visita registrada',
             'qr_data' => $socio->qr_code_data,
+            'vigilante_actual' => Auth::user()->nombre_completo ?? 'Personal de Seguridad',
         ]);
     }
 
@@ -144,32 +178,127 @@ class VisitaController extends Controller
         ]);
 
         $socio = Socio::findOrFail($validated['socios_id']);
+        $vigilante = Auth::user();
+        $vigilanteNombre = $vigilante ? $vigilante->nombre_completo : 'Personal de Seguridad';
 
         $visita = Visita::create([
             'socios_id' => $socio->id,
             'usuarios_id' => Auth::id(),
             'fecha_entrada' => Carbon::now(),
+            'fecha_salida' => null,
             'invitados' => $validated['invitados'] ?? 0,
             'observaciones' => $validated['observaciones'] ?? null,
         ]);
 
         Movimiento::create([
             'usuarios_id' => Auth::id() ?? 1,
-            'tipo' => substr("Ingreso Garita: {$socio->nombre_completo} (Acción {$socio->accion}) +{$visita->invitados} inv.", 0, 250),
+            'tipo' => substr("Ingreso Garita: {$socio->nombre_completo} (Acción {$socio->accion}) +{$visita->invitados} inv. — Registrado por: {$vigilanteNombre}", 0, 250),
             'fecha' => Carbon::now(),
         ]);
+
+        $mensaje = "¡Ingreso autorizado para {$socio->nombre_completo}! (Acción: {$socio->accion}) — Registrado por el Oficial: {$vigilanteNombre}";
 
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
-                'mensaje' => "¡Ingreso concedido para {$socio->nombre_completo}! (Acción: {$socio->accion})",
+                'mensaje' => $mensaje,
                 'visita_id' => $visita->id,
                 'fecha' => $visita->fecha_entrada->format('d/m/Y h:i A'),
+                'vigilante' => $vigilanteNombre,
             ]);
         }
 
-        return redirect()->route('visitas.index')
-            ->with('success', "¡Ingreso concedido para {$socio->nombre_completo}! (Acción: {$socio->accion})");
+        return redirect()->route('visitas.index')->with('success', $mensaje);
+    }
+
+    /**
+     * Marcar salida del socio (Check-out de Garita)
+     */
+    public function marcarSalida(Request $request, Visita $visita)
+    {
+        if ($visita->fecha_salida) {
+            $msg = 'Esta visita ya tenía registrada su salida a las ' . $visita->fecha_salida->format('h:i A');
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'mensaje' => $msg], 400);
+            }
+            return back()->with('warning', $msg);
+        }
+
+        $visita->update([
+            'fecha_salida' => Carbon::now(),
+        ]);
+
+        $vigilante = Auth::user();
+        $vigilanteNombre = $vigilante ? $vigilante->nombre_completo : 'Personal de Seguridad';
+        $socioNombre = $visita->socio ? $visita->socio->nombre_completo : 'Socio';
+        $accion = $visita->socio ? $visita->socio->accion : '';
+
+        Movimiento::create([
+            'usuarios_id' => Auth::id() ?? 1,
+            'tipo' => substr("Salida Garita: {$socioNombre} (Acción {$accion}) tras {$visita->tiempo_permanencia} — Verificado por: {$vigilanteNombre}", 0, 250),
+            'fecha' => Carbon::now(),
+        ]);
+
+        $msg = "🚪 Salida registrada para {$socioNombre}. Tiempo en el club: {$visita->tiempo_permanencia} — Verificado por el Oficial: {$vigilanteNombre}";
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'mensaje' => $msg,
+                'fecha_salida' => $visita->fecha_salida->format('d/m/Y h:i A'),
+                'tiempo_permanencia' => $visita->tiempo_permanencia,
+                'vigilante' => $vigilanteNombre,
+            ]);
+        }
+
+        return back()->with('success', $msg);
+    }
+
+    /**
+     * Asentar novedad en el Libro Digital de Minutas de Garita
+     */
+    public function storeNovedad(Request $request)
+    {
+        $validated = $request->validate([
+            'tipo' => 'required|string|in:Ronda Perimetral,Incidente,Acceso Vehicular,Entrega / Correspondencia,Mantenimiento,Cambio de Guardia,General',
+            'titulo' => 'required|string|max:100',
+            'descripcion' => 'required|string|max:1000',
+        ]);
+
+        $novedad = NovedadGarita::create([
+            'usuarios_id' => Auth::id(),
+            'tipo' => $validated['tipo'],
+            'titulo' => $validated['titulo'],
+            'descripcion' => $validated['descripcion'],
+            'fecha' => Carbon::now(),
+        ]);
+
+        $vigilanteNombre = Auth::user()->nombre_completo ?? 'Personal de Seguridad';
+
+        Movimiento::create([
+            'usuarios_id' => Auth::id() ?? 1,
+            'tipo' => substr("Minuta Garita: [{$novedad->tipo}] {$novedad->titulo} — Oficial: {$vigilanteNombre}", 0, 250),
+            'fecha' => Carbon::now(),
+        ]);
+
+        $msg = "🛡️ Novedad asentada en el libro de garita con éxito por el Oficial {$vigilanteNombre}.";
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'mensaje' => $msg,
+                'novedad' => [
+                    'id' => $novedad->id,
+                    'tipo' => $novedad->tipo,
+                    'titulo' => $novedad->titulo,
+                    'descripcion' => $novedad->descripcion,
+                    'fecha' => $novedad->fecha->format('d/m/Y h:i A'),
+                    'vigilante' => $vigilanteNombre,
+                ],
+            ]);
+        }
+
+        return back()->with('success', $msg);
     }
 
     /**

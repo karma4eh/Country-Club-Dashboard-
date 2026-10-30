@@ -2,56 +2,104 @@
 
 @section('title', 'Garita & Control de Visitas')
 @section('header_title', 'Garita de Vigilancia & Control de Acceso')
-@section('header_subtitle', 'Registro de visitas mediante Código QR, cédula o acción con control mensual')
+@section('header_subtitle', 'Control biométrico y digital de acceso, aforo en tiempo real y libro de novedades')
 
 @section('content')
 <div class="space-y-7">
 
-    <!-- Tarjetas de Métrica de Visitas -->
+    <!-- BANNER DE TURNO DEL OFICIAL DE GUARDIA -->
+    <div class="glass-panel rounded-3xl p-6 border border-[#243352] shadow-2xl relative overflow-hidden bg-gradient-to-r from-[#0C1424] via-[#101B30] to-[#0D1527]">
+        <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-5 relative z-10">
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400/20 to-amber-600/30 border border-amber-400/40 text-amber-300 flex items-center justify-center shadow-lg shadow-amber-500/10">
+                        <span class="material-icons-round text-3xl">security</span>
+                    </div>
+                    <span class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-[#0B101D] flex items-center justify-center" title="Oficial en línea">
+                        <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+                    </span>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-extrabold uppercase tracking-wider flex items-center space-x-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1 animate-pulse"></span>
+                            Guardia Activa • Garita Principal
+                        </span>
+                        <span class="text-slate-500 text-xs">•</span>
+                        <span class="text-slate-400 text-xs font-mono">{{ Carbon\Carbon::now()->translatedFormat('l, d \d\e F Y') }}</span>
+                    </div>
+                    <h2 class="text-xl font-extrabold text-white mt-1">
+                        Oficial Responsable: <span class="text-amber-300">{{ Auth::user()->nombre_completo ?? 'Personal de Seguridad' }}</span>
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">
+                        Identificador de Puesto: <span class="font-mono text-slate-300">PUESTO-GARITA-01</span> | Todas las lecturas e ingresos quedan auditados con su firma electrónica.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Botones de Acción de Guardia -->
+            <div class="flex items-center space-x-3 w-full md:w-auto">
+                <button type="button" onclick="abrirModalNovedad()" class="flex-1 md:flex-none px-4 py-2.5 rounded-2xl bg-[#141F36] hover:bg-[#1B2A4A] border border-[#2A3F66] text-amber-300 text-xs font-bold flex items-center justify-center space-x-2 transition shadow-lg shadow-black/30">
+                    <span class="material-icons-round text-base">edit_note</span>
+                    <span>Libro de Novedades</span>
+                </button>
+                <a href="#seccionAforo" class="flex-1 md:flex-none px-4 py-2.5 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-bold flex items-center justify-center space-x-2 transition">
+                    <span class="material-icons-round text-base">groups</span>
+                    <span>Aforo: {{ $totalAforoHoy }} pers.</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- TARJETAS DE MÉTRICAS OPERATIVAS -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <!-- Aforo en Tiempo Real -->
         <div class="glass-panel rounded-2xl p-5 border border-[#1B253B] flex items-center justify-between">
             <div>
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Ingresos de Hoy</span>
-                <h4 class="text-3xl font-extrabold text-emerald-400 mt-0.5 font-mono">{{ $visitasHoy }}</h4>
-                <p class="text-[10px] text-emerald-400/80 mt-1 flex items-center">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
-                    Garita en servicio
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">En el Club Ahora (Aforo)</span>
+                <h4 class="text-3xl font-extrabold text-emerald-400 mt-0.5 font-mono">{{ $totalAforoHoy }}</h4>
+                <p class="text-[10px] text-slate-400 mt-1">
+                    <span class="text-emerald-300 font-bold font-mono">{{ $totalSociosDentro }}</span> socios + <span class="text-blue-300 font-bold font-mono">{{ max(0, $totalAforoHoy - $totalSociosDentro) }}</span> invit.
                 </p>
             </div>
-            <div class="w-11 h-11 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
                 <span class="material-icons-round text-2xl">sensor_door</span>
             </div>
         </div>
 
+        <!-- Ingresos Registrados Hoy -->
         <div class="glass-panel rounded-2xl p-5 border border-[#1B253B] flex items-center justify-between">
             <div>
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Visitas en {{ $fechaSeleccionada->translatedFormat('F Y') }}</span>
-                <h4 class="text-3xl font-extrabold text-amber-300 mt-0.5 font-mono">{{ $totalVisitasMes }}</h4>
-                <p class="text-[10px] text-slate-400 mt-1">Registros en el mes</p>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Total Ingresos Hoy</span>
+                <h4 class="text-3xl font-extrabold text-amber-300 mt-0.5 font-mono">{{ $visitasHoy }}</h4>
+                <p class="text-[10px] text-slate-400 mt-1">Entradas validadas en garita</p>
             </div>
-            <div class="w-11 h-11 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+            <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
+                <span class="material-icons-round text-2xl">how_to_reg</span>
+            </div>
+        </div>
+
+        <!-- Visitas del Mes Seleccionado -->
+        <div class="glass-panel rounded-2xl p-5 border border-[#1B253B] flex items-center justify-between">
+            <div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Mes {{ $fechaSeleccionada->translatedFormat('F Y') }}</span>
+                <h4 class="text-3xl font-extrabold text-blue-400 mt-0.5 font-mono">{{ $totalVisitasMes }}</h4>
+                <p class="text-[10px] text-slate-400 mt-1">{{ $totalInvitadosMes }} invitados registrados</p>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center">
                 <span class="material-icons-round text-2xl">event_available</span>
             </div>
         </div>
 
+        <!-- Socios Únicos en el Mes -->
         <div class="glass-panel rounded-2xl p-5 border border-[#1B253B] flex items-center justify-between">
             <div>
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Acompañantes / Invitados</span>
-                <h4 class="text-3xl font-extrabold text-blue-400 mt-0.5 font-mono">{{ $totalInvitadosMes }}</h4>
-                <p class="text-[10px] text-slate-400 mt-1">Personas acompañantes</p>
-            </div>
-            <div class="w-11 h-11 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
-                <span class="material-icons-round text-2xl">group_add</span>
-            </div>
-        </div>
-
-        <div class="glass-panel rounded-2xl p-5 border border-[#1B253B] flex items-center justify-between">
-            <div>
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Socios Titulares Únicos</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Socios Titulares Activos</span>
                 <h4 class="text-3xl font-extrabold text-purple-400 mt-0.5 font-mono">{{ $sociosUnicosMes }}</h4>
-                <p class="text-[10px] text-slate-400 mt-1">Socios distintos asistieron</p>
+                <p class="text-[10px] text-slate-400 mt-1">Socios distintos este mes</p>
             </div>
-            <div class="w-11 h-11 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
+            <div class="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center">
                 <span class="material-icons-round text-2xl">badge</span>
             </div>
         </div>
@@ -64,7 +112,7 @@
         <div class="lg:col-span-7 glass-panel rounded-3xl p-7 border border-[#1B253B] shadow-2xl space-y-6">
             <div class="flex items-center justify-between border-b border-[#1F293D] pb-4">
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
                         <span class="material-icons-round text-xl">qr_code_scanner</span>
                     </div>
                     <div>
@@ -84,9 +132,12 @@
                 <div class="flex items-center justify-between text-xs">
                     <span class="font-bold text-amber-300 flex items-center">
                         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse mr-2"></span>
-                        Cámara activa - Apunte al código QR del carnet
+                        Cámara activa - Apunte al código QR del carnet del socio
                     </span>
-                    <button type="button" onclick="stopCameraScanner()" class="text-slate-400 hover:text-white">Cerrar cámara</button>
+                    <button type="button" onclick="stopCameraScanner()" class="text-slate-400 hover:text-white flex items-center space-x-1">
+                        <span class="material-icons-round text-sm">close</span>
+                        <span>Cerrar</span>
+                    </button>
                 </div>
                 <div id="reader" class="w-full max-w-sm mx-auto rounded-xl overflow-hidden"></div>
             </div>
@@ -95,30 +146,31 @@
             <form onsubmit="buscarSocioManual(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
-                        Código QR / Cédula / Número de Acción <span class="text-amber-400">*</span>
+                        Código QR / Cédula de Identidad / Número de Acción <span class="text-amber-400">*</span>
                     </label>
                     <div class="relative">
                         <span class="material-icons-round absolute left-4 top-3.5 text-slate-400 text-lg">search</span>
-                        <input type="text" id="inputBusquedaSocio" placeholder="Escanee con lector o escriba cédula / ACC-001..." autofocus
+                        <input type="text" id="inputBusquedaSocio" placeholder="Escanee con lector o escriba cédula / ACC-001 / Nombre..." autofocus
                                class="w-full bg-[#0A0F1E] border border-[#243352] rounded-2xl pl-12 pr-28 py-3.5 text-sm text-white font-mono placeholder-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition">
-                        <button type="submit" class="absolute right-2 top-2 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition">
+                        <button type="submit" class="absolute right-2 top-2 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition shadow-md">
                             Validar
                         </button>
                     </div>
-                    <p class="text-[11px] text-slate-400 mt-1.5">
-                        💡 Compatible con pistolas lectoras 2D/QR de garita, teclado o escaneo por webcam.
-                    </p>
+                    <div class="flex items-center justify-between text-[11px] text-slate-400 mt-2">
+                        <span>💡 Compatible con pistolas lectoras 2D/QR de garita, teclado o escaneo por webcam.</span>
+                        <span class="text-amber-300/80 font-mono">Oficial: {{ Auth::user()->nombre_completo ?? 'José Gregorio Colmenares' }}</span>
+                    </div>
                 </div>
             </form>
 
             <!-- Spinner de carga -->
             <div id="loaderSocio" class="hidden py-6 text-center text-slate-400 text-xs">
                 <span class="material-icons-round animate-spin text-2xl text-amber-400 block mb-1">sync</span>
-                <span>Consultando estado del socio en tiempo real...</span>
+                <span>Consultando estado del socio y solvencia en tiempo real...</span>
             </div>
 
-            <!-- Tarjeta de Validación del Socio Encontrado -->
-            <div id="socioCardValidation" class="hidden rounded-2xl p-6 border transition-all duration-300 space-y-5">
+            <!-- Tarjeta Dinámica de Validación del Socio Encontrado -->
+            <div id="socioCardValidation" class="hidden rounded-3xl p-6 border transition-all duration-300 space-y-5">
                 <!-- Se llena dinámicamente con JS -->
             </div>
 
@@ -129,10 +181,10 @@
             <div class="space-y-5">
                 <div class="flex items-center justify-between border-b border-[#1F293D] pb-4">
                     <div class="flex items-center space-x-2.5">
-                        <div class="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
+                        <div class="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
                             <span class="material-icons-round text-base">calendar_month</span>
                         </div>
-                        <h3 class="text-sm font-bold text-white">Control Mensual de Asistencia</h3>
+                        <h3 class="text-sm font-bold text-white">Control Mensual de Visitas</h3>
                     </div>
 
                     <!-- Selector de Mes Interactivo -->
@@ -197,25 +249,171 @@
                 </div>
             </div>
 
-            <!-- Información Operativa -->
-            <div class="p-4 rounded-2xl bg-[#10172A] border border-[#1E293B] text-[11px] text-slate-400 space-y-1">
-                <span class="font-bold text-slate-200 block">Oficial de Guardia en Garita:</span>
-                <p>{{ Auth::user()->nombre_completo ?? 'Personal de Seguridad' }} ({{ strtoupper(Auth::user()->rol ?? 'Vigilante') }})</p>
+            <!-- Ficha del Vigilante Responsable -->
+            <div class="p-4 rounded-2xl bg-[#10172A] border border-[#1E293B] text-xs text-slate-300 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 flex items-center justify-center">
+                        <span class="material-icons-round text-base">badge</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Oficial de Garita</span>
+                        <p class="font-extrabold text-white text-xs">{{ Auth::user()->nombre_completo ?? 'Personal de Seguridad' }}</p>
+                    </div>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    TURNO ACTIVO
+                </span>
             </div>
         </div>
 
+    </div>
+
+    <!-- SECCIÓN DE AFORO EN VIVO: PERSONAS ACTUALMENTE DENTRO DEL CLUB -->
+    <div id="seccionAforo" class="glass-panel rounded-3xl p-7 border border-[#1B253B] shadow-2xl space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[#1F293D] pb-5">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+                    <span class="material-icons-round text-xl">meeting_room</span>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                        <span>Aforo en Tiempo Real (Permanencia en Instalaciones)</span>
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            {{ $totalAforoHoy }} personas dentro
+                        </span>
+                    </h3>
+                    <p class="text-[11px] text-slate-400">Socios e invitados que ingresaron hoy y no han marcado salida</p>
+                </div>
+            </div>
+
+            <span class="text-xs text-slate-400 flex items-center space-x-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Actualización automática en garita</span>
+            </span>
+        </div>
+
+        @if($visitasActivasHoy->count() > 0)
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            @foreach($visitasActivasHoy as $act)
+            <div class="p-4 rounded-2xl bg-[#0B101D] border border-[#243352] hover:border-amber-400/50 transition-all space-y-3 shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <img src="{{ $act->socio->avatar_url }}" alt="avatar" class="w-10 h-10 rounded-xl border border-slate-700 object-cover">
+                        <div>
+                            <h4 class="font-bold text-white text-xs truncate max-w-[150px]">{{ $act->socio->nombre_completo }}</h4>
+                            <span class="text-[10px] font-mono text-amber-300 font-bold">{{ $act->socio->accion }}</span>
+                            <span class="text-[10px] text-slate-500 font-mono ml-1">V-{{ $act->socio->cedula }}</span>
+                        </div>
+                    </div>
+                    <span class="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                        DENTRO
+                    </span>
+                </div>
+
+                <div class="p-2.5 rounded-xl bg-[#070B14] border border-[#1E293B] space-y-1 text-[11px]">
+                    <div class="flex justify-between text-slate-400">
+                        <span>Ingreso hoy:</span>
+                        <strong class="text-slate-200 font-mono">{{ $act->fecha_entrada ? $act->fecha_entrada->format('h:i A') : '' }}</strong>
+                    </div>
+                    <div class="flex justify-between text-slate-400">
+                        <span>Permanencia:</span>
+                        <strong class="text-amber-300 font-mono">{{ $act->tiempo_permanencia }}</strong>
+                    </div>
+                    <div class="flex justify-between text-slate-400">
+                        <span>Acompañantes:</span>
+                        <strong class="text-blue-400 font-mono">+{{ $act->invitados }} pers.</strong>
+                    </div>
+                    @if($act->observaciones)
+                    <div class="text-[10px] text-slate-400 pt-1 border-t border-[#162238] truncate" title="{{ $act->observaciones }}">
+                        🚗 {{ $act->observaciones }}
+                    </div>
+                    @endif
+                    <div class="text-[10px] text-slate-500 pt-1 border-t border-[#162238]">
+                        🛡️ Ingresado por: <span class="text-slate-300 font-medium">{{ $act->vigilante->nombre_completo ?? 'Personal de Seguridad' }}</span>
+                    </div>
+                </div>
+
+                <!-- Botón de Salida Rápida -->
+                <form action="{{ route('visitas.salida', $act) }}" method="POST" onsubmit="return confirm('¿Registrar la salida para {{ $act->socio->nombre_completo }}?');">
+                    @csrf
+                    <button type="submit" class="w-full py-2 px-3 rounded-xl bg-[#141C30] hover:bg-rose-500/20 border border-[#243352] hover:border-rose-500/40 text-slate-300 hover:text-rose-300 text-xs font-bold transition flex items-center justify-center space-x-1.5 active:scale-95">
+                        <span class="material-icons-round text-sm text-rose-400">logout</span>
+                        <span>Marcar Salida</span>
+                    </button>
+                </form>
+            </div>
+            @endforeach
+        </div>
+        @else
+        <div class="p-8 text-center rounded-2xl bg-[#0A0F1E] border border-[#243352]/40 text-slate-500 text-xs">
+            <span class="material-icons-round text-3xl text-slate-600 block mb-1">night_shelter</span>
+            <span>No hay socios registrados dentro del club en este momento. Todos los accesos previos han marcado salida.</span>
+        </div>
+        @endif
+    </div>
+
+    <!-- LIBRO DE NOVEDADES DE GUARDIA (MINUTA DE GARITA) -->
+    <div class="glass-panel rounded-3xl p-7 border border-[#1B253B] shadow-2xl space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[#1F293D] pb-5">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center border border-blue-500/20">
+                    <span class="material-icons-round text-xl">menu_book</span>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-white">Libro Digital de Novedades de Garita (Minuta)</h3>
+                    <p class="text-[11px] text-slate-400">Bitácora oficial de incidentes, rondas perimetrales y novedades de seguridad</p>
+                </div>
+            </div>
+
+            <button type="button" onclick="abrirModalNovedad()" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition flex items-center space-x-1.5 shadow-md">
+                <span class="material-icons-round text-sm">add_circle</span>
+                <span>Asentar Nueva Novedad</span>
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            @forelse($novedadesRecientes as $nov)
+            <div class="p-4 rounded-2xl bg-[#0B101D] border border-[#243352] space-y-2.5">
+                <div class="flex items-center justify-between text-xs">
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                        {{ $nov->tipo }}
+                    </span>
+                    <span class="text-[10px] font-mono text-slate-400">
+                        {{ $nov->fecha ? $nov->fecha->format('d/m/Y h:i A') : '' }}
+                    </span>
+                </div>
+
+                <h4 class="font-bold text-white text-xs">{{ $nov->titulo }}</h4>
+                <p class="text-[11px] text-slate-300 leading-relaxed bg-[#070B14] p-3 rounded-xl border border-[#162238]">
+                    {{ $nov->descripcion }}
+                </p>
+
+                <div class="flex items-center justify-between text-[10px] text-slate-500 pt-1">
+                    <span class="flex items-center space-x-1">
+                        <span class="material-icons-round text-xs text-amber-400">shield</span>
+                        <span>Oficial: <strong class="text-slate-300 font-semibold">{{ $nov->vigilante->nombre_completo ?? 'Personal de Seguridad' }}</strong></span>
+                    </span>
+                </div>
+            </div>
+            @empty
+            <div class="col-span-full p-8 text-center text-slate-500 text-xs">
+                <span class="material-icons-round text-3xl text-slate-600 block mb-1">assignment</span>
+                <span>No hay novedades registradas recientemente. Todas las novedades asentadas por el oficial aparecerán aquí con su firma digital.</span>
+            </div>
+            @endforelse
+        </div>
     </div>
 
     <!-- TABLA DE HISTORIAL DE VISITAS DEL MES SELECCIONADO -->
     <div class="glass-panel rounded-3xl p-7 border border-[#1B253B] shadow-2xl space-y-5">
         <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[#1F293D] pb-5">
             <div class="flex items-center space-x-3">
-                <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
                     <span class="material-icons-round text-lg">history</span>
                 </div>
                 <div>
                     <h3 class="text-sm font-bold text-white">Registro de Visitas - {{ $fechaSeleccionada->translatedFormat('F Y') }}</h3>
-                    <p class="text-[11px] text-slate-400">Trazabilidad de accesos autorizados por garita principal</p>
+                    <p class="text-[11px] text-slate-400">Auditoría completa de ingresos con vigilante responsable y hora de salida</p>
                 </div>
             </div>
 
@@ -238,13 +436,14 @@
             <table class="w-full text-left text-xs">
                 <thead class="bg-[#0B101D] text-slate-400 font-bold uppercase tracking-wider border-b border-[#1B253B]">
                     <tr>
-                        <th class="px-6 py-4">Fecha & Hora</th>
+                        <th class="px-6 py-4">Fecha & Entrada</th>
+                        <th class="px-6 py-4">Salida / Permanencia</th>
                         <th class="px-6 py-4">Socio Titular</th>
                         <th class="px-6 py-4">Acción / Cédula</th>
                         <th class="px-6 py-4">Invitados</th>
-                        <th class="px-6 py-4">Vigilante / Garita</th>
+                        <th class="px-6 py-4">Oficial Vigilante</th>
                         <th class="px-6 py-4">Observaciones</th>
-                        <th class="px-6 py-4 text-right">Estatus</th>
+                        <th class="px-6 py-4 text-right">Acción</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#1B253B] bg-[#0E1526]/50">
@@ -252,7 +451,20 @@
                     <tr class="hover:bg-[#162238]/60 transition-colors">
                         <td class="px-6 py-4 text-slate-300 whitespace-nowrap font-mono text-[11px]">
                             <span class="text-white font-semibold">{{ $v->fecha_entrada ? $v->fecha_entrada->format('d/m/Y') : '' }}</span>
-                            <span class="text-amber-400 ml-1 font-bold">{{ $v->fecha_entrada ? $v->fecha_entrada->format('h:i A') : '' }}</span>
+                            <span class="text-emerald-400 ml-1 font-bold">{{ $v->fecha_entrada ? $v->fecha_entrada->format('h:i A') : '' }}</span>
+                        </td>
+
+                        <td class="px-6 py-4 whitespace-nowrap font-mono text-[11px]">
+                            @if($v->fecha_salida)
+                                <span class="text-slate-300">{{ $v->fecha_salida->format('h:i A') }}</span>
+                                <span class="text-[10px] text-amber-400 block font-bold">({{ $v->tiempo_permanencia }})</span>
+                            @elseif($v->en_club)
+                                <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold">
+                                    EN CLUB ({{ $v->tiempo_permanencia }})
+                                </span>
+                            @else
+                                <span class="text-slate-500 italic text-[10px]">Sin registro salida</span>
+                            @endif
                         </td>
 
                         <td class="px-6 py-4">
@@ -283,24 +495,37 @@
                             @endif
                         </td>
 
-                        <td class="px-6 py-4 text-slate-300 text-xs">
-                            <span class="text-slate-200 font-medium">{{ $v->vigilante->nombre_completo ?? 'Personal de Seguridad' }}</span>
+                        <td class="px-6 py-4 text-xs whitespace-nowrap">
+                            <div class="flex items-center space-x-1.5">
+                                <span class="material-icons-round text-xs text-amber-400">shield</span>
+                                <span class="text-slate-200 font-semibold">{{ $v->vigilante->nombre_completo ?? 'Personal de Seguridad' }}</span>
+                            </div>
+                            <span class="text-[10px] text-slate-500 block font-mono pl-4">Garita Principal</span>
                         </td>
 
-                        <td class="px-6 py-4 text-slate-400 text-xs truncate max-w-[200px]">
+                        <td class="px-6 py-4 text-slate-400 text-xs truncate max-w-[180px]" title="{{ $v->observaciones }}">
                             {{ $v->observaciones ?? '-' }}
                         </td>
 
-                        <td class="px-6 py-4 text-right">
+                        <td class="px-6 py-4 text-right whitespace-nowrap">
+                            @if(!$v->fecha_salida && $v->en_club)
+                            <form action="{{ route('visitas.salida', $v) }}" method="POST" class="inline-block" onsubmit="return confirm('¿Registrar salida?');">
+                                @csrf
+                                <button type="submit" class="px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-[10px] font-bold transition">
+                                    Marcar Salida
+                                </button>
+                            </form>
+                            @else
                             <span class="inline-flex items-center space-x-1 text-[10px] text-emerald-400 font-mono font-semibold">
-                                <span class="material-icons-round text-xs">check_circle</span>
-                                <span>Ingreso Registrado</span>
+                                <span class="material-icons-round text-xs">verified</span>
+                                <span>Verificado</span>
                             </span>
+                            @endif
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-12 text-center text-slate-500">
+                        <td colspan="8" class="px-6 py-12 text-center text-slate-500">
                             <span class="material-icons-round text-4xl text-slate-600 block mb-2">no_meeting_room</span>
                             <span>No se registraron visitas ni ingresos en {{ $fechaSeleccionada->translatedFormat('F de Y') }}.</span>
                         </td>
@@ -317,6 +542,74 @@
 
 </div>
 
+<!-- MODAL: ASENTAR NOVEDAD EN LIBRO DE GARITA -->
+<div id="modalNovedad" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-lg rounded-3xl p-7 border border-[#243352] shadow-2xl space-y-5 bg-[#0C1222]">
+        <div class="flex items-center justify-between border-b border-[#1F293D] pb-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
+                    <span class="material-icons-round text-xl">menu_book</span>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-white">Asentar Novedad de Garita</h3>
+                    <p class="text-[11px] text-slate-400">Oficial: <span class="text-amber-300 font-semibold">{{ Auth::user()->nombre_completo ?? 'José Gregorio Colmenares' }}</span></p>
+                </div>
+            </div>
+            <button type="button" onclick="cerrarModalNovedad()" class="text-slate-400 hover:text-white">
+                <span class="material-icons-round">close</span>
+            </button>
+        </div>
+
+        <form action="{{ route('visitas.novedades.store') }}" method="POST" class="space-y-4">
+            @csrf
+            <div>
+                <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                    Tipo de Novedad <span class="text-amber-400">*</span>
+                </label>
+                <select name="tipo" required class="w-full bg-[#0A0F1E] border border-[#243352] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
+                    <option value="Ronda Perimetral">🛡️ Ronda Perimetral</option>
+                    <option value="Acceso Vehicular">🚗 Acceso Vehicular Especial</option>
+                    <option value="Entrega / Correspondencia">📦 Entrega / Correspondencia para Socio</option>
+                    <option value="Incidente">⚠️ Incidente / Anomalía</option>
+                    <option value="Mantenimiento">🔧 Mantenimiento / Servicios Básicos</option>
+                    <option value="Cambio de Guardia">🔄 Cambio de Guardia / Relevo</option>
+                    <option value="General">📝 Novedad General</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                    Título / Resumen Corto <span class="text-amber-400">*</span>
+                </label>
+                <input type="text" name="titulo" required placeholder="Ej: Ronda nocturna sin novedades / Paquete para Acción 104"
+                       class="w-full bg-[#0A0F1E] border border-[#243352] rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                    Descripción Detallada de la Novedad <span class="text-amber-400">*</span>
+                </label>
+                <textarea name="descripcion" rows="4" required placeholder="Describa claramente lo ocurrido, personas involucradas, vehículos, horas o acuerdos..."
+                          class="w-full bg-[#0A0F1E] border border-[#243352] rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"></textarea>
+            </div>
+
+            <div class="p-3 rounded-xl bg-[#080D1A] border border-[#1E293B] text-[11px] text-slate-400 flex items-center space-x-2">
+                <span class="material-icons-round text-amber-400 text-sm">verified_user</span>
+                <span>Quedará registrado a nombre del oficial en servicio con sello de tiempo inmutable.</span>
+            </div>
+
+            <div class="flex items-center justify-end space-x-3 pt-3 border-t border-[#1F293D]">
+                <button type="button" onclick="cerrarModalNovedad()" class="px-4 py-2.5 rounded-xl bg-[#141C30] hover:bg-[#1E293B] text-slate-300 text-xs font-semibold transition border border-[#243352]">
+                    Cancelar
+                </button>
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 transition active:scale-95">
+                    Guardar en Minuta
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @push('scripts')
 <!-- Scripts locales para QR y Escáner -->
 <script src="{{ asset('js/qrcode.min.js') }}"></script>
@@ -324,6 +617,15 @@
 <script>
     let html5QrcodeScanner = null;
     let cameraActive = false;
+    const OFICIAL_ACTUAL = "{{ Auth::user()->nombre_completo ?? 'Personal de Seguridad' }}";
+
+    function abrirModalNovedad() {
+        document.getElementById('modalNovedad').classList.remove('hidden');
+    }
+
+    function cerrarModalNovedad() {
+        document.getElementById('modalNovedad').classList.add('hidden');
+    }
 
     // Búsqueda Manual / Lector de Barra
     function buscarSocioManual(e) {
@@ -352,13 +654,13 @@
             })
             .catch(err => {
                 loader.classList.add('hidden');
-                card.className = "rounded-2xl p-6 border border-rose-500/40 bg-rose-500/10 text-rose-300 space-y-2";
+                card.className = "rounded-3xl p-6 border border-rose-500/40 bg-rose-500/10 text-rose-300 space-y-2";
                 card.innerHTML = `
                     <div class="flex items-center space-x-2">
                         <span class="material-icons-round text-rose-400 text-xl">error_outline</span>
-                        <h4 class="font-bold text-sm">Socio no encontrado o código inválido</h4>
+                        <h4 class="font-bold text-sm">Socio no encontrado o código QR inválido</h4>
                     </div>
-                    <p class="text-xs text-slate-300">No se encontró ningún registro para el valor ingresado ("${query}"). Verifique la cédula o acción.</p>
+                    <p class="text-xs text-slate-300">No se encontró ningún socio activo registrado con ("${query}"). Verifique el número de acción o cédula.</p>
                 `;
                 card.classList.remove('hidden');
             });
@@ -388,8 +690,27 @@
             </span>`;
         }
 
+        let alertaEnClub = '';
+        if (s.esta_en_club) {
+            alertaEnClub = `
+                <div class="p-3 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <span class="material-icons-round text-base text-amber-400">info</span>
+                        <span>Este socio ya se encuentra dentro del club (Ingresó hoy a las ${s.hora_ingreso_hoy}).</span>
+                    </div>
+                    <form action="/visitas/${s.visita_activa_id}/salida" method="POST" class="inline">
+                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="px-3 py-1 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400 transition">
+                            Marcar Salida Ahora
+                        </button>
+                    </form>
+                </div>
+            `;
+        }
+
         card.className = `rounded-3xl p-6 border ${borderClass} space-y-5 shadow-2xl`;
         card.innerHTML = `
+            ${alertaEnClub}
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center space-x-4">
                     <img src="${s.avatar_url}" alt="Avatar" class="w-14 h-14 rounded-2xl border-2 border-amber-400/40 object-cover shadow-lg">
@@ -416,17 +737,26 @@
                 </div>
             </div>
 
+            <!-- Badge del Vigilante Responsable -->
+            <div class="p-3 rounded-xl bg-[#090E1A] border border-[#1E293B] text-[11px] text-slate-300 flex items-center justify-between">
+                <span class="flex items-center space-x-1.5">
+                    <span class="material-icons-round text-amber-400 text-sm">shield</span>
+                    <span>Oficial que registrará el acceso:</span>
+                </span>
+                <strong class="text-amber-300 font-bold">${OFICIAL_ACTUAL}</strong>
+            </div>
+
             <!-- Formulario de Confirmación de Ingreso -->
             <form onsubmit="registrarVisitaConfirmada(event, ${s.id})" class="space-y-4 pt-2 border-t border-[#1F293D]">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-slate-300 text-xs font-semibold mb-1">Acompañantes / Invitados</label>
                         <input type="number" id="visitaInvitados" min="0" max="20" value="0"
-                               class="w-full bg-[#0A0F1E] border border-[#243352] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
+                               class="w-full bg-[#0A0F1E] border border-[#243352] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400 font-mono">
                     </div>
                     <div>
                         <label class="block text-slate-300 text-xs font-semibold mb-1">Observaciones / Placa vehículo</label>
-                        <input type="text" id="visitaObservaciones" placeholder="Ej: Vehículo Ford Placa ABC-123"
+                        <input type="text" id="visitaObservaciones" placeholder="Ej: Toyota Fortuner Gris Placa ABC-123"
                                class="w-full bg-[#0A0F1E] border border-[#243352] rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400">
                     </div>
                 </div>
@@ -466,7 +796,7 @@
         })
         .then(res => res.json())
         .then(data => {
-            alert('✅ ' + data.mensaje);
+            alert(data.mensaje);
             window.location.reload();
         })
         .catch(err => {

@@ -43,6 +43,8 @@ Route::middleware('auth')->group(function () {
     // Control de Visitas / Garita
     Route::get('/visitas', [VisitaController::class, 'index'])->name('visitas.index');
     Route::post('/visitas', [VisitaController::class, 'store'])->name('visitas.store');
+    Route::post('/visitas/{visita}/salida', [VisitaController::class, 'marcarSalida'])->name('visitas.salida');
+    Route::post('/visitas/novedades', [VisitaController::class, 'storeNovedad'])->name('visitas.novedades.store');
     Route::get('/api/visitas/buscar-socio', [VisitaController::class, 'buscarSocio'])->name('visitas.buscar');
     Route::delete('/visitas/{visita}', [VisitaController::class, 'destroy'])->name('visitas.destroy');
 });

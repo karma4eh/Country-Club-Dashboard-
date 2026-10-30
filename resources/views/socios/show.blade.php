@@ -315,8 +315,9 @@
             <table class="w-full text-left text-xs">
                 <thead class="bg-[#0B101D] text-slate-400 font-bold uppercase tracking-wider border-b border-[#1B253B]">
                     <tr>
-                        <th class="px-6 py-4">Fecha & Hora Exacta</th>
-                        <th class="px-6 py-4">Vigilante / Garita</th>
+                        <th class="px-6 py-4">Fecha & Entrada</th>
+                        <th class="px-6 py-4">Salida / Permanencia</th>
+                        <th class="px-6 py-4">Oficial Vigilante</th>
                         <th class="px-6 py-4">Invitados / Acompañantes</th>
                         <th class="px-6 py-4">Observaciones / Vehículo</th>
                         <th class="px-6 py-4 text-right">Estatus</th>
@@ -329,8 +330,24 @@
                             <span class="text-white font-semibold">{{ $v->fecha_entrada ? $v->fecha_entrada->format('d/m/Y') : '' }}</span>
                             <span class="text-amber-400 ml-1.5 font-bold">{{ $v->fecha_entrada ? $v->fecha_entrada->format('h:i A') : '' }}</span>
                         </td>
+                        <td class="px-6 py-4 whitespace-nowrap font-mono text-[11px]">
+                            @if($v->fecha_salida)
+                                <span class="text-slate-300">{{ $v->fecha_salida->format('h:i A') }}</span>
+                                <span class="text-[10px] text-amber-400 block font-bold">({{ $v->tiempo_permanencia }})</span>
+                            @elseif($v->en_club)
+                                <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold">
+                                    EN CLUB
+                                </span>
+                            @else
+                                <span class="text-slate-500 italic text-[10px]">-</span>
+                            @endif
+                        </td>
                         <td class="px-6 py-4 text-slate-200">
-                            {{ $v->vigilante->nombre_completo ?? 'Garita Principal' }}
+                            <div class="flex items-center space-x-1.5">
+                                <span class="material-icons-round text-xs text-amber-400">shield</span>
+                                <span class="font-semibold text-slate-200">{{ $v->vigilante->nombre_completo ?? 'Personal de Seguridad' }}</span>
+                            </div>
+                            <span class="text-[10px] text-slate-500 block font-mono pl-4">Garita Principal</span>
                         </td>
                         <td class="px-6 py-4 font-mono text-xs text-slate-300">
                             @if($v->invitados > 0)
@@ -353,7 +370,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-8 text-center text-slate-500">
+                        <td colspan="6" class="px-6 py-8 text-center text-slate-500">
                             <span class="material-icons-round text-3xl text-slate-600 block mb-1">no_meeting_room</span>
                             <span>No se registraron ingresos para este socio en {{ $fechaSeleccionada->translatedFormat('F de Y') }}.</span>
                         </td>
