@@ -17,6 +17,7 @@ yarn-error.log
 /.idea
 /.vscode
 .system_generated
+database/*.sqlite
 
 /storage/app/*
 !/storage/app/.gitignore

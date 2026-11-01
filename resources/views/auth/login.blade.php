@@ -102,6 +102,13 @@
                 <p class="text-xs text-slate-400">Ingrese sus credenciales autorizadas para acceder a la consola directiva.</p>
             </div>
 
+            @if(session('error'))
+            <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start space-x-2.5">
+                <span class="material-icons-round text-amber-400 text-base mt-0.5">warning</span>
+                <p class="font-medium">{{ session('error') }}</p>
+            </div>
+            @endif
+
             @if(isset($errors) && $errors->any())
             <div class="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start space-x-2.5">
                 <span class="material-icons-round text-rose-400 text-base mt-0.5">error_outline</span>

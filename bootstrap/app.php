@@ -16,5 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, $request) {
+            return redirect()->route('login')->with('error', 'El formulario de acceso expiró por inactividad o recarga. Por favor, vuelva a intentar ingresar.');
+        });
     })->create();
