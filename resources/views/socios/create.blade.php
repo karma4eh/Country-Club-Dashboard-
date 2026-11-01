@@ -21,13 +21,21 @@
     </div>
 
     @if(isset($errors) && $errors->any())
-    <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start space-x-3">
-        <span class="material-icons-round text-rose-400 text-lg mt-0.5">error_outline</span>
-        <div class="space-y-1">
-            <p class="font-bold">Por favor revise los siguientes errores en el formulario:</p>
-            <ul class="list-disc list-inside space-y-0.5 text-slate-300">
+    <div class="p-5 rounded-3xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start space-x-3.5 shadow-xl shadow-rose-500/5">
+        <div class="w-8 h-8 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span class="material-icons-round text-rose-400 text-base">warning</span>
+        </div>
+        <div class="space-y-2 flex-1">
+            <div>
+                <h4 class="font-bold text-white text-sm">No se pudo procesar la afiliación</h4>
+                <p class="text-[11px] text-slate-300 mt-0.5">Por favor revise y corrija los siguientes datos para poder continuar:</p>
+            </div>
+            <ul class="space-y-1.5 pt-1">
                 @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
+                    <li class="flex items-start space-x-2 bg-[#0C1222]/80 px-3.5 py-2 rounded-xl border border-rose-500/20 text-rose-200">
+                        <span class="material-icons-round text-rose-400 text-sm mt-0.5">cancel</span>
+                        <span class="font-medium text-xs">{{ $error }}</span>
+                    </li>
                 @endforeach
             </ul>
         </div>

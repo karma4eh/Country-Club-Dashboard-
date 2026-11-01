@@ -93,6 +93,17 @@ class SocioController extends Controller
             'direccion' => 'nullable|string',
             'estado' => 'required|in:activo,inactivo',
             'fecha_nacimiento' => 'nullable|date',
+        ], [
+            'cedula.unique' => 'Ya existe un socio registrado con la cédula de identidad V-:input. Verifique en el directorio.',
+            'cedula.required' => 'El número de cédula de identidad es obligatorio.',
+            'accion.unique' => 'El número de acción :input ya se encuentra asignado a otro socio del club. Ingrese una acción disponible.',
+            'accion.required' => 'Debe asignar un número de acción oficial al socio.',
+            'correo.unique' => 'El correo electrónico (:input) ya está registrado con otra membresía.',
+            'correo.required' => 'Debe ingresar un correo electrónico para el envío de credenciales y bienvenida.',
+            'correo.email' => 'El correo electrónico ingresado no tiene un formato válido (ej: nombre@correo.com).',
+            'nombre.required' => 'El nombre del socio titular es obligatorio.',
+            'apellido.required' => 'El apellido del socio titular es obligatorio.',
+            'estado.required' => 'Debe seleccionar el estado de la afiliación (Activo o Inactivo).',
         ]);
 
         $validated['saldo'] = 0.00;
@@ -214,6 +225,12 @@ class SocioController extends Controller
             'numero' => 'nullable|string|max:30',
             'direccion' => 'nullable|string',
             'estado' => 'required|in:activo,inactivo',
+        ], [
+            'correo.unique' => 'El correo electrónico (:input) ya está asignado a otro socio.',
+            'correo.required' => 'El correo electrónico es obligatorio.',
+            'correo.email' => 'El formato del correo electrónico no es válido.',
+            'nombre.required' => 'El nombre es obligatorio.',
+            'apellido.required' => 'El apellido es obligatorio.',
         ]);
 
         $socio->update($validated);

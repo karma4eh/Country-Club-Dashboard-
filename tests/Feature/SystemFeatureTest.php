@@ -80,6 +80,37 @@ class SystemFeatureTest extends TestCase
         });
     }
 
+    public function test_socio_registration_validation_shows_friendly_spanish_messages_for_duplicates()
+    {
+        $admin = User::where('rol', 'admin')->first() ?? User::first();
+        $this->actingAs($admin);
+
+        $existente = Socio::first();
+
+        // Intentar registrar duplicando cédula, acción y correo existentes
+        $response = $this->from('/socios/create')->post('/socios', [
+            'nombre' => 'Pedro',
+            'apellido' => 'Gómez',
+            'cedula' => $existente->cedula,
+            'accion' => $existente->accion,
+            'correo' => $existente->correo,
+            'estado' => 'activo',
+        ]);
+
+        $response->assertRedirect('/socios/create');
+        $response->assertSessionHasErrors(['cedula', 'accion', 'correo']);
+
+        $errors = session('errors');
+        $this->assertStringContainsString('Ya existe un socio registrado con la cédula', $errors->first('cedula'));
+        $this->assertStringContainsString('ya se encuentra asignado a otro socio del club', $errors->first('accion'));
+        $this->assertStringContainsString('ya está registrado con otra membresía', $errors->first('correo'));
+
+        // Cero textos técnicos como validation.unique
+        $this->assertStringNotContainsString('validation.unique', $errors->first('cedula'));
+        $this->assertStringNotContainsString('validation.unique', $errors->first('accion'));
+        $this->assertStringNotContainsString('validation.unique', $errors->first('correo'));
+    }
+
     public function test_visitas_module_and_garita_check_in()
     {
         $vigilante = User::where('rol', 'vigilante')->first() ?? User::first();
