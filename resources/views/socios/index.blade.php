@@ -78,94 +78,119 @@
     </div>
 
     <!-- Tabla de Socios -->
-    <div class="glass-panel rounded-3xl p-7 border border-[#1B253B] shadow-2xl space-y-4">
+    <div class="glass-panel rounded-3xl p-6 sm:p-7 border border-[#1B253B] shadow-2xl space-y-4">
         <div class="overflow-x-auto rounded-2xl border border-[#1B253B]">
             <table class="w-full text-left text-xs">
                 <thead class="bg-[#0B101D] text-slate-400 font-bold uppercase tracking-wider border-b border-[#1B253B]">
                     <tr>
-                        <th class="px-6 py-4">Socio Titular</th>
-                        <th class="px-6 py-4">Cédula</th>
-                        <th class="px-6 py-4">Acción</th>
-                        <th class="px-6 py-4">Contacto</th>
-                        <th class="px-6 py-4">Estado</th>
-                        <th class="px-6 py-4">Saldo Contable</th>
-                        <th class="px-6 py-4 text-right">Acciones</th>
+                        <th class="px-4 py-3.5">Socio & Acción</th>
+                        <th class="px-3.5 py-3.5">Teléfono</th>
+                        <th class="px-3.5 py-3.5">Estado</th>
+                        <th class="px-3.5 py-3.5">Saldo Contable</th>
+                        <th class="px-4 py-3.5 text-right">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#1B253B] bg-[#0E1526]/50">
                     @forelse($socios as $socio)
                     <tr class="hover:bg-[#162238]/60 transition-colors">
-                        <td class="px-6 py-4 font-semibold text-white flex items-center space-x-3.5">
-                            <img src="{{ $socio->avatar_url }}" alt="avatar" class="w-9 h-9 rounded-xl border border-slate-700 shadow-sm object-cover">
-                            <div>
-                                <span class="block text-slate-100 font-bold text-xs">{{ $socio->nombre_completo }}</span>
-                                <span class="text-[11px] text-slate-400 font-normal">{{ $socio->correo }}</span>
+                        <td class="px-4 py-3.5">
+                            <div class="flex items-center space-x-3">
+                                <img src="{{ $socio->avatar_url }}" alt="avatar" class="w-10 h-10 rounded-xl border border-amber-500/30 shadow-md object-cover flex-shrink-0">
+                                <div class="min-w-0">
+                                    <div class="flex items-center space-x-2">
+                                        <a href="{{ route('socios.show', $socio) }}" class="font-bold text-white hover:text-amber-300 transition text-xs truncate max-w-[170px] lg:max-w-[220px]" title="{{ $socio->nombre_completo }}">
+                                            {{ $socio->nombre_completo }}
+                                        </a>
+                                        <span class="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 font-mono font-bold text-[10px] border border-amber-500/30 flex-shrink-0">
+                                            {{ $socio->accion }}
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center space-x-2 text-[11px] text-slate-400 font-mono mt-0.5">
+                                        <span class="text-slate-300">V-{{ $socio->cedula }}</span>
+                                        <span class="text-slate-600">&bull;</span>
+                                        <span class="truncate max-w-[150px] text-slate-500" title="{{ $socio->correo }}">{{ $socio->correo }}</span>
+                                    </div>
+                                </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-slate-300 font-mono">V-{{ $socio->cedula }}</td>
-                        <td class="px-6 py-4">
-                            <span class="px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-400 font-mono font-bold border border-amber-500/20 text-[11px]">
-                                {{ $socio->accion }}
-                            </span>
+
+                        <td class="px-3.5 py-3.5 text-slate-300 font-mono text-[11px] whitespace-nowrap">
+                            <div class="flex items-center space-x-1.5">
+                                <span class="material-icons-round text-xs text-slate-500">call</span>
+                                <span>{{ $socio->numero ?? 'Sin número' }}</span>
+                            </div>
                         </td>
-                        <td class="px-6 py-4 text-slate-300">
-                            {{ $socio->numero ?? '-' }}
-                        </td>
-                        <td class="px-6 py-4">
+
+                        <td class="px-3.5 py-3.5 whitespace-nowrap">
                             @if($socio->estado === 'activo')
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shadow-sm">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
                                     Activo
                                 </span>
                             @else
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase bg-rose-500/10 text-rose-400 border border-rose-500/30 shadow-sm">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-500/10 text-rose-400 border border-rose-500/30">
                                     <span class="w-1.5 h-1.5 rounded-full bg-rose-400 mr-1.5"></span>
                                     Inactivo
                                 </span>
                             @endif
                         </td>
-                        <td class="px-6 py-4">
+
+                        <td class="px-3.5 py-3.5 whitespace-nowrap">
                             @if($socio->saldo < 0)
-                                <div class="space-y-0.5">
-                                    <span class="text-rose-400 font-extrabold font-mono text-sm block">
+                                <div class="flex items-baseline space-x-1.5">
+                                    <span class="text-rose-400 font-black font-mono text-xs">
                                         ${{ number_format($socio->saldo, 2) }}
                                     </span>
-                                    <span class="text-[10px] text-rose-400/90 font-medium">Debe {{ $socio->meses_deuda }} {{ $socio->meses_deuda == 1 ? 'mes' : 'meses' }}</span>
+                                    <span class="px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-300 border border-rose-500/20 text-[9px] font-bold">
+                                        {{ $socio->meses_deuda }} {{ $socio->meses_deuda == 1 ? 'mes' : 'meses' }}
+                                    </span>
                                 </div>
                             @else
-                                <div class="space-y-0.5">
-                                    <span class="text-emerald-400 font-extrabold font-mono text-sm block">
+                                <div class="flex items-baseline space-x-1.5">
+                                    <span class="text-emerald-400 font-black font-mono text-xs">
                                         ${{ number_format($socio->saldo, 2) }}
                                     </span>
-                                    <span class="text-[10px] text-emerald-400 font-medium">Solvente</span>
+                                    <span class="text-[10px] text-emerald-400 font-semibold font-mono">Solvente</span>
                                 </div>
                             @endif
                         </td>
-                        <td class="px-6 py-4 text-right space-x-1.5 whitespace-nowrap">
-                            <a href="{{ route('socios.show', $socio) }}" class="inline-flex items-center px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs transition">
-                                <span class="material-icons-round text-xs mr-1 text-amber-400">visibility</span>
-                                Ficha
-                            </a>
-                            <button type="button" onclick="abrirCarnetRapido({{ $socio->id }}, {{ json_encode($socio->nombre_completo) }}, '{{ $socio->cedula }}', '{{ $socio->accion }}', '{{ $socio->avatar_url }}', '{{ $socio->socio_desde ? $socio->socio_desde->format('m/Y') : date('m/Y') }}')" class="inline-flex items-center px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 font-semibold text-xs transition">
-                                <span class="material-icons-round text-xs mr-1 text-amber-400">qr_code</span>
-                                Carnet
-                            </button>
-                            <a href="{{ route('pagos.create', ['cedula' => $socio->cedula]) }}" class="inline-flex items-center px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition">
-                                <span class="material-icons-round text-xs mr-1">payments</span>
-                                Cobrar
-                            </a>
+
+                        <td class="px-4 py-3.5 text-right whitespace-nowrap">
+                            <div class="inline-flex items-center space-x-1.5">
+                                <a href="{{ route('socios.show', $socio) }}" 
+                                   title="Ver Ficha y Estadísticas"
+                                   class="inline-flex items-center px-2.5 py-1.5 rounded-xl bg-[#141C30] hover:bg-[#1E293B] border border-[#243352] text-slate-200 hover:text-white font-semibold text-xs transition active:scale-95 shadow-sm">
+                                    <span class="material-icons-round text-xs mr-1 text-amber-400">visibility</span>
+                                    <span>Ficha</span>
+                                </a>
+
+                                <button type="button" 
+                                        onclick="abrirCarnetRapido({{ $socio->id }}, {{ json_encode($socio->nombre_completo) }}, '{{ $socio->cedula }}', '{{ $socio->accion }}', '{{ $socio->avatar_url }}', '{{ $socio->socio_desde ? $socio->socio_desde->format('m/Y') : date('m/Y') }}')" 
+                                        title="Ver e Imprimir Carnet con QR"
+                                        class="inline-flex items-center px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 font-semibold text-xs transition active:scale-95 shadow-sm cursor-pointer">
+                                    <span class="material-icons-round text-xs mr-1 text-amber-400">qr_code</span>
+                                    <span>Carnet</span>
+                                </button>
+
+                                <a href="{{ route('pagos.create', ['cedula' => $socio->cedula]) }}" 
+                                   title="Cobrar Cuota en Caja"
+                                   class="inline-flex items-center px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition active:scale-95">
+                                    <span class="material-icons-round text-xs mr-1">payments</span>
+                                    <span>Cobrar</span>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-8 text-center text-slate-500 font-medium">No se encontraron socios con los filtros aplicados.</td>
+                        <td colspan="5" class="px-6 py-8 text-center text-slate-500 font-medium">No se encontraron socios con los filtros aplicados.</td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
 
-        <div class="pt-4">
+        <div class="pt-2 border-t border-[#1B253B]">
             {{ $socios->links() }}
         </div>
     </div>
