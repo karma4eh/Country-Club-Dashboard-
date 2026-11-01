@@ -83,6 +83,12 @@ class SocioController extends Controller
             }
         }
 
+        // Si el usuario ingresó 'ACC-9972', 'acc-9972' o similar, limpiar el prefijo automáticamente ya que la acción se sobreentiende
+        if ($request->has('accion')) {
+            $accionLimpia = trim(preg_replace('/^acc[-_\s]*/i', '', (string) $request->input('accion')));
+            $request->merge(['accion' => $accionLimpia]);
+        }
+
         $validated = $request->validate([
             'nombre' => 'required|string|max:100',
             'apellido' => 'required|string|max:100',
@@ -218,6 +224,12 @@ class SocioController extends Controller
 
     public function update(Request $request, Socio $socio)
     {
+        // Si el usuario ingresó 'ACC-9972', 'acc-9972' o similar, limpiar el prefijo automáticamente ya que la acción se sobreentiende
+        if ($request->has('accion')) {
+            $accionLimpia = trim(preg_replace('/^acc[-_\s]*/i', '', (string) $request->input('accion')));
+            $request->merge(['accion' => $accionLimpia]);
+        }
+
         $validated = $request->validate([
             'nombre' => 'required|string|max:100',
             'apellido' => 'required|string|max:100',

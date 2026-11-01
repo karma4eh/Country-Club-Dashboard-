@@ -332,11 +332,11 @@
                 </div>
             </div>
 
-            <!-- CÓDIGO QR GENERADO EN VIVO -->
-            <div class="p-4 rounded-2xl bg-white flex flex-col items-center justify-center space-y-1 shadow-inner">
-                <div id="qrcodeCarnet"></div>
-                <span class="text-[9px] font-mono text-slate-900 font-bold uppercase tracking-wider">
-                    {{ $socio->accion }} • V-{{ $socio->cedula }}
+            <!-- CÓDIGO QR GENERADO EN VIVO (TEMA OSCURO INTEGRADO) -->
+            <div class="carnet-qr-box p-4 rounded-2xl bg-[#060911] border border-amber-500/30 flex flex-col items-center justify-center space-y-2 shadow-inner">
+                <div id="qrcodeCarnet" class="flex items-center justify-center p-1 rounded-xl bg-[#060911]"></div>
+                <span class="carnet-qr-label text-[9px] font-mono text-amber-300 font-bold uppercase tracking-wider">
+                    Acción #{{ $socio->accion }} • V-{{ $socio->cedula }}
                 </span>
             </div>
 
@@ -430,6 +430,19 @@
     </div>
 </div>
 
+@push('styles')
+<style>
+@media print {
+    body * { visibility: hidden; }
+    #modalCarnet, #modalCarnet * { visibility: visible; }
+    #modalCarnet { position: absolute; left: 0; top: 0; width: 100%; background: transparent !important; }
+    .carnet-qr-box { background: #FFFFFF !important; border-color: #CBD5E1 !important; }
+    #qrcodeCarnet img, #qrcodeCarnet canvas { filter: invert(1) contrast(1.5) !important; }
+    .carnet-qr-label { color: #0F172A !important; }
+}
+</style>
+@endpush
+
 @push('scripts')
 <script src="{{ asset('js/qrcode.min.js') }}"></script>
 <script>
@@ -450,8 +463,8 @@
                 }),
                 width: 140,
                 height: 140,
-                colorDark: "#0B0F19",
-                colorLight: "#FFFFFF",
+                colorDark: "#FBBF24",
+                colorLight: "#060911",
                 correctLevel: QRCode.CorrectLevel.M
             });
         }

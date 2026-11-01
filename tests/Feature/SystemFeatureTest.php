@@ -54,14 +54,15 @@ class SystemFeatureTest extends TestCase
         $this->actingAs($user);
 
         $cedula = '99' . rand(100000, 999999);
-        $accion = 'ACC-' . rand(500, 999);
+        $accionInput = 'ACC-' . rand(500, 999);
+        $accionEsperada = preg_replace('/^acc[-_\s]*/i', '', $accionInput);
         $correo = "socio.test{$cedula}@countryclub.com";
 
         $response = $this->post('/socios', [
             'nombre' => 'Alejandro',
             'apellido' => 'Guzmán',
             'cedula' => $cedula,
-            'accion' => $accion,
+            'accion' => $accionInput,
             'correo' => $correo,
             'numero' => '04141234567',
             'direccion' => 'Urb. Valle Arriba',
@@ -70,13 +71,13 @@ class SystemFeatureTest extends TestCase
 
         $socio = Socio::where('cedula', $cedula)->first();
         $this->assertNotNull($socio);
-        $this->assertEquals($accion, $socio->accion);
+        $this->assertEquals($accionEsperada, $socio->accion);
 
         $response->assertRedirect('/socios/' . $socio->id);
 
-        Mail::assertSent(SocioBienvenidaMail::class, function ($mail) use ($socio, $accion, $correo) {
+        Mail::assertSent(SocioBienvenidaMail::class, function ($mail) use ($socio, $accionEsperada, $correo) {
             return $mail->hasTo($correo) &&
-                   $mail->socio->accion === $accion;
+                   $mail->socio->accion === $accionEsperada;
         });
     }
 
@@ -441,5 +442,50 @@ class SystemFeatureTest extends TestCase
         ]);
         $res3->assertStatus(200);
         $res3->assertJsonFragment(['success' => true]);
+    }
+
+    public function test_socio_registration_cleans_acc_prefix_and_sends_welcome_email_with_logo()
+    {
+        Mail::fake();
+
+        $admin = User::where('rol', 'admin')->first() ?? User::first();
+        $this->actingAs($admin);
+
+        $cedula = '88' . rand(100000, 999999);
+        $correo = "socio.nuevo.{$cedula}@countryclub.test";
+        $numeroAccion = (string) rand(1000, 9999);
+
+        // Se envía con 'ACC-' como el usuario suele escribir por inercia
+        $response = $this->post('/socios', [
+            'nombre' => 'Alejandro',
+            'apellido' => 'Perez',
+            'cedula' => $cedula,
+            'accion' => "ACC-{$numeroAccion}",
+            'correo' => $correo,
+            'numero' => '04121234567',
+            'direccion' => 'Valle Arriba, Caracas',
+            'estado' => 'activo',
+        ]);
+
+        $response->assertStatus(302);
+
+        // En base de datos debe guardarse limpio como número sin el prefijo 'ACC-' porque se sobreentiende
+        $socio = Socio::where('cedula', $cedula)->first();
+        $this->assertNotNull($socio);
+        $this->assertEquals($numeroAccion, $socio->accion);
+
+        // Verificar que se envió el correo de bienvenida
+        Mail::assertSent(SocioBienvenidaMail::class, function ($mail) use ($correo, $socio) {
+            return $mail->hasTo($correo) && $mail->socio->id === $socio->id;
+        });
+
+        // Verificar que el vigilante en garita puede buscarlo tanto con "9972" como con "ACC-9972"
+        $buscarLimpio = $this->getJson('/api/visitas/buscar-socio?query=' . $numeroAccion);
+        $buscarLimpio->assertStatus(200);
+        $buscarLimpio->assertJsonFragment(['id' => $socio->id]);
+
+        $buscarPrefijo = $this->getJson('/api/visitas/buscar-socio?query=ACC-' . $numeroAccion);
+        $buscarPrefijo->assertStatus(200);
+        $buscarPrefijo->assertJsonFragment(['id' => $socio->id]);
     }
 }

@@ -226,9 +226,9 @@
                 <span id="carnetCedula" class="text-xs font-mono text-slate-400"></span>
             </div>
 
-            <div class="p-3 rounded-xl bg-white flex flex-col items-center justify-center space-y-1">
-                <div id="qrcodeCarnet"></div>
-                <span class="text-[9px] font-mono text-slate-900 font-bold uppercase tracking-wider">Código de Acceso Garita</span>
+            <div class="carnet-qr-box p-3.5 rounded-2xl bg-[#060911] border border-amber-500/30 flex flex-col items-center justify-center space-y-1.5 shadow-inner">
+                <div id="qrcodeCarnet" class="flex items-center justify-center p-1 rounded-xl bg-[#060911]"></div>
+                <span class="carnet-qr-label text-[9px] font-mono text-amber-300 font-bold uppercase tracking-wider">Código de Acceso Garita</span>
             </div>
 
             <div class="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-white/10">
@@ -248,6 +248,19 @@
         </div>
     </div>
 </div>
+
+@push('styles')
+<style>
+@media print {
+    body * { visibility: hidden; }
+    #modalCarnet, #modalCarnet * { visibility: visible; }
+    #modalCarnet { position: absolute; left: 0; top: 0; width: 100%; background: transparent !important; }
+    .carnet-qr-box { background: #FFFFFF !important; border-color: #CBD5E1 !important; }
+    #qrcodeCarnet img, #qrcodeCarnet canvas { filter: invert(1) contrast(1.5) !important; }
+    .carnet-qr-label { color: #0F172A !important; }
+}
+</style>
+@endpush
 
 @push('scripts')
 <script src="{{ asset('js/qrcode.min.js') }}"></script>
@@ -272,8 +285,8 @@
             }),
             width: 130,
             height: 130,
-            colorDark: "#0B0F19",
-            colorLight: "#FFFFFF",
+            colorDark: "#FBBF24",
+            colorLight: "#060911",
             correctLevel: QRCode.CorrectLevel.M
         });
 

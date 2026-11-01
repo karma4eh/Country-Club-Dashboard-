@@ -150,7 +150,7 @@
                     </label>
                     <div class="relative">
                         <span class="material-icons-round absolute left-4 top-3.5 text-slate-400 text-lg">search</span>
-                        <input type="text" id="inputBusquedaSocio" placeholder="Escanee con lector o escriba cédula / ACC-001 / Nombre..." autofocus
+                        <input type="text" id="inputBusquedaSocio" placeholder="Escanee carnet QR o escriba cédula / N° de Acción (ej: 9972) / Nombre..." autofocus
                                class="w-full bg-[#0A0F1E] border border-[#243352] rounded-2xl pl-12 pr-28 py-3.5 text-sm text-white font-mono placeholder-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition">
                         <button type="submit" class="absolute right-2 top-2 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition shadow-md">
                             Validar

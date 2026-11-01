@@ -116,8 +116,12 @@ class VisitaController extends Controller
             $cedula = $m[1];
         }
 
+        $cleanAccion = trim(preg_replace('/^acc[-_\s]*/i', '', $input));
+
         $socio = Socio::where('cedula', $cedula)
             ->orWhere('accion', $input)
+            ->orWhere('accion', $cleanAccion)
+            ->orWhere('accion', "ACC-{$cleanAccion}")
             ->orWhere('accion', $accion)
             ->orWhere(function ($q) use ($input) {
                 $q->where('nombre', 'like', "%{$input}%")

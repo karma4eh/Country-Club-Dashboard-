@@ -108,12 +108,13 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Número / Código de Acción <span class="text-amber-400">*</span></label>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Número de Acción <span class="text-amber-400">*</span></label>
                             <div class="relative">
                                 <span class="material-icons-round absolute left-3.5 top-2.5 text-slate-400 text-sm">confirmation_number</span>
-                                <input type="text" name="accion" id="inputAccion" value="{{ old('accion') }}" required placeholder="ACC-105"
+                                <input type="text" name="accion" id="inputAccion" value="{{ old('accion') }}" required placeholder="Ej: 9972 o 105"
                                        class="w-full bg-[#0A0F1E] border border-[#243352] rounded-2xl pl-10 pr-4 py-2.5 text-xs text-white font-mono uppercase tracking-wider placeholder-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition">
                             </div>
+                            <p class="text-[11px] text-slate-400 mt-1">Ingrese solo el número. La condición de acción se sobreentiende en el club.</p>
                             @error('accion') <p class="text-rose-400 text-[11px] mt-1">{{ $message }}</p> @enderror
                         </div>
 
@@ -199,11 +200,11 @@
 
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-2">
-                            <span class="material-icons-round text-amber-400 text-2xl">shield</span>
+                            <img src="{{ asset('img/logo.png') }}" alt="Logo" class="h-6 w-auto object-contain">
                             <span class="text-xs font-extrabold tracking-widest uppercase font-serif text-amber-200">COUNTRY CLUB</span>
                         </div>
-                        <span id="previewAccion" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                            ACC-000
+                        <span id="previewAccion" class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                            Acción #---
                         </span>
                     </div>
 
@@ -220,10 +221,10 @@
                         </div>
                     </div>
 
-                    <!-- Código QR en el Carnet -->
-                    <div class="p-3 rounded-2xl bg-white flex flex-col items-center justify-center space-y-1">
-                        <div id="previewQrContainer" class="flex items-center justify-center"></div>
-                        <span class="text-[9px] font-mono text-slate-900 font-bold uppercase tracking-wider">
+                    <!-- Código QR en el Carnet (Tema Oscuro Integrado sin Fondo Blanco) -->
+                    <div class="p-4 rounded-2xl bg-[#060911] border border-amber-500/30 flex flex-col items-center justify-center space-y-2 shadow-inner">
+                        <div id="previewQrContainer" class="flex items-center justify-center p-1.5 rounded-xl bg-[#060911]"></div>
+                        <span class="text-[9px] font-mono text-amber-300/90 font-bold uppercase tracking-wider">
                             Código QR Oficial para Garita
                         </span>
                     </div>
@@ -289,24 +290,25 @@
         const nom = inputNombre.value.trim();
         const ape = inputApellido.value.trim();
         const ced = inputCedula.value.trim();
-        const acc = inputAccion.value.trim();
+        const accRaw = inputAccion.value.trim();
+        const acc = accRaw.replace(/^acc[-_\s]*/i, '');
 
         previewNombre.textContent = (nom || ape) ? `${nom} ${ape}`.trim() : 'Nombre del Titular';
         previewCedula.textContent = ced ? `V-${ced}` : 'V-00.000.000';
-        previewAccion.textContent = acc ? acc.toUpperCase() : 'ACC-000';
+        previewAccion.textContent = acc ? `Acción #${acc}` : 'Acción #---';
 
-        // Actualizar QR en vivo
+        // Actualizar QR en vivo con tema oscuro (fondo oscuro #060911 y módulos dorados #FBBF24 sin fondo blanco)
         qrContainer.innerHTML = '';
         qrInstance = new QRCode(qrContainer, {
             text: JSON.stringify({
                 club: "COUNTRY_CLUB",
                 cedula: ced || "00000000",
-                accion: acc ? acc.toUpperCase() : "ACC-000"
+                accion: acc || "---"
             }),
-            width: 90,
-            height: 90,
-            colorDark: "#0B0F19",
-            colorLight: "#FFFFFF",
+            width: 95,
+            height: 95,
+            colorDark: "#FBBF24",
+            colorLight: "#060911",
             correctLevel: QRCode.CorrectLevel.M
         });
     }
