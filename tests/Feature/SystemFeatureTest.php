@@ -276,12 +276,13 @@ class SystemFeatureTest extends TestCase
             $response->assertSee('COUNTRY CLUB C.A.');
             $response->assertSee('COMPROBANTE OFICIAL DE INGRESO');
             $response->assertDontSee('¡Pago registrado exitosamente!');
-            // Verificación del Sello de Tinta Realista
-            $response->assertSee('★ COUNTRY CLUB C.A. ★');
+            // Verificación del Sello de Tinta Realista (Sin estrellas, con desgaste de tinta real)
+            $response->assertSee('COUNTRY CLUB C.A.');
+            $response->assertDontSee('★ COUNTRY CLUB C.A. ★');
             $response->assertSee('CANCELADO');
-            $response->assertSee('Caja Principal • Recaudación');
-            $response->assertSee('stamp-ink');
-            $response->assertSee('sello-tinta-filtro');
+            $response->assertSee('CAJA PRINCIPAL • RECAUDACIÓN');
+            $response->assertSee('stamp-real-ink');
+            $response->assertSee('stamp-wear-mask');
         }
 
         // Movimientos

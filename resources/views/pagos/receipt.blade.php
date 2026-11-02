@@ -5,16 +5,6 @@
 @section('header_subtitle', 'Comprobante oficial emitido por la Administración del Country Club')
 
 @section('content')
-<!-- SVG FILTER PARA EFECTO DE SELLO DE TINTA DE CAUCHO (DISTRESSED INK STAMP) -->
-<svg width="0" height="0" class="absolute pointer-events-none" style="position: absolute; width: 0; height: 0; overflow: hidden;" aria-hidden="true">
-    <defs>
-        <filter id="sello-tinta-filtro" x="-10%" y="-10%" width="120%" height="120%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="3" result="noise" />
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" xChannelSelector="R" yChannelSelector="G" />
-        </filter>
-    </defs>
-</svg>
-
 <div class="max-w-4xl mx-auto space-y-3 pb-4">
 
     <!-- BARRA DE ACCIONES SUPERIOR (Oculta al imprimir) -->
@@ -46,26 +36,19 @@
     <!-- DOCUMENTO FORMAL: FACTURA / RECIBO OFICIAL EN PALETA OSCURA INSTITUCIONAL -->
     <div id="factura-imprimible" class="bg-[#0F172A] text-slate-100 rounded-2xl shadow-2xl border border-amber-500/30 overflow-hidden relative print:shadow-none print:m-0 print:rounded-none">
 
-        <!-- Marca de agua de seguridad institucional de fondo -->
-        <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] overflow-hidden select-none" aria-hidden="true">
-            <img src="{{ asset('img/logo.png') }}" class="w-[420px] h-[420px] object-contain filter grayscale" alt="">
-        </div>
-
         <!-- Banda decorativa institucional superior -->
         <div class="h-1.5 bg-gradient-to-r from-[#1E293B] via-[#F59E0B] to-[#10B981]"></div>
 
         <div class="p-5 sm:p-6 space-y-3.5 relative z-10">
 
             <!-- 1. ENCABEZADO INSTITUCIONAL & METADATOS FISCALES -->
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#1F293D]">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-3.5 border-b border-[#1F293D]">
                 <!-- Logotipo e Identidad Institucional -->
-                <div class="flex items-center space-x-3">
-                    <div class="w-12 h-12 rounded-xl bg-[#090D1A] p-2 flex items-center justify-center border border-amber-500/25 shadow-inner flex-shrink-0">
-                        <img src="{{ asset('img/logo.png') }}" alt="Country Club" class="h-9 w-auto object-contain">
-                    </div>
-                    <div>
+                <div class="flex items-center space-x-4">
+                    <img src="{{ asset('img/logo.png') }}" alt="Country Club" class="h-12 w-auto object-contain filter drop-shadow-md">
+                    <div class="border-l border-[#1F293D] pl-3.5">
                         <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white font-serif leading-tight">COUNTRY CLUB C.A.</h1>
-                        <p class="text-[9px] font-bold text-amber-400 uppercase tracking-widest">Dirección de Administración y Finanzas</p>
+                        <p class="text-[10px] font-bold text-amber-400 uppercase tracking-widest">Dirección de Administración y Finanzas</p>
                         <p class="text-[9px] text-slate-400 mt-0.5">R.I.F.: J-00028491-3 • NIT: 0142859201</p>
                         <p class="text-[8px] text-slate-400">Av. Principal del Country Club, Quinta Club House, Caracas, Venezuela • Tel: (0212) 261-0000</p>
                     </div>
@@ -91,31 +74,31 @@
 
             <!-- 2. DATOS DEL CLIENTE / SOCIO TITULAR -->
             <div class="bg-[#0A0F1E] rounded-xl p-3 border border-[#1F293D]">
-                <div class="text-[8px] font-extrabold uppercase tracking-widest text-slate-400 mb-1.5 flex items-center justify-between">
+                <div class="text-[9px] font-extrabold uppercase tracking-widest text-slate-400 mb-2 flex items-center justify-between">
                     <span>Datos del Socio Titular (Contribuyente / Beneficiario)</span>
                     <span class="px-2 py-0.5 rounded-full text-[8px] font-bold {{ ($pago->socio->saldo ?? 0) >= 0 ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/15 text-rose-400 border border-rose-500/30' }}">
                         {{ ($pago->socio->saldo ?? 0) >= 0 ? 'ESTADO: SOLVENTE' : 'ESTADO: PENDIENTE' }}
                     </span>
                 </div>
 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5 text-xs">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
                     <div>
-                        <span class="text-slate-400 text-[9px] block">Nombre Completo:</span>
+                        <span class="text-slate-400 text-[10px] block">Nombre Completo:</span>
                         <strong class="text-xs font-bold text-white">{{ $pago->socio->nombre_completo ?? 'Socio Titular' }}</strong>
                     </div>
 
                     <div>
-                        <span class="text-slate-400 text-[9px] block">Cédula de Identidad:</span>
+                        <span class="text-slate-400 text-[10px] block">Cédula de Identidad:</span>
                         <strong class="font-mono font-bold text-slate-200 text-xs">V-{{ $pago->socio->cedula ?? '' }}</strong>
                     </div>
 
                     <div>
-                        <span class="text-slate-400 text-[9px] block">Acción / Membresía:</span>
+                        <span class="text-slate-400 text-[10px] block">Acción / Membresía:</span>
                         <strong class="font-mono font-bold text-amber-300 text-xs">Acción #{{ $pago->socio->accion ?? '' }}</strong>
                     </div>
 
                     <div>
-                        <span class="text-slate-400 text-[9px] block">Contacto:</span>
+                        <span class="text-slate-400 text-[10px] block">Contacto:</span>
                         <span class="text-slate-300 text-[11px] truncate block">{{ $pago->socio->correo ?? $pago->socio->numero ?? 'Registrado' }}</span>
                     </div>
                 </div>
@@ -140,33 +123,33 @@
             <!-- 4. TABLA DETALLADA DE CONCEPTOS FACTURADOS -->
             <div class="overflow-hidden rounded-xl border border-[#1F293D]">
                 <table class="w-full text-xs text-left">
-                    <thead class="bg-[#111C33] text-slate-300 font-bold uppercase text-[8px] tracking-wider">
+                    <thead class="bg-[#111C33] text-slate-300 font-bold uppercase text-[9px] tracking-wider">
                         <tr>
-                            <th class="px-3 py-1.5 text-center w-10">#</th>
-                            <th class="px-3 py-1.5">Descripción del Concepto / Servicio</th>
-                            <th class="px-3 py-1.5 text-center">Período</th>
-                            <th class="px-3 py-1.5 text-right">Monto ($ USD)</th>
-                            <th class="px-3 py-1.5 text-right">Tasa BCV</th>
-                            <th class="px-3 py-1.5 text-right">Total en Bolívares (Bs.)</th>
+                            <th class="px-3.5 py-2 text-center w-10">#</th>
+                            <th class="px-3.5 py-2">Descripción del Concepto / Servicio</th>
+                            <th class="px-3.5 py-2 text-center">Período</th>
+                            <th class="px-3.5 py-2 text-right">Monto ($ USD)</th>
+                            <th class="px-3.5 py-2 text-right">Tasa BCV</th>
+                            <th class="px-3.5 py-2 text-right">Total en Bolívares (Bs.)</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-[#1F293D] bg-[#0A0F1E]">
                         <tr>
-                            <td class="px-3 py-2 text-center font-mono font-bold text-slate-500">01</td>
-                            <td class="px-3 py-2">
+                            <td class="px-3.5 py-2.5 text-center font-mono font-bold text-slate-500">01</td>
+                            <td class="px-3.5 py-2.5">
                                 <strong class="text-xs text-white block">{{ $pago->descripcion }}</strong>
-                                <span class="text-[9px] text-slate-400">Cuota ordinaria de membresía • Acceso integral a instalaciones</span>
+                                <span class="text-[10px] text-slate-400">Cuota ordinaria de membresía • Acceso integral a instalaciones</span>
                             </td>
-                            <td class="px-3 py-2 text-center font-medium text-slate-300 text-[10px]">
+                            <td class="px-3.5 py-2.5 text-center font-medium text-slate-300 text-[11px]">
                                 {{ $pago->fecha_pago ? $pago->fecha_pago->format('m/Y') : now()->format('m/Y') }}
                             </td>
-                            <td class="px-3 py-2 text-right font-mono font-bold text-emerald-400 text-xs">
+                            <td class="px-3.5 py-2.5 text-right font-mono font-bold text-emerald-400 text-xs">
                                 ${{ number_format($pago->monto, 2) }}
                             </td>
-                            <td class="px-3 py-2 text-right font-mono text-slate-400 text-[10px]">
+                            <td class="px-3.5 py-2.5 text-right font-mono text-slate-400 text-[11px]">
                                 {{ number_format($tasa, 2, ',', '.') }}
                             </td>
-                            <td class="px-3 py-2 text-right font-mono font-extrabold text-amber-300 text-xs">
+                            <td class="px-3.5 py-2.5 text-right font-mono font-extrabold text-amber-300 text-xs">
                                 Bs. {{ number_format($montoBs, 2, ',', '.') }}
                             </td>
                         </tr>
@@ -177,7 +160,7 @@
             <!-- 5. BLOQUE DE LIQUIDACIÓN, TOTALES Y SELLO DE TINTA DE CAJA -->
             <div class="grid grid-cols-1 md:grid-cols-12 gap-3.5 pt-1 items-center">
                 <!-- Columna Izquierda: QR de Verificación y Sello de Tinta Realista (7 cols) -->
-                <div class="md:col-span-7 flex flex-row items-center justify-start space-x-4">
+                <div class="md:col-span-7 flex flex-row items-center justify-start space-x-3 sm:space-x-4">
                     <!-- Código QR Oficial Fiscal / Verificación -->
                     <div class="p-2 rounded-xl border border-amber-500/25 bg-[#060911] flex flex-col items-center justify-center flex-shrink-0 shadow-inner">
                         <div id="qrcodeFactura" class="flex items-center justify-center p-0.5 bg-[#060911]"></div>
@@ -187,23 +170,69 @@
                     </div>
 
                     <!-- SELLO DE TINTA DE CAUCHO REALISTA ("CANCELADO") -->
-                    <div class="stamp-ink-wrapper select-none">
-                        <div class="stamp-ink">
-                            <div class="stamp-stars">
-                                ★ COUNTRY CLUB C.A. ★
-                            </div>
-                            <div class="stamp-divider"></div>
-                            <div class="stamp-status">
-                                CANCELADO
-                            </div>
-                            <div class="stamp-divider"></div>
-                            <div class="stamp-dept">
-                                Caja Principal • Recaudación
-                            </div>
-                            <div class="stamp-date">
-                                {{ $pago->fecha_pago ? $pago->fecha_pago->format('d/m/Y') : date('d/m/Y') }}
-                            </div>
-                        </div>
+                    <div class="stamp-ink-container select-none">
+                        <svg viewBox="0 0 280 120" class="w-56 sm:w-64 h-auto filter drop-shadow(0 2px 6px rgba(0,0,0,0.45)) transition-transform duration-300 hover:rotate-[-6deg]" style="transform: rotate(-8deg); transform-origin: center center;" aria-label="Sello de Tinta Cancelado">
+                            <defs>
+                                <!-- Filtro de Tinta Real: Simula la absorción de tinta líquida en papel y bordes de caucho imperfectos -->
+                                <filter id="stamp-real-ink" x="-20%" y="-20%" width="140%" height="140%">
+                                    <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="4" result="paperFiber" />
+                                    <feDisplacementMap in="SourceGraphic" in2="paperFiber" scale="2.8" xChannelSelector="R" yChannelSelector="G" result="roughInk" />
+                                    <feGaussianBlur in="roughInk" stdDeviation="0.3" result="bleed" />
+                                    <feMerge>
+                                        <feMergeNode in="bleed" opacity="0.6" />
+                                        <feMergeNode in="roughInk" />
+                                    </feMerge>
+                                </filter>
+
+                                <!-- Máscara de Desgaste de Almohadilla: Puntos de menor entintado y presión manual no uniforme -->
+                                <mask id="stamp-wear-mask">
+                                    <rect x="0" y="0" width="280" height="120" fill="#FFFFFF" />
+                                    <!-- Micro-poros de absorción irregular -->
+                                    <circle cx="38" cy="22" r="3" fill="#666" />
+                                    <circle cx="85" cy="58" r="2" fill="#777" />
+                                    <circle cx="140" cy="54" r="3" fill="#666" />
+                                    <circle cx="210" cy="38" r="2.5" fill="#777" />
+                                    <circle cx="245" cy="74" r="3" fill="#666" />
+                                    <circle cx="65" cy="90" r="2.5" fill="#777" />
+                                    <circle cx="180" cy="95" r="2" fill="#888" />
+                                    <circle cx="120" cy="24" r="2.5" fill="#777" />
+                                    <circle cx="195" cy="62" r="2.5" fill="#666" />
+                                    <line x1="90" y1="60" x2="155" y2="60" stroke="#777" stroke-width="1.2" />
+                                </mask>
+                            </defs>
+
+                            <!-- Grupo Estampado con Tinta y Filtro Orgánico -->
+                            <g filter="url(#stamp-real-ink)" mask="url(#stamp-wear-mask)" fill="#DC2626" stroke="#DC2626">
+                                <!-- Base tenue de tinta absorbida por la almohadilla -->
+                                <rect x="4" y="4" width="272" height="112" rx="8" ry="8" fill="rgba(220, 38, 38, 0.06)" stroke="none" />
+
+                                <!-- Borde exterior de caucho grueso -->
+                                <rect x="4" y="4" width="272" height="112" rx="8" ry="8" fill="none" stroke="#DC2626" stroke-width="3.2" stroke-linecap="round" />
+
+                                <!-- Borde interior fino con holgura -->
+                                <rect x="10" y="10" width="260" height="100" rx="5" ry="5" fill="none" stroke="#DC2626" stroke-width="1.4" opacity="0.9" />
+
+                                <!-- 1. COUNTRY CLUB C.A. (Sin estrellas) -->
+                                <text x="140" y="28" text-anchor="middle" font-family="'Impact', 'Arial Black', sans-serif" font-weight="900" font-size="12" letter-spacing="3" fill="#DC2626" stroke="none">COUNTRY CLUB C.A.</text>
+
+                                <!-- Separador superior doble de sello -->
+                                <line x1="18" y1="35" x2="262" y2="35" stroke="#DC2626" stroke-width="1.8" />
+                                <line x1="22" y1="38" x2="258" y2="38" stroke="#DC2626" stroke-width="0.8" opacity="0.7" />
+
+                                <!-- 2. CANCELADO (Imprenta condensada clásica de sello contable) -->
+                                <text x="140" y="67" text-anchor="middle" font-family="'Impact', 'Arial Black', sans-serif" font-weight="900" font-size="28" letter-spacing="4" fill="#DC2626" stroke="none">CANCELADO</text>
+
+                                <!-- Separador inferior doble de sello -->
+                                <line x1="22" y1="74" x2="258" y2="74" stroke="#DC2626" stroke-width="0.8" opacity="0.7" />
+                                <line x1="18" y1="77" x2="262" y2="77" stroke="#DC2626" stroke-width="1.8" />
+
+                                <!-- 3. CAJA PRINCIPAL • RECAUDACIÓN -->
+                                <text x="140" y="91" text-anchor="middle" font-family="'Arial Black', sans-serif" font-weight="800" font-size="9" letter-spacing="1.8" fill="#DC2626" stroke="none">CAJA PRINCIPAL • RECAUDACIÓN</text>
+
+                                <!-- 4. Fecha de Pago -->
+                                <text x="140" y="105" text-anchor="middle" font-family="'Courier New', monospace" font-weight="bold" font-size="11.5" letter-spacing="2.5" fill="#EF4444" stroke="none">{{ $pago->fecha_pago ? $pago->fecha_pago->format('d/m/Y') : date('d/m/Y') }}</text>
+                            </g>
+                        </svg>
                     </div>
                 </div>
 
@@ -275,114 +304,6 @@
 
 @push('styles')
 <style>
-    /* ========================================================
-       SELLO DE TINTA DE CAUCHO REALISTA (RUBBER INK STAMP)
-       ======================================================== */
-    .stamp-ink-wrapper {
-        position: relative;
-        display: inline-block;
-        padding: 4px;
-    }
-
-    .stamp-ink {
-        position: relative;
-        display: inline-flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 7px 16px;
-        min-width: 220px;
-        max-width: 240px;
-        /* Doble borde clásico de sello de caucho */
-        border: 3px solid #EF4444;
-        border-radius: 8px;
-        outline: 1.5px solid #EF4444;
-        outline-offset: -5px;
-        background-color: rgba(239, 68, 68, 0.06);
-        color: #EF4444;
-        /* Inclinación natural de estampación a mano */
-        transform: rotate(-8.5deg);
-        transform-origin: center center;
-        text-align: center;
-        box-shadow: inset 0 0 10px rgba(239, 68, 68, 0.12), 0 2px 8px rgba(0, 0, 0, 0.35);
-        /* Rugosidad física de la tinta sobre papel */
-        filter: url(#sello-tinta-filtro);
-        -webkit-filter: url(#sello-tinta-filtro);
-        transition: transform 0.2s ease;
-    }
-
-    .stamp-ink:hover {
-        transform: rotate(-7deg) scale(1.02);
-    }
-
-    /* Textura porosa y desgaste de tinta de almohadilla */
-    .stamp-ink::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background-image: 
-            radial-gradient(circle at 18% 25%, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-            radial-gradient(circle at 75% 65%, rgba(0, 0, 0, 0.2) 1px, transparent 1px),
-            radial-gradient(circle at 45% 82%, rgba(255, 255, 255, 0.06) 1.5px, transparent 1.5px);
-        background-size: 7px 7px, 11px 11px, 9px 9px;
-        opacity: 0.7;
-        pointer-events-none;
-        border-radius: 8px;
-    }
-
-    .stamp-stars {
-        font-size: 9px;
-        font-weight: 900;
-        letter-spacing: 0.22em;
-        color: #F87171;
-        text-transform: uppercase;
-        line-height: 1;
-        white-space: nowrap;
-        text-shadow: 0 0 1px rgba(239, 68, 68, 0.6);
-    }
-
-    .stamp-divider {
-        width: 100%;
-        height: 1.5px;
-        background: #EF4444;
-        opacity: 0.8;
-        margin: 3px 0;
-    }
-
-    .stamp-status {
-        font-size: 22px;
-        font-family: 'Arial Black', Impact, sans-serif;
-        font-weight: 900;
-        letter-spacing: 0.22em;
-        color: #EF4444;
-        line-height: 1;
-        padding: 1px 0;
-        text-transform: uppercase;
-        text-shadow: 0 0 1px rgba(239, 68, 68, 0.8);
-    }
-
-    .stamp-dept {
-        font-size: 8px;
-        font-weight: 800;
-        letter-spacing: 0.16em;
-        color: #F87171;
-        text-transform: uppercase;
-        line-height: 1;
-        white-space: nowrap;
-        text-shadow: 0 0 1px rgba(239, 68, 68, 0.5);
-    }
-
-    .stamp-date {
-        font-size: 10px;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        font-weight: 700;
-        letter-spacing: 0.22em;
-        color: #FECACA;
-        margin-top: 2px;
-        line-height: 1;
-        text-shadow: 0 0 1px rgba(239, 68, 68, 0.6);
-    }
-
     /* Estilos de Impresión Fidedigna */
     @media print {
         @page {
@@ -415,13 +336,6 @@
             background: #0F172A !important;
             color: #FFFFFF !important;
             page-break-inside: avoid;
-        }
-
-        .stamp-ink {
-            border-color: #DC2626 !important;
-            outline-color: #DC2626 !important;
-            color: #DC2626 !important;
-            background-color: rgba(220, 38, 38, 0.08) !important;
         }
 
         * {
