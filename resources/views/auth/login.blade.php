@@ -86,49 +86,221 @@
             background: linear-gradient(135deg, rgba(191, 149, 63, 0.18) 0%, rgba(120, 82, 16, 0.1) 100%);
             border: 1px solid rgba(191, 149, 63, 0.35);
         }
+
+        /* =====================================================
+           FONDO DINÁMICO ANIMADO
+           ===================================================== */
+        .bg-scene {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* Aurora dorada */
+        .aurora-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            mix-blend-mode: screen;
+            will-change: transform;
+        }
+        .orb-1 {
+            width: 620px; height: 620px;
+            top: -180px; left: -140px;
+            background: radial-gradient(circle, rgba(217,119,6,.38) 0%, rgba(191,149,63,.12) 45%, transparent 70%);
+            animation: drift1 22s ease-in-out infinite;
+        }
+        .orb-2 {
+            width: 560px; height: 560px;
+            bottom: -200px; right: -160px;
+            background: radial-gradient(circle, rgba(245,158,11,.30) 0%, rgba(146,64,14,.12) 45%, transparent 70%);
+            animation: drift2 26s ease-in-out infinite;
+        }
+        .orb-3 {
+            width: 420px; height: 420px;
+            top: 40%; left: 55%;
+            background: radial-gradient(circle, rgba(252,211,77,.16) 0%, rgba(30,41,59,.25) 50%, transparent 72%);
+            animation: drift3 30s ease-in-out infinite;
+        }
+        @keyframes drift1 {
+            0%,100% { transform: translate(0,0) scale(1); }
+            33%     { transform: translate(140px,90px) scale(1.15); }
+            66%     { transform: translate(60px,200px) scale(.92); }
+        }
+        @keyframes drift2 {
+            0%,100% { transform: translate(0,0) scale(1); }
+            40%     { transform: translate(-180px,-120px) scale(1.12); }
+            75%     { transform: translate(-60px,-220px) scale(.95); }
+        }
+        @keyframes drift3 {
+            0%,100% { transform: translate(-50%,-50%) scale(1); opacity: .7; }
+            50%     { transform: translate(-90%,-20%) scale(1.25); opacity: 1; }
+        }
+
+        /* Malla en perspectiva que avanza */
+        .grid-floor {
+            position: absolute;
+            left: -50%; right: -50%;
+            bottom: -10%;
+            height: 60%;
+            background-image:
+                linear-gradient(rgba(191,149,63,.22) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(191,149,63,.22) 1px, transparent 1px);
+            background-size: 60px 60px;
+            transform: perspective(500px) rotateX(62deg);
+            transform-origin: center top;
+            -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,.9) 0%, transparent 85%);
+                    mask-image: linear-gradient(to top, rgba(0,0,0,.9) 0%, transparent 85%);
+            animation: gridMove 6s linear infinite;
+            opacity: .55;
+        }
+        @keyframes gridMove {
+            from { background-position: 0 0; }
+            to   { background-position: 0 60px; }
+        }
+
+        /* Miras / dianas del polígono */
+        .target-ring {
+            position: absolute;
+            opacity: .22;
+        }
+        .target-left {
+            width: 520px; height: 520px;
+            top: -110px; left: -120px;
+        }
+        .spin-slow    { transform-origin: 200px 200px; animation: spin 60s linear infinite; }
+        .spin-reverse { transform-origin: 200px 200px; animation: spin 38s linear infinite reverse; }
+        .pulse-core   { transform-origin: 200px 200px; animation: corePulse 3.2s ease-in-out infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes corePulse {
+            0%,100% { transform: scale(1);   opacity: .6; }
+            50%     { transform: scale(1.35); opacity: 1; }
+        }
+
+        /* Radar con barrido */
+        .radar {
+            position: absolute;
+            width: 460px; height: 460px;
+            bottom: -120px; right: -100px;
+            border-radius: 50%;
+            opacity: .35;
+        }
+        .radar-rings { position: absolute; inset: 0; width: 100%; height: 100%; }
+        .radar-sweep {
+            position: absolute;
+            inset: 2%;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, rgba(245,158,11,.55) 0deg, rgba(245,158,11,.12) 40deg, transparent 75deg, transparent 360deg);
+            animation: spin 7s linear infinite;
+        }
+        .radar-blip {
+            position: absolute;
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: #FCD34D;
+            box-shadow: 0 0 12px 3px rgba(252,211,77,.8);
+            opacity: 0;
+            animation: blip 7s ease-out infinite;
+        }
+        @keyframes blip {
+            0%   { opacity: 0;  transform: scale(.4); }
+            6%   { opacity: 1;  transform: scale(1.3); }
+            40%  { opacity: .2; transform: scale(1); }
+            100% { opacity: 0; }
+        }
+
+        /* Haces de luz diagonales */
+        .light-beam {
+            position: absolute;
+            width: 160%;
+            height: 120px;
+            left: -30%;
+            background: linear-gradient(90deg, transparent 0%, rgba(252,211,77,.07) 45%, rgba(255,250,230,.12) 50%, rgba(252,211,77,.07) 55%, transparent 100%);
+            filter: blur(14px);
+            transform: rotate(-24deg);
+        }
+        .beam-1 { top: 10%; animation: beamSweep 14s ease-in-out infinite; }
+        .beam-2 { top: 60%; animation: beamSweep 18s ease-in-out infinite 5s; }
+        @keyframes beamSweep {
+            0%,100% { transform: rotate(-24deg) translateX(-40%); opacity: 0; }
+            20%     { opacity: 1; }
+            50%     { transform: rotate(-24deg) translateX(40%); opacity: .9; }
+            80%     { opacity: 0; }
+        }
+
+        #goldDust { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+        .vignette {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, transparent 35%, rgba(3,5,10,.75) 100%);
+        }
+
+        @media (max-width: 640px) {
+            .target-left { width: 340px; height: 340px; }
+            .radar { width: 300px; height: 300px; }
+        }
+
+        /* Accesibilidad: sin animaciones si el usuario lo prefiere */
+        @media (prefers-reduced-motion: reduce) {
+            .bg-scene *, .gold-prestige-title { animation: none !important; }
+        }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden selection:bg-amber-500 selection:text-black">
 
     <!-- =========================================================================
-         FONDO AMBIENTAL DE LUJO: CELOSÍA GEOMÉTRICA & ONDAS ARQUITECTÓNICAS DORADAS
+         FONDO DINÁMICO ANIMADO: AURORA DORADA, MIRAS DE POLÍGONO, RADAR Y PARTÍCULAS
          ========================================================================= -->
-    <div class="fixed inset-0 pointer-events-none select-none overflow-hidden z-0">
-        <!-- Haz de Luz Cenital (Spotlight Club Directivo) -->
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-[550px] bg-[radial-gradient(ellipse_at_top,rgba(217,119,6,0.18)_0%,rgba(191,149,63,0.06)_40%,transparent_70%)] pointer-events-none"></div>
-        
-        <!-- Foco ambiental inferior derecho -->
-        <div class="absolute -bottom-24 -right-24 w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(245,158,11,0.08)_0%,rgba(16,185,129,0.03)_40%,transparent_70%)] pointer-events-none"></div>
+    <div class="bg-scene" aria-hidden="true">
+        <!-- 1. Aurora: orbes de luz dorada que se desplazan lentamente -->
+        <div class="aurora-orb orb-1"></div>
+        <div class="aurora-orb orb-2"></div>
+        <div class="aurora-orb orb-3"></div>
 
-        <!-- Malla de Micro-Celosía Geométrica Texturizada -->
-        <svg class="absolute inset-0 w-full h-full opacity-[0.045]" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-            <defs>
-                <pattern id="luxury-geometric-grid" width="48" height="48" patternUnits="userSpaceOnUse">
-                    <path d="M 48 0 L 0 48 M 0 0 L 48 48" fill="none" stroke="#F59E0B" stroke-width="0.8"/>
-                    <circle cx="24" cy="24" r="1.5" fill="#FBBF24" />
-                </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#luxury-geometric-grid)"/>
+        <!-- 2. Malla en perspectiva que avanza (pista del polígono) -->
+        <div class="grid-floor"></div>
+
+        <!-- 3. Mira/diana del polígono girando (izquierda superior) -->
+        <svg class="target-ring target-left" viewBox="0 0 400 400" fill="none">
+            <g class="spin-slow">
+                <circle cx="200" cy="200" r="190" stroke="#BF953F" stroke-width="1" stroke-dasharray="3 9"/>
+                <circle cx="200" cy="200" r="150" stroke="#BF953F" stroke-width="1.2"/>
+            </g>
+            <g class="spin-reverse">
+                <circle cx="200" cy="200" r="110" stroke="#F59E0B" stroke-width="1" stroke-dasharray="40 14"/>
+                <circle cx="200" cy="200" r="70" stroke="#BF953F" stroke-width="1"/>
+            </g>
+            <circle cx="200" cy="200" r="30" stroke="#FCD34D" stroke-width="1.5" class="pulse-core"/>
+            <path d="M200 0V160M200 240V400M0 200H160M240 200H400" stroke="#BF953F" stroke-width="0.8"/>
         </svg>
 
-        <!-- Ondas Curvas Fluidas y Círculos Concéntricos (Arquitectura de Prestigio) -->
-        <svg class="absolute -top-16 -left-20 w-[680px] h-[680px] opacity-[0.14] text-amber-500" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="250" cy="250" r="235" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 8" />
-            <circle cx="250" cy="250" r="185" stroke="currentColor" stroke-width="1" />
-            <circle cx="250" cy="250" r="135" stroke="currentColor" stroke-width="0.8" stroke-dasharray="2 6" />
-            <path d="M40 250 C120 170 210 140 360 190 C430 220 480 310 500 400" stroke="currentColor" stroke-width="2" />
-            <path d="M0 320 C140 250 280 270 420 380" stroke="currentColor" stroke-width="1.5" />
-        </svg>
+        <!-- 4. Radar con barrido (derecha inferior) -->
+        <div class="radar">
+            <svg viewBox="0 0 400 400" fill="none" class="radar-rings">
+                <circle cx="200" cy="200" r="195" stroke="#BF953F" stroke-width="1"/>
+                <circle cx="200" cy="200" r="140" stroke="#BF953F" stroke-width="0.8" stroke-dasharray="4 6"/>
+                <circle cx="200" cy="200" r="85" stroke="#BF953F" stroke-width="0.8"/>
+                <path d="M200 5V395M5 200H395" stroke="#BF953F" stroke-width="0.6"/>
+            </svg>
+            <div class="radar-sweep"></div>
+            <span class="radar-blip" style="top:30%;left:62%;animation-delay:.6s"></span>
+            <span class="radar-blip" style="top:66%;left:28%;animation-delay:2.4s"></span>
+            <span class="radar-blip" style="top:48%;left:78%;animation-delay:3.8s"></span>
+        </div>
 
-        <svg class="absolute -bottom-24 -right-16 w-[720px] h-[720px] opacity-[0.12] text-amber-400" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="250" cy="250" r="225" stroke="currentColor" stroke-width="1.5" />
-            <circle cx="250" cy="250" r="165" stroke="currentColor" stroke-width="1" stroke-dasharray="6 6" />
-            <path d="M0 140 C160 210 310 190 500 310" stroke="currentColor" stroke-width="2" />
-            <path d="M60 40 C190 130 310 170 460 290" stroke="currentColor" stroke-width="1.5" />
-        </svg>
+        <!-- 5. Haces de luz diagonales que cruzan la escena -->
+        <div class="light-beam beam-1"></div>
+        <div class="light-beam beam-2"></div>
 
-        <!-- Resplandor central difuminado que realza la tarjeta -->
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-gradient-to-b from-amber-500/10 via-transparent to-transparent rounded-full blur-3xl pointer-events-none"></div>
+        <!-- 6. Partículas doradas (polvo de oro) -->
+        <canvas id="goldDust"></canvas>
+
+        <!-- 7. Viñeta para centrar la atención en la tarjeta -->
+        <div class="vignette"></div>
     </div>
 
     <div class="w-full max-w-md relative z-10 space-y-6 my-6">
@@ -295,6 +467,68 @@
             document.getElementById('email').value = email;
             document.getElementById('password').value = password;
         }
+
+        // Polvo de oro: partículas doradas flotando con parallax suave al mover el ratón
+        (function () {
+            const canvas = document.getElementById('goldDust');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            let w, h, dpr, particles = [];
+            let mx = 0, my = 0, tx = 0, ty = 0;
+
+            function resize() {
+                dpr = Math.min(window.devicePixelRatio || 1, 2);
+                w = canvas.clientWidth; h = canvas.clientHeight;
+                canvas.width = w * dpr; canvas.height = h * dpr;
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                const count = Math.round(Math.min(90, (w * h) / 16000));
+                particles = Array.from({ length: count }, () => spawn(true));
+            }
+
+            function spawn(initial) {
+                const depth = Math.random() * 0.8 + 0.2; // 0.2 lejos — 1 cerca
+                return {
+                    x: Math.random() * w,
+                    y: initial ? Math.random() * h : h + 10,
+                    r: depth * 2.2 + 0.3,
+                    vy: -(depth * 0.35 + 0.08),
+                    vx: (Math.random() - 0.5) * 0.15,
+                    a: Math.random() * 0.5 + 0.25,
+                    tw: Math.random() * Math.PI * 2,
+                    depth
+                };
+            }
+
+            window.addEventListener('mousemove', e => {
+                tx = (e.clientX / w - 0.5) * 30;
+                ty = (e.clientY / h - 0.5) * 30;
+            });
+            window.addEventListener('resize', resize);
+            resize();
+
+            function frame() {
+                mx += (tx - mx) * 0.05; my += (ty - my) * 0.05;
+                ctx.clearRect(0, 0, w, h);
+                for (let i = 0; i < particles.length; i++) {
+                    const p = particles[i];
+                    p.y += p.vy; p.x += p.vx; p.tw += 0.03;
+                    if (p.y < -10) particles[i] = spawn(false);
+                    const alpha = p.a * (0.6 + 0.4 * Math.sin(p.tw));
+                    const px = p.x + mx * p.depth, py = p.y + my * p.depth;
+                    const g = ctx.createRadialGradient(px, py, 0, px, py, p.r * 4);
+                    g.addColorStop(0, `rgba(255, 236, 170, ${alpha})`);
+                    g.addColorStop(0.4, `rgba(245, 158, 11, ${alpha * 0.5})`);
+                    g.addColorStop(1, 'rgba(245, 158, 11, 0)');
+                    ctx.fillStyle = g;
+                    ctx.beginPath();
+                    ctx.arc(px, py, p.r * 4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                if (!reduce) requestAnimationFrame(frame);
+            }
+            frame();
+        })();
     </script>
 </body>
 </html>
