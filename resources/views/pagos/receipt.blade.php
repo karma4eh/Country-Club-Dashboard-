@@ -72,7 +72,7 @@
     </div>
 
     <!-- =========================================================================================
-         DOCUMENTO FORMAL: FACTURA CORPORATIVA BASADA EN EL DISEÑO DE REFERENCIA (ONDAS DORADO/OSCURO)
+         DOCUMENTO FORMAL: FACTURA CORPORATIVA (ONDAS DORADO/OSCURO)
          ========================================================================================= -->
     <div id="factura-imprimible" class="bg-white text-slate-900 rounded-2xl shadow-2xl overflow-hidden relative border border-slate-200 print:shadow-none print:border-none print:m-0 print:rounded-none">
 
@@ -89,8 +89,8 @@
         <!-- CUERPO DE LA FACTURA -->
         <div class="px-8 sm:px-12 pt-1 pb-4 relative z-10 space-y-5">
 
-            <!-- 1. ENCABEZADO: DATOS DEL CLIENTE (IZQUIERDA) & LOGO OFICIAL (DERECHA) -->
-            <div class="flex flex-col sm:flex-row items-start justify-between gap-6">
+            <!-- 1. ENCABEZADO: DATOS DEL CLIENTE (IZQUIERDA) & LOGO OFICIAL CON QR EN LA PARTE ARRIBA DERECHA -->
+            <div class="flex flex-col sm:flex-row items-start justify-between gap-4">
                 <!-- Columna Izquierda: Datos del Cliente -->
                 <div class="space-y-1">
                     <h2 class="text-sm font-extrabold uppercase tracking-wider text-slate-900">DATOS DEL CLIENTE</h2>
@@ -103,14 +103,21 @@
                     </div>
                 </div>
 
-                <!-- Columna Derecha: Logotipo Oficial del Country Club & Badge -->
-                <div class="flex flex-col items-end sm:text-right">
-                    <img src="{{ asset('img/logo.png') }}" alt="Country Club C.A." class="h-14 sm:h-16 w-auto object-contain">
-                    <h1 class="text-base font-extrabold text-slate-900 font-serif tracking-tight mt-1">COUNTRY CLUB C.A.</h1>
-                    <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-emerald-100 text-emerald-800 border border-emerald-300">
-                        COMPROBANTE OFICIAL DE INGRESO
-                    </span>
-                    <span class="text-[9px] font-mono text-slate-500 mt-0.5">Control: 00-{{ str_pad($pago->id * 11 + 1042, 6, '0', STR_PAD_LEFT) }}</span>
+                <!-- Columna Derecha: Identidad Corporativa & CÓDIGO QR ARRIBA A LA DERECHA -->
+                <div class="flex items-center space-x-3.5 sm:self-start">
+                    <div class="text-right">
+                        <img src="{{ asset('img/logo.png') }}" alt="Country Club C.A." class="h-12 sm:h-14 w-auto object-contain ml-auto">
+                        <h1 class="text-sm font-extrabold text-slate-900 font-serif tracking-tight mt-0.5">COUNTRY CLUB C.A.</h1>
+                        <span class="inline-block mt-0.5 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-emerald-100 text-emerald-800 border border-emerald-300">
+                            COMPROBANTE OFICIAL DE INGRESO
+                        </span>
+                        <div class="text-[9px] font-mono text-slate-500 mt-0.5">Control: 00-{{ str_pad($pago->id * 11 + 1042, 6, '0', STR_PAD_LEFT) }}</div>
+                    </div>
+
+                    <!-- CÓDIGO QR EN LA PARTE ARRIBA DERECHA (Limpio y directo, sin etiqueta inferior) -->
+                    <div class="p-1 rounded-xl border border-slate-300 bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <div id="qrcodeFactura" class="flex items-center justify-center"></div>
+                    </div>
                 </div>
             </div>
 
@@ -204,68 +211,54 @@
                     <p><strong class="font-semibold text-slate-800">Teléfono:</strong> (0212) 261-0000</p>
                 </div>
 
-                <!-- Columna Derecha: Firma Conforme y Sello de Tinta Realista -->
-                <div class="md:col-span-6 flex flex-col items-center sm:items-end space-y-3 relative">
+                <!-- Columna Derecha: Firma Conforme y Sello de Tinta Realista Nítido -->
+                <div class="md:col-span-6 flex flex-col items-center sm:items-end space-y-2 relative">
 
-                    <!-- SELLO DE TINTA DE CAUCHO REALISTA ("CANCELADO" / CAJA PRINCIPAL) & QR FISCAL -->
-                    <div class="flex items-center space-x-3 select-none">
-                        <!-- QR Verificación -->
-                        <div class="p-1 rounded-lg border border-slate-300 bg-white flex flex-col items-center justify-center flex-shrink-0 shadow-sm">
-                            <div id="qrcodeFactura" class="flex items-center justify-center"></div>
-                            <span class="text-[6px] font-mono text-slate-500 font-bold uppercase mt-0.5">QR Fiscal</span>
-                        </div>
+                    <!-- SELLO DE TINTA DE CAUCHO REALISTA ("CANCELADO") - NÍTIDO Y DE ALTA DEFINICIÓN -->
+                    <div class="stamp-ink-container select-none">
+                        <svg viewBox="0 0 270 115" class="w-52 sm:w-56 h-auto" style="transform: rotate(-6deg); transform-origin: center center;" aria-label="Sello Cancelado">
+                            <defs>
+                                <filter id="stamp-real-ink" x="0%" y="0%" width="100%" height="100%">
+                                    <!-- Filtro limpio sin desenfoque -->
+                                </filter>
+                                <mask id="stamp-wear-mask">
+                                    <rect x="0" y="0" width="270" height="115" fill="#FFFFFF" />
+                                </mask>
+                            </defs>
 
-                        <!-- Sello de Tinta de Caucho Realista (Sin estrellas, con desgaste de tinta real) -->
-                        <div class="stamp-ink-container select-none">
-                            <svg viewBox="0 0 280 120" class="w-48 sm:w-52 h-auto filter drop-shadow(0 2px 4px rgba(0,0,0,0.25))" style="transform: rotate(-7deg); transform-origin: center center;" aria-label="Sello de Tinta Cancelado">
-                                <defs>
-                                    <filter id="stamp-real-ink" x="-20%" y="-20%" width="140%" height="140%">
-                                        <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="4" result="paperFiber" />
-                                        <feDisplacementMap in="SourceGraphic" in2="paperFiber" scale="2.8" xChannelSelector="R" yChannelSelector="G" result="roughInk" />
-                                        <feGaussianBlur in="roughInk" stdDeviation="0.3" result="bleed" />
-                                        <feMerge>
-                                            <feMergeNode in="bleed" opacity="0.6" />
-                                            <feMergeNode in="roughInk" />
-                                        </feMerge>
-                                    </filter>
+                            <g fill="#DC2626" stroke="#DC2626">
+                                <!-- Fondo tenue de tinta -->
+                                <rect x="3" y="3" width="264" height="109" rx="8" ry="8" fill="rgba(220, 38, 38, 0.04)" stroke="none" />
 
-                                    <mask id="stamp-wear-mask">
-                                        <rect x="0" y="0" width="280" height="120" fill="#FFFFFF" />
-                                        <circle cx="38" cy="22" r="3" fill="#666" />
-                                        <circle cx="85" cy="58" r="2" fill="#777" />
-                                        <circle cx="140" cy="54" r="3" fill="#666" />
-                                        <circle cx="210" cy="38" r="2.5" fill="#777" />
-                                        <circle cx="245" cy="74" r="3" fill="#666" />
-                                        <circle cx="65" cy="90" r="2.5" fill="#777" />
-                                        <circle cx="180" cy="95" r="2" fill="#888" />
-                                        <circle cx="120" cy="24" r="2.5" fill="#777" />
-                                        <circle cx="195" cy="62" r="2.5" fill="#666" />
-                                        <line x1="90" y1="60" x2="155" y2="60" stroke="#777" stroke-width="1.2" />
-                                    </mask>
-                                </defs>
+                                <!-- Marco exterior grueso de caucho nítido -->
+                                <rect x="3" y="3" width="264" height="109" rx="8" ry="8" fill="none" stroke="#DC2626" stroke-width="3.5" />
 
-                                <g filter="url(#stamp-real-ink)" mask="url(#stamp-wear-mask)" fill="#DC2626" stroke="#DC2626">
-                                    <rect x="4" y="4" width="272" height="112" rx="8" ry="8" fill="rgba(220, 38, 38, 0.05)" stroke="none" />
-                                    <rect x="4" y="4" width="272" height="112" rx="8" ry="8" fill="none" stroke="#DC2626" stroke-width="3.2" />
-                                    <rect x="10" y="10" width="260" height="100" rx="5" ry="5" fill="none" stroke="#DC2626" stroke-width="1.4" opacity="0.9" />
+                                <!-- Marco interior fino nítido -->
+                                <rect x="9" y="9" width="252" height="97" rx="5" ry="5" fill="none" stroke="#DC2626" stroke-width="1.5" />
 
-                                    <text x="140" y="28" text-anchor="middle" font-family="'Impact', 'Arial Black', sans-serif" font-weight="900" font-size="12" letter-spacing="3" fill="#DC2626" stroke="none">COUNTRY CLUB C.A.</text>
-                                    <line x1="18" y1="35" x2="262" y2="35" stroke="#DC2626" stroke-width="1.8" />
-                                    <line x1="22" y1="38" x2="258" y2="38" stroke="#DC2626" stroke-width="0.8" opacity="0.7" />
+                                <!-- 1. COUNTRY CLUB C.A. (Nítido, en negrita y sin estrellas) -->
+                                <text x="135" y="27" text-anchor="middle" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-size="12" letter-spacing="3" fill="#DC2626" stroke="none">COUNTRY CLUB C.A.</text>
 
-                                    <text x="140" y="67" text-anchor="middle" font-family="'Impact', 'Arial Black', sans-serif" font-weight="900" font-size="28" letter-spacing="4" fill="#DC2626" stroke="none">CANCELADO</text>
-                                    <line x1="22" y1="74" x2="258" y2="74" stroke="#DC2626" stroke-width="0.8" opacity="0.7" />
-                                    <line x1="18" y1="77" x2="262" y2="77" stroke="#DC2626" stroke-width="1.8" />
+                                <!-- Línea separadora superior -->
+                                <line x1="16" y1="34" x2="254" y2="34" stroke="#DC2626" stroke-width="2" />
 
-                                    <text x="140" y="91" text-anchor="middle" font-family="'Arial Black', sans-serif" font-weight="800" font-size="9" letter-spacing="1.8" fill="#DC2626" stroke="none">CAJA PRINCIPAL • RECAUDACIÓN</text>
-                                    <text x="140" y="105" text-anchor="middle" font-family="'Courier New', monospace" font-weight="bold" font-size="11.5" letter-spacing="2.5" fill="#EF4444" stroke="none">{{ $pago->fecha_pago ? $pago->fecha_pago->format('d/m/Y') : date('d/m/Y') }}</text>
-                                </g>
-                            </svg>
-                        </div>
+                                <!-- 2. CANCELADO (Letras gruesas, nítidas, alto impacto, cero borrosidad) -->
+                                <text x="135" y="66" text-anchor="middle" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-size="28" letter-spacing="4" fill="#DC2626" stroke="none">CANCELADO</text>
+
+                                <!-- Línea separadora inferior -->
+                                <line x1="16" y1="73" x2="254" y2="73" stroke="#DC2626" stroke-width="2" />
+
+                                <!-- 3. CAJA PRINCIPAL • RECAUDACIÓN -->
+                                <text x="135" y="87" text-anchor="middle" font-family="'Arial Black', sans-serif" font-weight="800" font-size="9" letter-spacing="1.8" fill="#DC2626" stroke="none">CAJA PRINCIPAL • RECAUDACIÓN</text>
+
+                                <!-- 4. Fecha de Pago -->
+                                <text x="135" y="101" text-anchor="middle" font-family="'Courier New', monospace" font-weight="bold" font-size="12" letter-spacing="2.5" fill="#DC2626" stroke="none">{{ $pago->fecha_pago ? $pago->fecha_pago->format('d/m/Y') : date('d/m/Y') }}</text>
+                            </g>
+                        </svg>
                     </div>
 
                     <!-- Línea de Firma Idéntica a la Imagen de Referencia ("Sandra Haro") -->
-                    <div class="w-56 text-center pt-2">
+                    <div class="w-56 text-center pt-1">
                         <div class="border-b-2 border-slate-400 w-full mb-1"></div>
                         <p class="font-bold text-slate-900 text-xs tracking-wide">{{ $pago->socio->nombre_completo ?? 'Socio Titular' }}</p>
                         <p class="text-[9px] text-slate-500 uppercase tracking-wider">Firma Conforme del Titular</p>
@@ -352,8 +345,8 @@
                     tasa: {{ round((float) $tasa, 2) }},
                     fecha: "{{ $pago->fecha_pago ? $pago->fecha_pago->format('Y-m-d') : date('Y-m-d') }}"
                 }),
-                width: 55,
-                height: 55,
+                width: 62,
+                height: 62,
                 colorDark: "#111827",
                 colorLight: "#FFFFFF",
                 correctLevel: QRCode.CorrectLevel.M
