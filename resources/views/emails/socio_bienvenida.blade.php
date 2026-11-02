@@ -113,7 +113,7 @@
         .qr-legend {
             font-size: 10px;
             font-family: 'Courier New', monospace;
-            color: #FBBF24;
+            color: #CBD5E1;
             font-weight: bold;
             letter-spacing: 1.5px;
             text-transform: uppercase;

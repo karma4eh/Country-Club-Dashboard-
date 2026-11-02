@@ -117,6 +117,10 @@ class SocioController extends Controller
 
         $socio = Socio::create($validated);
 
+        if ($request->filled('qr_base64')) {
+            \App\Services\QrCodeService::guardarDesdeBase64($socio, $request->input('qr_base64'));
+        }
+
         // Envío de correo de bienvenida con Número de Acción
         $emailEnviado = false;
         try {

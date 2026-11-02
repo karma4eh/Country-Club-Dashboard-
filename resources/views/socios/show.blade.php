@@ -463,7 +463,7 @@
                 }),
                 width: 140,
                 height: 140,
-                colorDark: "#FBBF24",
+                colorDark: "#FFFFFF",
                 colorLight: "#060911",
                 correctLevel: QRCode.CorrectLevel.M
             });

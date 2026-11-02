@@ -48,6 +48,7 @@
         <div class="lg:col-span-2 space-y-6">
             <form action="{{ route('socios.store') }}" method="POST" class="space-y-6" id="socioForm">
                 @csrf
+                <input type="hidden" name="qr_base64" id="hiddenQrBase64">
 
                 <!-- Sección 1: Datos Personales -->
                 <div class="glass-panel rounded-3xl p-7 border border-[#1F293D] shadow-2xl space-y-5">
@@ -175,9 +176,9 @@
                         Cancelar
                     </a>
 
-                    <button type="submit" class="px-7 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/20 flex items-center space-x-2 transition active:scale-[0.98]">
-                        <span class="material-icons-round text-base">person_add_alt_1</span>
-                        <span>Guardar y Emitir Membresía</span>
+                    <button type="submit" id="btnSubmitForm" class="px-7 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/20 flex items-center space-x-2 transition active:scale-[0.98]">
+                        <span class="material-icons-round text-base" id="btnSubmitIcon">person_add_alt_1</span>
+                        <span id="btnSubmitText">Guardar y Emitir Membresía</span>
                     </button>
                 </div>
 
@@ -221,10 +222,10 @@
                         </div>
                     </div>
 
-                    <!-- Código QR en el Carnet (Tema Oscuro Integrado sin Fondo Blanco) -->
-                    <div class="p-4 rounded-2xl bg-[#060911] border border-amber-500/30 flex flex-col items-center justify-center space-y-2 shadow-inner">
+                    <!-- Código QR en el Carnet (Tema Oscuro con QR Blanco Puro) -->
+                    <div class="p-4 rounded-2xl bg-[#060911] border border-[#243352] flex flex-col items-center justify-center space-y-2 shadow-inner">
                         <div id="previewQrContainer" class="flex items-center justify-center p-1.5 rounded-xl bg-[#060911]"></div>
-                        <span class="text-[9px] font-mono text-amber-300/90 font-bold uppercase tracking-wider">
+                        <span class="text-[9px] font-mono text-slate-300 font-bold uppercase tracking-wider">
                             Código QR Oficial para Garita
                         </span>
                     </div>
@@ -297,7 +298,7 @@
         previewCedula.textContent = ced ? `V-${ced}` : 'V-00.000.000';
         previewAccion.textContent = acc ? `Acción #${acc}` : 'Acción #---';
 
-        // Actualizar QR en vivo con tema oscuro (fondo oscuro #060911 y módulos dorados #FBBF24 sin fondo blanco)
+        // Actualizar QR en vivo con tema oscuro: fondo oscuro #060911 y módulos blancos puros #FFFFFF
         qrContainer.innerHTML = '';
         qrInstance = new QRCode(qrContainer, {
             text: JSON.stringify({
@@ -307,7 +308,7 @@
             }),
             width: 95,
             height: 95,
-            colorDark: "#FBBF24",
+            colorDark: "#FFFFFF",
             colorLight: "#060911",
             correctLevel: QRCode.CorrectLevel.M
         });
@@ -317,6 +318,24 @@
     inputApellido.addEventListener('input', updatePreview);
     inputCedula.addEventListener('input', updatePreview);
     inputAccion.addEventListener('input', updatePreview);
+
+    // Capturar QR Base64 para guardado instantáneo sin peticiones externas
+    const socioForm = document.getElementById('socioForm');
+    socioForm.addEventListener('submit', function() {
+        const canvas = qrContainer.querySelector('canvas');
+        if (canvas) {
+            document.getElementById('hiddenQrBase64').value = canvas.toDataURL('image/png');
+        }
+        const btn = document.getElementById('btnSubmitForm');
+        const text = document.getElementById('btnSubmitText');
+        const icon = document.getElementById('btnSubmitIcon');
+        if (btn) {
+            btn.disabled = true;
+            btn.classList.add('opacity-75', 'cursor-wait');
+            if (icon) icon.classList.add('animate-pulse');
+            if (text) text.textContent = 'Guardando y emitiendo membresía...';
+        }
+    });
 
     window.addEventListener('DOMContentLoaded', updatePreview);
 </script>
