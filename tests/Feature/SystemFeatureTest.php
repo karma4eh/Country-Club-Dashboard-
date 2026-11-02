@@ -268,7 +268,7 @@ class SystemFeatureTest extends TestCase
         $response = $this->get('/pagos/create');
         $response->assertStatus(200);
 
-        // Pagos Receipt (Factura Oficial sin banners molestos)
+        // Pagos Receipt (Factura Oficial con Sello de Tinta de Caucho Realista)
         $pago = Pago::first();
         if ($pago) {
             $response = $this->get(route('pagos.receipt', $pago));
@@ -276,6 +276,12 @@ class SystemFeatureTest extends TestCase
             $response->assertSee('COUNTRY CLUB C.A.');
             $response->assertSee('COMPROBANTE OFICIAL DE INGRESO');
             $response->assertDontSee('¡Pago registrado exitosamente!');
+            // Verificación del Sello de Tinta Realista
+            $response->assertSee('★ COUNTRY CLUB C.A. ★');
+            $response->assertSee('CANCELADO');
+            $response->assertSee('Caja Principal • Recaudación');
+            $response->assertSee('stamp-ink');
+            $response->assertSee('sello-tinta-filtro');
         }
 
         // Movimientos
