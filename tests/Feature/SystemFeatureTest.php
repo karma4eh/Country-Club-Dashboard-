@@ -11,9 +11,11 @@ use App\Models\TasaDolar;
 use App\Mail\SocioBienvenidaMail;
 use App\Services\BcvScraperService;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class SystemFeatureTest extends TestCase
 {
+    use DatabaseTransactions;
     public function test_guest_is_redirected_to_login()
     {
         $response = $this->get('/dashboard');
