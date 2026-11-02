@@ -23,12 +23,12 @@ class SystemFeatureTest extends TestCase
         $response->assertRedirect('/login');
     }
 
-    public function test_login_page_renders_with_real_bcv_rate()
+    public function test_login_page_renders_with_gold_logo_and_country_club()
     {
         $response = $this->get('/login');
         $response->assertStatus(200);
         $response->assertSee('COUNTRY CLUB');
-        $response->assertSee('Tasa BCV Oficial');
+        $response->assertSee('Polígono de Tiro');
     }
 
     public function test_user_can_login_with_demo_credentials()
