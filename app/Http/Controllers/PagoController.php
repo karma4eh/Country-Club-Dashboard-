@@ -62,7 +62,11 @@ class PagoController extends Controller
         $socio = Socio::where('cedula', $validated['cedula'])->first();
 
         if (!$socio) {
-            return back()->withErrors(['cedula' => 'Socio no encontrado.'])->withInput();
+            return back()->with('pago_fallido', [
+                'titulo' => 'No se realizó el pago',
+                'mensaje' => 'No se encontró ningún socio con la cédula indicada.',
+                'saldo' => null,
+            ])->withErrors(['cedula' => 'Socio no encontrado.'])->withInput();
         }
 
         // Prevención de doble clic / cobro duplicado en menos de 20 segundos
@@ -134,8 +138,8 @@ class PagoController extends Controller
             ]);
         }
 
-        return redirect()->route('pagos.receipt', $pago)->with('pago_exitoso', [
-            'titulo' => 'Pago realizado',
+        return redirect()->route('pagos.confirmation', $pago)->with('pago_exitoso', [
+            'titulo' => 'Pago satisfactoriamente',
             'monto' => (float) $pago->monto,
             'monto_bs' => (float) $montoBs,
             'saldo' => (float) $socio->saldo,
@@ -145,6 +149,15 @@ class PagoController extends Controller
             'correo_enviado' => $correoEnviado,
             'numero' => $socio->numero,
         ]);
+    }
+
+    public function confirmation(Pago $pago, BcvScraperService $bcvService)
+    {
+        $pago->load('socio');
+        $tasa = $bcvService->obtenerTasa();
+        $montoBs = $pago->monto * $tasa;
+
+        return view('pagos.confirmation', compact('pago', 'tasa', 'montoBs'));
     }
 
     public function receipt(Pago $pago, BcvScraperService $bcvService)

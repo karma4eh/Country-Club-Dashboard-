@@ -536,7 +536,7 @@ class SystemFeatureTest extends TestCase
         $response->assertSessionHas('pago_exitoso');
 
         $sessionData = session('pago_exitoso');
-        $this->assertEquals('Pago realizado', $sessionData['titulo']);
+        $this->assertEquals('Pago satisfactoriamente', $sessionData['titulo']);
         $this->assertEquals($montoPago, $sessionData['monto']);
         $this->assertEquals(25.00, $sessionData['saldo']);
         $this->assertTrue($sessionData['correo_enviado']);
@@ -548,15 +548,33 @@ class SystemFeatureTest extends TestCase
                    (float) $mail->pago->monto === (float) $montoPago;
         });
 
-        // Seguir la ruta del recibo
+        // 1. Verificar la Pantalla de Confirmación con el Chulo Dinámico y Saldo (sin mostrar la factura completa de golpe)
         $pago = Pago::where('socios_id', $socio->id)->latest('id')->first();
         $this->assertNotNull($pago);
 
+        $confirmResponse = $this->get(route('pagos.confirmation', $pago));
+        $confirmResponse->assertStatus(200);
+        $confirmResponse->assertSee('Pago satisfactoriamente');
+        $confirmResponse->assertSee('chulo-svg');
+        $confirmResponse->assertSee('Saldo Actual del Socio');
+        $confirmResponse->assertSee('WhatsApp');
+        $confirmResponse->assertSee('Imprimir Factura');
+
+        // 2. Verificar la Factura Oficial cuando se desea consultar o imprimir
         $receiptResponse = $this->get(route('pagos.receipt', $pago));
         $receiptResponse->assertStatus(200);
         $receiptResponse->assertSee('WhatsApp');
         $receiptResponse->assertSee('wa.me/584141234567');
-        $receiptResponse->assertSee('Saldo Actual del Socio');
         $receiptResponse->assertSee('REC-' . str_pad($pago->id, 6, '0', STR_PAD_LEFT));
+
+        // 3. Verificar caso cuando no se realiza el pago (cédula inexistente)
+        $failResponse = $this->post('/pagos', [
+            'cedula' => '9999999999',
+            'monto' => 10.00,
+            'descripcion' => 'Intento con socio inexistente',
+        ]);
+        $failResponse->assertStatus(302);
+        $failResponse->assertSessionHas('pago_fallido');
+        $this->assertEquals('No se realizó el pago', session('pago_fallido')['titulo']);
     }
 }

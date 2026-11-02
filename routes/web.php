@@ -51,6 +51,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/pagos', [PagoController::class, 'store'])->name('pagos.store');
         Route::get('/pagos/calcular-deuda', [PagoController::class, 'calcularDeuda'])->name('pagos.calcular');
         Route::get('/pagos/{pago}/recibo', [PagoController::class, 'receipt'])->name('pagos.receipt');
+        Route::get('/pagos/{pago}/confirmacion', [PagoController::class, 'confirmation'])->name('pagos.confirmation');
     });
 
     // 5. Bitácora de Auditoría Interna (Exclusivo Admin y Secretaria)

@@ -7,6 +7,28 @@
 @section('content')
 <div class="max-w-5xl mx-auto space-y-7">
 
+    @if(session('pago_fallido'))
+    <div class="bg-gradient-to-r from-rose-950/80 to-slate-900 border border-rose-500/40 rounded-2xl p-4 sm:p-5 shadow-xl flex items-center justify-between gap-4 animate-fade-in">
+        <div class="flex items-center space-x-3.5">
+            <div class="w-11 h-11 rounded-2xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 flex-shrink-0">
+                <span class="material-icons-round text-2xl">cancel</span>
+            </div>
+            <div>
+                <h4 class="text-base font-bold text-white">{{ session('pago_fallido.titulo', 'No se realizó el pago') }}</h4>
+                <p class="text-xs text-rose-200/80">{{ session('pago_fallido.mensaje') }}</p>
+                @if(isset(session('pago_fallido')['saldo']) && session('pago_fallido')['saldo'] !== null)
+                    <p class="text-xs text-amber-300 font-semibold mt-1">
+                        Saldo actual del socio: ${{ number_format(session('pago_fallido')['saldo'], 2) }} USD
+                    </p>
+                @endif
+            </div>
+        </div>
+        <button type="button" onclick="this.closest('.animate-fade-in').remove()" class="text-rose-300 hover:text-white p-1">
+            <span class="material-icons-round text-lg">close</span>
+        </button>
+    </div>
+    @endif
+
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-7">
 
         <!-- Formulario de Cobro (Columna Izquierda: 7 cols) -->
