@@ -19,175 +19,150 @@
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #060911;
+            background: radial-gradient(circle at 50% 18%, #0C1324 0%, #060912 60%, #03050A 100%);
             color: #F3F4F6;
         }
 
-        .ambient-glow-amber {
-            position: absolute;
-            width: 650px;
-            height: 650px;
-            background: radial-gradient(circle, rgba(245, 158, 11, 0.14) 0%, rgba(217, 119, 6, 0.05) 45%, rgba(0, 0, 0, 0) 70%);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .ambient-glow-gold {
-            position: absolute;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(251, 191, 36, 0.12) 0%, rgba(180, 83, 9, 0.04) 50%, rgba(0, 0, 0, 0) 75%);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .glass-login {
-            background: rgba(11, 16, 29, 0.82);
-            backdrop-filter: blur(28px);
-            -webkit-backdrop-filter: blur(28px);
-            border: 1px solid rgba(245, 158, 11, 0.22);
-            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.85), 
-                        0 0 35px -5px rgba(245, 158, 11, 0.08), 
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        }
-
-        /* EFECTO DE BRILLO DORADO METÁLICO (SHIMMER & GLEAM) */
-        .gold-shimmer-title {
+        /* EFECTO DE ORO METÁLICO SERIO & PRESTIGIOSO (SIN ESTRELLITAS NI EXCESOS) */
+        .gold-prestige-title {
             font-family: 'Cinzel', serif;
+            font-weight: 900;
+            letter-spacing: 0.12em;
             background: linear-gradient(
-                110deg,
-                #92400E 0%,
-                #D97706 18%,
-                #FBBF24 35%,
-                #FFFDF0 48%,
-                #FFFFFF 50%,
-                #FFFDF0 52%,
-                #FBBF24 65%,
-                #D97706 82%,
-                #92400E 100%
+                125deg,
+                #7A5210 0%,
+                #BF953F 18%,
+                #FCF6BA 36%,
+                #A87B22 50%,
+                #FBF5B7 64%,
+                #946416 82%,
+                #7A5210 100%
             );
-            background-size: 260% 100%;
+            background-size: 220% 100%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: goldShimmerSweep 4s linear infinite, goldAuraGlow 4s ease-in-out infinite;
-            letter-spacing: 0.07em;
+            filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.95)) 
+                    drop-shadow(0 0 16px rgba(191, 149, 63, 0.35));
+            animation: goldPrestigeLuster 6.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
             display: inline-block;
             position: relative;
         }
 
-        @keyframes goldShimmerSweep {
-            0% {
-                background-position: 130% center;
-            }
-            100% {
-                background-position: -130% center;
-            }
-        }
-
-        @keyframes goldAuraGlow {
+        @keyframes goldPrestigeLuster {
             0%, 100% {
-                filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.35));
+                background-position: 0% center;
+                filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.95)) 
+                        drop-shadow(0 0 14px rgba(191, 149, 63, 0.3));
             }
             50% {
-                filter: drop-shadow(0 0 28px rgba(251, 191, 36, 0.75)) drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
-            }
-        }
-
-        /* Destello / Sparkle brillante en la esquina del título */
-        .sparkle-flare {
-            position: absolute;
-            top: -6px;
-            right: -15px;
-            width: 18px;
-            height: 18px;
-            pointer-events: none;
-            opacity: 0.85;
-            animation: sparklePulse 3.5s ease-in-out infinite;
-        }
-
-        @keyframes sparklePulse {
-            0%, 100% {
-                transform: scale(0.6) rotate(0deg);
-                opacity: 0.35;
-            }
-            50% {
-                transform: scale(1.25) rotate(45deg);
-                opacity: 1;
-                filter: drop-shadow(0 0 8px #FDE68A);
+                background-position: 100% center;
+                filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.95)) 
+                        drop-shadow(0 0 24px rgba(251, 245, 183, 0.65));
             }
         }
 
         /* Logotipo flotante puro sin recuadro ni marcos */
         .logo-floating {
-            filter: drop-shadow(0 0 22px rgba(245, 158, 11, 0.45)) drop-shadow(0 8px 16px rgba(0, 0, 0, 0.85));
+            filter: drop-shadow(0 0 24px rgba(217, 119, 6, 0.4)) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.9));
             transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease;
         }
 
         .logo-floating:hover {
-            transform: scale(1.06) translateY(-3px);
-            filter: drop-shadow(0 0 34px rgba(245, 158, 11, 0.75)) drop-shadow(0 12px 24px rgba(0, 0, 0, 0.95));
+            transform: scale(1.05) translateY(-2px);
+            filter: drop-shadow(0 0 34px rgba(245, 158, 11, 0.65)) drop-shadow(0 12px 24px rgba(0, 0, 0, 0.95));
+        }
+
+        .glass-login {
+            background: rgba(11, 16, 29, 0.85);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid rgba(217, 119, 6, 0.25);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.9), 
+                        0 0 40px -10px rgba(191, 149, 63, 0.1), 
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
         .gold-badge {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.18) 0%, rgba(180, 83, 9, 0.08) 100%);
-            border: 1px solid rgba(245, 158, 11, 0.35);
+            background: linear-gradient(135deg, rgba(191, 149, 63, 0.18) 0%, rgba(120, 82, 16, 0.1) 100%);
+            border: 1px solid rgba(191, 149, 63, 0.35);
         }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden selection:bg-amber-500 selection:text-black">
 
-    <!-- Ambient Golden Lighting Effects -->
-    <div class="ambient-glow-amber -top-44 -left-44"></div>
-    <div class="ambient-glow-gold -bottom-44 -right-44"></div>
-    <div class="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:32px_32px] opacity-25 pointer-events-none"></div>
+    <!-- =========================================================================
+         FONDO AMBIENTAL DE LUJO: CELOSÍA GEOMÉTRICA & ONDAS ARQUITECTÓNICAS DORADAS
+         ========================================================================= -->
+    <div class="fixed inset-0 pointer-events-none select-none overflow-hidden z-0">
+        <!-- Haz de Luz Cenital (Spotlight Club Directivo) -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-[550px] bg-[radial-gradient(ellipse_at_top,rgba(217,119,6,0.18)_0%,rgba(191,149,63,0.06)_40%,transparent_70%)] pointer-events-none"></div>
+        
+        <!-- Foco ambiental inferior derecho -->
+        <div class="absolute -bottom-24 -right-24 w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(245,158,11,0.08)_0%,rgba(16,185,129,0.03)_40%,transparent_70%)] pointer-events-none"></div>
+
+        <!-- Malla de Micro-Celosía Geométrica Texturizada -->
+        <svg class="absolute inset-0 w-full h-full opacity-[0.045]" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+            <defs>
+                <pattern id="luxury-geometric-grid" width="48" height="48" patternUnits="userSpaceOnUse">
+                    <path d="M 48 0 L 0 48 M 0 0 L 48 48" fill="none" stroke="#F59E0B" stroke-width="0.8"/>
+                    <circle cx="24" cy="24" r="1.5" fill="#FBBF24" />
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#luxury-geometric-grid)"/>
+        </svg>
+
+        <!-- Ondas Curvas Fluidas y Círculos Concéntricos (Arquitectura de Prestigio) -->
+        <svg class="absolute -top-16 -left-20 w-[680px] h-[680px] opacity-[0.14] text-amber-500" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="250" cy="250" r="235" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 8" />
+            <circle cx="250" cy="250" r="185" stroke="currentColor" stroke-width="1" />
+            <circle cx="250" cy="250" r="135" stroke="currentColor" stroke-width="0.8" stroke-dasharray="2 6" />
+            <path d="M40 250 C120 170 210 140 360 190 C430 220 480 310 500 400" stroke="currentColor" stroke-width="2" />
+            <path d="M0 320 C140 250 280 270 420 380" stroke="currentColor" stroke-width="1.5" />
+        </svg>
+
+        <svg class="absolute -bottom-24 -right-16 w-[720px] h-[720px] opacity-[0.12] text-amber-400" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="250" cy="250" r="225" stroke="currentColor" stroke-width="1.5" />
+            <circle cx="250" cy="250" r="165" stroke="currentColor" stroke-width="1" stroke-dasharray="6 6" />
+            <path d="M0 140 C160 210 310 190 500 310" stroke="currentColor" stroke-width="2" />
+            <path d="M60 40 C190 130 310 170 460 290" stroke="currentColor" stroke-width="1.5" />
+        </svg>
+
+        <!-- Resplandor central difuminado que realza la tarjeta -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-gradient-to-b from-amber-500/10 via-transparent to-transparent rounded-full blur-3xl pointer-events-none"></div>
+    </div>
 
     <div class="w-full max-w-md relative z-10 space-y-6 my-6">
         
-        <!-- CABECERA INSTITUCIONAL: LOGO FLOTANTE SIN RECUADRO & COUNTRY CLUB CON BRILLO DORADO -->
+        <!-- CABECERA INSTITUCIONAL: LOGO FLOTANTE SIN RECUADRO & COUNTRY CLUB CON BRILLO DE ORO SERIO -->
         <div class="text-center space-y-4">
             
             <!-- Logotipo Oficial Libre y Flotante (100% SIN RECUADRO NI MARCOS) -->
             <div class="relative mx-auto inline-flex items-center justify-center select-none pt-1">
-                <!-- Aura de Luz Dorada Atmosférica Difuminada -->
-                <div class="absolute -inset-6 bg-gradient-to-tr from-amber-500/20 via-amber-400/15 to-transparent rounded-full blur-2xl pointer-events-none"></div>
+                <!-- Aura de Luz Dorada Suave en el Fondo del Logo -->
+                <div class="absolute -inset-6 bg-gradient-to-tr from-amber-500/15 via-amber-400/10 to-transparent rounded-full blur-2xl pointer-events-none"></div>
                 
                 <img src="{{ asset('img/logo.png') }}" 
                      alt="SCOCC Polígono de Tiro - Country Club C.A." 
                      class="relative z-10 h-20 sm:h-24 w-auto object-contain logo-floating pointer-events-auto">
             </div>
 
-            <!-- Título con Efecto de Brillo / Destello Dorado Metálico Vivo -->
+            <!-- Título con Reflejo de Oro Sólido Serio (Sin estrellitas) -->
             <div class="space-y-1.5">
-                <div class="relative inline-block">
-                    <h1 class="text-3xl sm:text-4xl font-black tracking-tight gold-shimmer-title uppercase select-none">
-                        COUNTRY CLUB
-                    </h1>
-                    <!-- Destello brillante en la esquina del título -->
-                    <svg class="sparkle-flare" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5L12 0Z" fill="url(#goldSparkleGrad)" />
-                        <defs>
-                            <linearGradient id="goldSparkleGrad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
-                                <stop stop-color="#FFFFFF" />
-                                <stop offset="0.5" stop-color="#FCD34D" />
-                                <stop offset="1" stop-color="#F59E0B" />
-                            </linearGradient>
-                        </defs>
-                    </svg>
-                </div>
+                <h1 class="text-3xl sm:text-4xl font-black tracking-tight gold-prestige-title uppercase select-none">
+                    COUNTRY CLUB
+                </h1>
 
-                <p class="text-xs font-extrabold uppercase tracking-[0.22em] text-amber-400/90 flex items-center justify-center space-x-2">
-                    <span class="inline-block w-4 h-px bg-amber-400/40"></span>
+                <p class="text-xs font-bold uppercase tracking-[0.22em] text-amber-400/80 flex items-center justify-center space-x-2">
+                    <span class="inline-block w-4 h-px bg-amber-400/30"></span>
                     <span>Polígono de Tiro &bull; Portal Directivo</span>
-                    <span class="inline-block w-4 h-px bg-amber-400/40"></span>
+                    <span class="inline-block w-4 h-px bg-amber-400/30"></span>
                 </p>
             </div>
 
-            <!-- Badge Ejecutivo de la Consola (Sin tasa BCV como solicitó el usuario) -->
+            <!-- Badge Ejecutivo de la Consola -->
             <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full gold-badge shadow-sm">
-                <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                <span class="text-[10px] font-extrabold uppercase tracking-widest text-amber-200">
+                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-amber-200">
                     Consola de Control &amp; Gestión Administrativa
                 </span>
             </div>
