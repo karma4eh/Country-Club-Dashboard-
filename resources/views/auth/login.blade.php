@@ -53,20 +53,81 @@
                         inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
-        .gold-gradient-text {
-            background: linear-gradient(135deg, #FFFDF5 0%, #FCD34D 35%, #F59E0B 70%, #B45309 100%);
+        /* EFECTO DE BRILLO DORADO METÁLICO (SHIMMER & GLEAM) */
+        .gold-shimmer-title {
+            font-family: 'Cinzel', serif;
+            background: linear-gradient(
+                110deg,
+                #92400E 0%,
+                #D97706 18%,
+                #FBBF24 35%,
+                #FFFDF0 48%,
+                #FFFFFF 50%,
+                #FFFDF0 52%,
+                #FBBF24 65%,
+                #D97706 82%,
+                #92400E 100%
+            );
+            background-size: 260% 100%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            animation: goldShimmerSweep 4s linear infinite, goldAuraGlow 4s ease-in-out infinite;
+            letter-spacing: 0.07em;
+            display: inline-block;
+            position: relative;
         }
 
-        .gold-logo-glow {
-            filter: drop-shadow(0 0 16px rgba(245, 158, 11, 0.5)) drop-shadow(0 6px 14px rgba(0, 0, 0, 0.7));
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease;
+        @keyframes goldShimmerSweep {
+            0% {
+                background-position: 130% center;
+            }
+            100% {
+                background-position: -130% center;
+            }
         }
 
-        .gold-logo-glow:hover {
-            transform: scale(1.04);
-            filter: drop-shadow(0 0 24px rgba(245, 158, 11, 0.75)) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.8));
+        @keyframes goldAuraGlow {
+            0%, 100% {
+                filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.35));
+            }
+            50% {
+                filter: drop-shadow(0 0 28px rgba(251, 191, 36, 0.75)) drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
+            }
+        }
+
+        /* Destello / Sparkle brillante en la esquina del título */
+        .sparkle-flare {
+            position: absolute;
+            top: -6px;
+            right: -15px;
+            width: 18px;
+            height: 18px;
+            pointer-events: none;
+            opacity: 0.85;
+            animation: sparklePulse 3.5s ease-in-out infinite;
+        }
+
+        @keyframes sparklePulse {
+            0%, 100% {
+                transform: scale(0.6) rotate(0deg);
+                opacity: 0.35;
+            }
+            50% {
+                transform: scale(1.25) rotate(45deg);
+                opacity: 1;
+                filter: drop-shadow(0 0 8px #FDE68A);
+            }
+        }
+
+        /* Logotipo flotante puro sin recuadro ni marcos */
+        .logo-floating {
+            filter: drop-shadow(0 0 22px rgba(245, 158, 11, 0.45)) drop-shadow(0 8px 16px rgba(0, 0, 0, 0.85));
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease;
+        }
+
+        .logo-floating:hover {
+            transform: scale(1.06) translateY(-3px);
+            filter: drop-shadow(0 0 34px rgba(245, 158, 11, 0.75)) drop-shadow(0 12px 24px rgba(0, 0, 0, 0.95));
         }
 
         .gold-badge {
@@ -84,29 +145,42 @@
 
     <div class="w-full max-w-md relative z-10 space-y-6 my-6">
         
-        <!-- CABECERA INSTITUCIONAL CON LOGO EN DORADO (COUNTRY CLUB • POLÍGONO DE TIRO) -->
-        <div class="text-center space-y-3.5">
+        <!-- CABECERA INSTITUCIONAL: LOGO FLOTANTE SIN RECUADRO & COUNTRY CLUB CON BRILLO DORADO -->
+        <div class="text-center space-y-4">
             
-            <!-- Emblema de Prestigio con Logotipo Oficial en Aureola Dorada -->
-            <div class="relative mx-auto inline-flex items-center justify-center">
-                <div class="relative p-3.5 sm:p-4 rounded-3xl bg-gradient-to-b from-[#1C253B]/90 via-[#101728]/95 to-[#0A0E1A] border border-amber-500/40 shadow-2xl shadow-amber-500/15 group">
-                    <!-- Resplandor Dorado de Fondo -->
-                    <div class="absolute inset-0 rounded-3xl bg-amber-400/15 blur-lg group-hover:bg-amber-400/25 transition duration-500 pointer-events-none"></div>
-                    
-                    <!-- Logotipo Oficial del Country Club / Polígono de Tiro -->
-                    <img src="{{ asset('img/logo.png') }}" 
-                         alt="Country Club C.A. - Polígono de Tiro" 
-                         class="relative z-10 h-16 sm:h-20 w-auto object-contain gold-logo-glow select-none">
-                </div>
+            <!-- Logotipo Oficial Libre y Flotante (100% SIN RECUADRO NI MARCOS) -->
+            <div class="relative mx-auto inline-flex items-center justify-center select-none pt-1">
+                <!-- Aura de Luz Dorada Atmosférica Difuminada -->
+                <div class="absolute -inset-6 bg-gradient-to-tr from-amber-500/20 via-amber-400/15 to-transparent rounded-full blur-2xl pointer-events-none"></div>
+                
+                <img src="{{ asset('img/logo.png') }}" 
+                     alt="SCOCC Polígono de Tiro - Country Club C.A." 
+                     class="relative z-10 h-20 sm:h-24 w-auto object-contain logo-floating pointer-events-auto">
             </div>
 
-            <!-- Título Institucional y Subtítulo -->
-            <div class="space-y-1">
-                <h1 class="text-3xl sm:text-4xl font-black tracking-tight font-serif gold-gradient-text uppercase">
-                    COUNTRY CLUB
-                </h1>
-                <p class="text-xs font-bold uppercase tracking-[0.22em] text-amber-400/90">
-                    Polígono de Tiro &bull; Portal Directivo
+            <!-- Título con Efecto de Brillo / Destello Dorado Metálico Vivo -->
+            <div class="space-y-1.5">
+                <div class="relative inline-block">
+                    <h1 class="text-3xl sm:text-4xl font-black tracking-tight gold-shimmer-title uppercase select-none">
+                        COUNTRY CLUB
+                    </h1>
+                    <!-- Destello brillante en la esquina del título -->
+                    <svg class="sparkle-flare" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5L12 0Z" fill="url(#goldSparkleGrad)" />
+                        <defs>
+                            <linearGradient id="goldSparkleGrad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#FFFFFF" />
+                                <stop offset="0.5" stop-color="#FCD34D" />
+                                <stop offset="1" stop-color="#F59E0B" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+
+                <p class="text-xs font-extrabold uppercase tracking-[0.22em] text-amber-400/90 flex items-center justify-center space-x-2">
+                    <span class="inline-block w-4 h-px bg-amber-400/40"></span>
+                    <span>Polígono de Tiro &bull; Portal Directivo</span>
+                    <span class="inline-block w-4 h-px bg-amber-400/40"></span>
                 </p>
             </div>
 
