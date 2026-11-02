@@ -115,8 +115,7 @@ class PagoController extends Controller
             ]);
         }
 
-        return redirect()->route('pagos.receipt', $pago)
-            ->with('success', '¡Pago registrado exitosamente!');
+        return redirect()->route('pagos.receipt', $pago);
     }
 
     public function receipt(Pago $pago, BcvScraperService $bcvService)

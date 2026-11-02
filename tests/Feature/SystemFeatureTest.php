@@ -268,6 +268,16 @@ class SystemFeatureTest extends TestCase
         $response = $this->get('/pagos/create');
         $response->assertStatus(200);
 
+        // Pagos Receipt (Factura Oficial sin banners molestos)
+        $pago = Pago::first();
+        if ($pago) {
+            $response = $this->get(route('pagos.receipt', $pago));
+            $response->assertStatus(200);
+            $response->assertSee('COUNTRY CLUB C.A.');
+            $response->assertSee('COMPROBANTE OFICIAL DE INGRESO');
+            $response->assertDontSee('¡Pago registrado exitosamente!');
+        }
+
         // Movimientos
         $response = $this->get('/movimientos');
         $response->assertStatus(200);

@@ -300,7 +300,7 @@
         <main class="flex-1 overflow-y-auto p-8 space-y-6">
             
             <!-- Notificaciones Flash -->
-            @if(session('success'))
+            @if(session('success') && !request()->routeIs('pagos.receipt'))
             <div class="bg-emerald-950/40 border border-emerald-500/40 text-emerald-200 px-5 py-4 rounded-2xl flex items-center justify-between shadow-lg backdrop-blur-md">
                 <div class="flex items-center space-x-3">
                     <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0">
@@ -312,7 +312,7 @@
             </div>
             @endif
 
-            @if(session('error'))
+            @if(session('error') && !request()->routeIs('pagos.receipt'))
             <div class="bg-rose-950/40 border border-rose-500/40 text-rose-200 px-5 py-4 rounded-2xl flex items-center justify-between shadow-lg backdrop-blur-md">
                 <div class="flex items-center space-x-3">
                     <div class="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center flex-shrink-0">
