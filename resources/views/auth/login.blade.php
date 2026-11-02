@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acceso Seguro | Country Club C.A. - Portal Directivo</title>
     
-    <!-- Google Fonts: Plus Jakarta Sans & Cinzel Luxury Serif -->
+    <!-- Google Fonts: Plus Jakarta Sans & Cinzel Luxury Serif (Non-blocking) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     
     <!-- Compiled Static Tailwind CSS -->
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
@@ -472,7 +472,7 @@
             </div>
             @endif
 
-            <form action="{{ route('login.post') }}" method="POST" class="space-y-4">
+            <form action="{{ route('login.post', [], false) }}" method="POST" id="loginForm" class="space-y-4">
                 @csrf
 
                 <!-- Correo Electrónico -->
@@ -531,9 +531,9 @@
                 </div>
 
                 <!-- Botón de Acceso Principal Dorado -->
-                <button type="submit" class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-amber-500/25 active:scale-[0.98] transition flex items-center justify-center space-x-2 mt-2">
-                    <span>Ingresar al Sistema</span>
-                    <span class="material-icons-round text-base">arrow_forward</span>
+                <button type="submit" id="btnLoginSubmit" class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-amber-500/25 active:scale-[0.98] transition flex items-center justify-center space-x-2 mt-2">
+                    <span id="btnLoginText">Ingresar al Sistema</span>
+                    <span class="material-icons-round text-base" id="btnLoginIcon">arrow_forward</span>
                 </button>
             </form>
 
@@ -569,6 +569,41 @@
             document.getElementById('password').value = password;
         }
 
+        // Prevención de doble envío y liberación inmediata del navegador al entrar
+        (function () {
+            const form = document.getElementById('loginForm');
+            const btn = document.getElementById('btnLoginSubmit');
+            const text = document.getElementById('btnLoginText');
+            const icon = document.getElementById('btnLoginIcon');
+            if (!form || !btn) return;
+
+            form.addEventListener('submit', function (e) {
+                if (window.__loginSubmitting) {
+                    e.preventDefault();
+                    return;
+                }
+                window.__loginSubmitting = true;
+                btn.classList.add('opacity-80', 'cursor-wait');
+                if (text) text.textContent = 'Ingresando al Sistema...';
+                if (icon) {
+                    icon.textContent = 'sync';
+                    icon.classList.add('animate-spin');
+                }
+            });
+
+            window.addEventListener('pageshow', function (e) {
+                if (e.persisted) {
+                    window.__loginSubmitting = false;
+                    btn.classList.remove('opacity-80', 'cursor-wait');
+                    if (text) text.textContent = 'Ingresar al Sistema';
+                    if (icon) {
+                        icon.textContent = 'arrow_forward';
+                        icon.classList.remove('animate-spin');
+                    }
+                }
+            });
+        })();
+
         // Polvo de oro: partículas doradas flotando con parallax suave al mover el ratón
         (function () {
             const canvas = document.getElementById('goldDust');
@@ -579,11 +614,11 @@
             let mx = 0, my = 0, tx = 0, ty = 0;
 
             function resize() {
-                dpr = Math.min(window.devicePixelRatio || 1, 2);
+                dpr = Math.min(window.devicePixelRatio || 1, 1.5);
                 w = canvas.clientWidth; h = canvas.clientHeight;
                 canvas.width = w * dpr; canvas.height = h * dpr;
                 ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-                const count = Math.round(Math.min(90, (w * h) / 16000));
+                const count = Math.round(Math.min(45, (w * h) / 24000));
                 particles = Array.from({ length: count }, () => spawn(true));
             }
 
@@ -609,6 +644,7 @@
             resize();
 
             function frame() {
+                if (window.__loginSubmitting) return;
                 mx += (tx - mx) * 0.05; my += (ty - my) * 0.05;
                 ctx.clearRect(0, 0, w, h);
                 for (let i = 0; i < particles.length; i++) {
@@ -626,7 +662,7 @@
                     ctx.arc(px, py, p.r * 4, 0, Math.PI * 2);
                     ctx.fill();
                 }
-                if (!reduce) requestAnimationFrame(frame);
+                if (!reduce && !window.__loginSubmitting) requestAnimationFrame(frame);
             }
             frame();
         })();
@@ -635,11 +671,10 @@
         (function () {
             const scope = document.getElementById('scope');
             const layer = document.getElementById('impactLayer');
-            const scene = document.querySelector('.bg-scene');
             if (!scope || !layer) return;
             if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { scope.style.display = 'none'; return; }
 
-            const MAX_HOLES = 14;
+            const MAX_HOLES = 12;
             const rand = (a, b) => a + Math.random() * (b - a);
             const wait = ms => new Promise(r => setTimeout(r, ms));
 
@@ -684,10 +719,10 @@
             }
 
             function fire(x, y) {
+                if (window.__loginSubmitting) return;
                 scope.classList.remove('firing');
                 void scope.offsetWidth; // reinicia la animación de retroceso
                 scope.classList.add('firing');
-                scene.classList.remove('shake'); void scene.offsetWidth; scene.classList.add('shake');
 
                 spawn('muzzle-flash', x, y, 300);
                 spawn('shock-ring', x, y, 800);
@@ -702,13 +737,15 @@
 
             async function loop() {
                 await wait(800);
-                while (true) {
+                while (!window.__loginSubmitting) {
                     if (document.hidden) { await wait(1000); continue; }
                     const t = pickTarget();
                     aimAt(t);
                     await wait(1800);                 // desplazamiento de la mira
+                    if (window.__loginSubmitting) break;
                     scope.classList.add('locking');   // fija el blanco
                     await wait(rand(450, 750));
+                    if (window.__loginSubmitting) break;
                     fire(t.x, t.y);
                     // A veces doble disparo (double tap) con leve dispersión
                     if (Math.random() < .35) {

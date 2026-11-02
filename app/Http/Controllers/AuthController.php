@@ -18,8 +18,7 @@ class AuthController extends Controller
             }
             return redirect()->route('dashboard');
         }
-        $tasa = \App\Models\TasaDolar::tasaActual();
-        return view('auth.login', compact('tasa'));
+        return view('auth.login');
     }
 
     public function login(Request $request)
@@ -31,18 +30,23 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
+            $request->session()->forget('url.intended');
 
-            Movimiento::create([
-                'usuarios_id' => Auth::id(),
-                'tipo' => 'Inicio de Sesión',
-                'fecha' => Carbon::now(),
-            ]);
+            try {
+                Movimiento::create([
+                    'usuarios_id' => Auth::id(),
+                    'tipo' => 'Inicio de Sesión',
+                    'fecha' => Carbon::now(),
+                ]);
+            } catch (\Throwable $e) {
+                // No bloquear el acceso si falla el registro secundario de bitácora
+            }
 
             if (Auth::user()->esVigilante()) {
                 return redirect()->route('visitas.index');
             }
 
-            return redirect()->intended(route('dashboard'));
+            return redirect()->route('dashboard');
         }
 
         return back()->withErrors([

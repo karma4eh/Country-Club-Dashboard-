@@ -12,6 +12,9 @@ if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php'))
 // Register the Composer autoloader...
 require __DIR__.'/../vendor/autoload.php';
 
+// Evitar condiciones de carrera con putenv() en Apache multi-hilo (Windows ZTS)
+\Illuminate\Support\Env::disablePutenv();
+
 // Bootstrap Laravel and handle the request...
 (require_once __DIR__.'/../bootstrap/app.php')
     ->handleRequest(Request::capture());

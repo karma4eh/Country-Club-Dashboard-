@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Inicio') | Country Club - Sistema Ejecutivo</title>
     
-    <!-- Google Fonts: Plus Jakarta Sans -->
+    <!-- Google Fonts: Plus Jakarta Sans (Carga Asíncrona No-Bloqueante) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     
     <!-- Compiled Static Tailwind CSS (Ultra-Fast) -->
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
@@ -431,11 +431,25 @@
             }
         });
 
+        let notificacionesInterval = null;
+
         function consultarNotificaciones() {
-            fetch("{{ route('notificaciones.index') }}")
-                .then(res => res.json())
+            if (document.hidden) return;
+            fetch("{{ route('notificaciones.index', [], false) }}", {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(res => {
+                    if (res.status === 401 || res.redirected) {
+                        if (notificacionesInterval) clearInterval(notificacionesInterval);
+                        return null;
+                    }
+                    return res.ok ? res.json() : null;
+                })
                 .then(data => {
-                    if (!data.success) return;
+                    if (!data || !data.success) return;
 
                     const badge = document.getElementById('badgeNotificacionesCount');
                     const lista = document.getElementById('listaNotificaciones');
@@ -566,7 +580,7 @@
         // Consultar al cargar la página y hacer sondeo periódico cada 15 segundos
         document.addEventListener('DOMContentLoaded', function () {
             consultarNotificaciones();
-            setInterval(consultarNotificaciones, 15000);
+            notificacionesInterval = setInterval(consultarNotificaciones, 15000);
         });
     </script>
 
