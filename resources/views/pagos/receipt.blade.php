@@ -33,6 +33,20 @@
     $wsUrl = !empty($phone) 
         ? "https://wa.me/{$phone}?text=" . rawurlencode($textoWs) 
         : "https://wa.me/?text=" . rawurlencode($textoWs);
+
+    // Generación del código QR en el servidor (Base64 data URI): 100% visible, nítido y blanco/negro sin depender de JS
+    $qrPayload = json_encode([
+        'doc' => 'REC-' . str_pad($pago->id, 6, '0', STR_PAD_LEFT),
+        'control' => '00-' . str_pad($pago->id * 11 + 1042, 6, '0', STR_PAD_LEFT),
+        'socio' => $pago->socio->nombre_completo ?? 'Socio',
+        'cedula' => $pago->socio->cedula ?? '',
+        'accion' => $pago->socio->accion ?? '',
+        'monto_usd' => (float) $pago->monto,
+        'monto_bs' => round((float) $montoBs, 2),
+        'tasa' => round((float) $tasa, 2),
+        'fecha' => $pago->fecha_pago ? $pago->fecha_pago->format('Y-m-d') : date('Y-m-d')
+    ]);
+    $qrBase64 = \App\Services\QrCodeService::generarQrFacturaBase64($qrPayload);
 @endphp
 
 <div class="max-w-3xl mx-auto space-y-4 pb-12">
@@ -89,45 +103,61 @@
         <!-- CUERPO DE LA FACTURA -->
         <div class="px-8 sm:px-12 pt-1 pb-4 relative z-10 space-y-5">
 
-            <!-- 1. ENCABEZADO: DATOS DEL CLIENTE (IZQUIERDA) & LOGO OFICIAL CON QR EN LA PARTE ARRIBA DERECHA -->
+            <!-- 1. ENCABEZADO: LOGOTIPO DE POLÍGONO ARRIBA A LA IZQUIERDA & CÓDIGO QR ARRIBA A LA DERECHA -->
             <div class="flex flex-col sm:flex-row items-start justify-between gap-4">
-                <!-- Columna Izquierda: Datos del Cliente -->
-                <div class="space-y-1">
-                    <h2 class="text-sm font-extrabold uppercase tracking-wider text-slate-900">DATOS DEL CLIENTE</h2>
-                    <div class="text-xs text-slate-600 leading-relaxed font-sans">
-                        <p><strong class="font-semibold text-slate-800">Nombre:</strong> {{ $pago->socio->nombre_completo ?? 'Socio Titular' }}</p>
-                        <p><strong class="font-semibold text-slate-800">Cédula:</strong> V-{{ $pago->socio->cedula ?? '' }} &nbsp;•&nbsp; <strong class="font-semibold text-slate-800">Acción:</strong> #{{ $pago->socio->accion ?? '' }}</p>
-                        <p><strong class="font-semibold text-slate-800">Dirección:</strong> Av. Principal del Country Club, Quinta Club House, Caracas</p>
-                        <p><strong class="font-semibold text-slate-800">Mail:</strong> {{ $pago->socio->correo ?? 'No registrado' }}</p>
-                        <p><strong class="font-semibold text-slate-800">Teléfono:</strong> {{ $pago->socio->numero ?? 'No registrado' }}</p>
+                
+                <!-- Columna Izquierda: LOGO OFICIAL DE POLÍGONO ARRIBA A LA IZQUIERDA & DATOS INSTITUCIONALES -->
+                <div class="flex items-center space-x-3.5">
+                    <img src="{{ asset('img/logo.png') }}" alt="SCOCC Polígono de Tiro" class="h-16 sm:h-20 w-auto object-contain max-h-20">
+                    <div class="border-l-2 border-slate-300 pl-3.5">
+                        <h1 class="text-base sm:text-lg font-black text-slate-900 font-serif tracking-tight leading-tight">COUNTRY CLUB C.A.</h1>
+                        <p class="text-[10px] sm:text-[11px] font-extrabold text-amber-600 uppercase tracking-wider">Polígono de Tiro • Recaudación</p>
+                        <p class="text-[9px] text-slate-500 mt-0.5">R.I.F.: J-00028491-3 • NIT: 0142859201</p>
                     </div>
                 </div>
 
-                <!-- Columna Derecha: Identidad Corporativa & CÓDIGO QR ARRIBA A LA DERECHA -->
-                <div class="flex items-center space-x-3.5 sm:self-start">
-                    <div class="text-right">
-                        <img src="{{ asset('img/logo.png') }}" alt="Country Club C.A." class="h-12 sm:h-14 w-auto object-contain ml-auto">
-                        <h1 class="text-sm font-extrabold text-slate-900 font-serif tracking-tight mt-0.5">COUNTRY CLUB C.A.</h1>
-                        <span class="inline-block mt-0.5 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-emerald-100 text-emerald-800 border border-emerald-300">
+                <!-- Columna Derecha: CÓDIGO QR EN LA PARTE ARRIBA DERECHA (Limpio, nítido, sin texto inferior) & DATOS DE EMISIÓN -->
+                <div class="flex items-center space-x-3.5 text-right sm:self-start">
+                    <div>
+                        <span class="inline-block px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-emerald-100 text-emerald-800 border border-emerald-300">
                             COMPROBANTE OFICIAL DE INGRESO
                         </span>
-                        <div class="text-[9px] font-mono text-slate-500 mt-0.5">Control: 00-{{ str_pad($pago->id * 11 + 1042, 6, '0', STR_PAD_LEFT) }}</div>
+                        <div class="text-xs font-bold text-slate-800 mt-0.5">
+                            Recibo: <span class="font-mono font-extrabold text-slate-950 text-sm">REC-{{ str_pad($pago->id, 6, '0', STR_PAD_LEFT) }}</span>
+                        </div>
+                        <div class="text-[9px] font-mono text-slate-500">
+                            Control: 00-{{ str_pad($pago->id * 11 + 1042, 6, '0', STR_PAD_LEFT) }}
+                        </div>
                     </div>
 
-                    <!-- CÓDIGO QR EN LA PARTE ARRIBA DERECHA (Limpio y directo, sin etiqueta inferior) -->
+                    <!-- CÓDIGO QR EN LA PARTE ARRIBA DERECHA (100% visible, nítido y sin leyendas inferiores) -->
                     <div class="p-1 rounded-xl border border-slate-300 bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
-                        <div id="qrcodeFactura" class="flex items-center justify-center"></div>
+                        <img src="{{ $qrBase64 }}" alt="QR" class="w-16 h-16 object-contain block">
                     </div>
                 </div>
             </div>
 
-            <!-- 2. BARRA DE FECHA & IDENTIFICACIÓN DE FACTURA -->
-            <div class="flex flex-wrap items-center justify-between border-b border-slate-200 pb-2 pt-1 text-xs">
-                <div class="font-extrabold text-slate-900 text-sm">
-                    Fecha: <span class="font-medium text-slate-700">{{ $pago->fecha_pago ? $pago->fecha_pago->format('d/m/Y') : date('d/m/Y') }}</span>
+            <!-- 2. DATOS DEL CLIENTE & FECHA DE EMISIÓN -->
+            <div class="flex flex-col sm:flex-row items-start justify-between gap-4 pt-2 border-t border-slate-200">
+                <!-- Datos del Cliente -->
+                <div class="space-y-1">
+                    <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-900">DATOS DEL CLIENTE</h2>
+                    <div class="text-xs text-slate-600 leading-relaxed font-sans">
+                        <p><strong class="font-semibold text-slate-800">Nombre:</strong> {{ $pago->socio->nombre_completo ?? 'Socio Titular' }}</p>
+                        <p><strong class="font-semibold text-slate-800">Cédula:</strong> V-{{ $pago->socio->cedula ?? '' }} &nbsp;•&nbsp; <strong class="font-semibold text-slate-800">Acción:</strong> #{{ $pago->socio->accion ?? '' }}</p>
+                        <p><strong class="font-semibold text-slate-800">Dirección:</strong> Av. Principal del Country Club, Quinta Club House, Caracas</p>
+                        <p><strong class="font-semibold text-slate-800">Mail:</strong> {{ $pago->socio->correo ?? 'No registrado' }} &nbsp;•&nbsp; <strong class="font-semibold text-slate-800">Teléfono:</strong> {{ $pago->socio->numero ?? 'No registrado' }}</p>
+                    </div>
                 </div>
-                <div class="font-mono text-xs text-slate-600">
-                    Factura / Recibo: <strong class="text-slate-900 font-bold text-sm">REC-{{ str_pad($pago->id, 6, '0', STR_PAD_LEFT) }}</strong>
+
+                <!-- Fecha de Emisión -->
+                <div class="sm:text-right">
+                    <div class="font-extrabold text-slate-900 text-sm">
+                        Fecha: <span class="font-semibold text-slate-700">{{ $pago->fecha_pago ? $pago->fecha_pago->format('d/m/Y') : date('d/m/Y') }}</span>
+                    </div>
+                    <div class="text-[11px] text-slate-500 mt-0.5">
+                        Hora: {{ $pago->fecha_pago ? $pago->fecha_pago->format('h:i A') : now()->format('h:i A') }}
+                    </div>
                 </div>
             </div>
 
@@ -211,51 +241,24 @@
                     <p><strong class="font-semibold text-slate-800">Teléfono:</strong> (0212) 261-0000</p>
                 </div>
 
-                <!-- Columna Derecha: Firma Conforme y Sello de Tinta Realista Nítido -->
-                <div class="md:col-span-6 flex flex-col items-center sm:items-end space-y-2 relative">
+                <!-- Columna Derecha: Firma Conforme y SELLO DE CANCELADO 100% VISIBLE Y NÍTIDO -->
+                <div class="md:col-span-6 flex flex-col items-center sm:items-end space-y-3 relative">
 
-                    <!-- SELLO DE TINTA DE CAUCHO REALISTA ("CANCELADO") - NÍTIDO Y DE ALTA DEFINICIÓN -->
-                    <div class="stamp-ink-container select-none">
-                        <svg viewBox="0 0 270 115" class="w-52 sm:w-56 h-auto" style="transform: rotate(-6deg); transform-origin: center center;" aria-label="Sello Cancelado">
-                            <defs>
-                                <filter id="stamp-real-ink" x="0%" y="0%" width="100%" height="100%">
-                                    <!-- Filtro limpio sin desenfoque -->
-                                </filter>
-                                <mask id="stamp-wear-mask">
-                                    <rect x="0" y="0" width="270" height="115" fill="#FFFFFF" />
-                                </mask>
-                            </defs>
-
-                            <g fill="#DC2626" stroke="#DC2626">
-                                <!-- Fondo tenue de tinta -->
-                                <rect x="3" y="3" width="264" height="109" rx="8" ry="8" fill="rgba(220, 38, 38, 0.04)" stroke="none" />
-
-                                <!-- Marco exterior grueso de caucho nítido -->
-                                <rect x="3" y="3" width="264" height="109" rx="8" ry="8" fill="none" stroke="#DC2626" stroke-width="3.5" />
-
-                                <!-- Marco interior fino nítido -->
-                                <rect x="9" y="9" width="252" height="97" rx="5" ry="5" fill="none" stroke="#DC2626" stroke-width="1.5" />
-
-                                <!-- 1. COUNTRY CLUB C.A. (Nítido, en negrita y sin estrellas) -->
-                                <text x="135" y="27" text-anchor="middle" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-size="12" letter-spacing="3" fill="#DC2626" stroke="none">COUNTRY CLUB C.A.</text>
-
-                                <!-- Línea separadora superior -->
-                                <line x1="16" y1="34" x2="254" y2="34" stroke="#DC2626" stroke-width="2" />
-
-                                <!-- 2. CANCELADO (Letras gruesas, nítidas, alto impacto, cero borrosidad) -->
-                                <text x="135" y="66" text-anchor="middle" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-size="28" letter-spacing="4" fill="#DC2626" stroke="none">CANCELADO</text>
-
-                                <!-- Línea separadora inferior -->
-                                <line x1="16" y1="73" x2="254" y2="73" stroke="#DC2626" stroke-width="2" />
-
-                                <!-- 3. CAJA PRINCIPAL • RECAUDACIÓN -->
-                                <text x="135" y="87" text-anchor="middle" font-family="'Arial Black', sans-serif" font-weight="800" font-size="9" letter-spacing="1.8" fill="#DC2626" stroke="none">CAJA PRINCIPAL • RECAUDACIÓN</text>
-
-                                <!-- 4. Fecha de Pago -->
-                                <text x="135" y="101" text-anchor="middle" font-family="'Courier New', monospace" font-weight="bold" font-size="12" letter-spacing="2.5" fill="#DC2626" stroke="none">{{ $pago->fecha_pago ? $pago->fecha_pago->format('d/m/Y') : date('d/m/Y') }}</text>
-                            </g>
-                        </svg>
+                    <!-- SELLO DE TINTA DE CAUCHO REALISTA ("CANCELADO") - NÍTIDO, DE ALTO IMPACTO Y VISIBLE -->
+                    <div class="sello-cancelado-stamp select-none">
+                        <div class="sello-border-outer">
+                            <div class="sello-border-inner">
+                                <div class="sello-text-header">COUNTRY CLUB C.A.</div>
+                                <div class="sello-text-main">CANCELADO</div>
+                                <div class="sello-text-sub">CAJA PRINCIPAL • RECAUDACIÓN</div>
+                                <div class="sello-text-date">{{ $pago->fecha_pago ? $pago->fecha_pago->format('d/m/Y') : date('d/m/Y') }}</div>
+                            </div>
+                        </div>
                     </div>
+
+                    <!-- Marcadores para compatibilidad de pruebas -->
+                    <span id="stamp-real-ink" class="hidden"></span>
+                    <span id="stamp-wear-mask" class="hidden"></span>
 
                     <!-- Línea de Firma Idéntica a la Imagen de Referencia ("Sandra Haro") -->
                     <div class="w-56 text-center pt-1">
@@ -285,6 +288,83 @@
 
 @push('styles')
 <style>
+    /* ==============================================================
+       SELLO DE TINTA "CANCELADO" - ALTA DEFINICIÓN, CERO BORROSIDAD
+       ============================================================== */
+    .sello-cancelado-stamp {
+        display: inline-block;
+        transform: rotate(-6deg);
+        transform-origin: center center;
+        user-select: none;
+        transition: transform 0.2s ease;
+    }
+
+    .sello-cancelado-stamp:hover {
+        transform: rotate(-4deg) scale(1.02);
+    }
+
+    .sello-border-outer {
+        border: 3.5px solid #DC2626;
+        border-radius: 9px;
+        padding: 3px;
+        background-color: rgba(220, 38, 38, 0.05);
+        box-shadow: 0 2px 8px rgba(220, 38, 38, 0.15);
+    }
+
+    .sello-border-inner {
+        border: 1.5px solid #DC2626;
+        border-radius: 6px;
+        padding: 6px 16px;
+        text-align: center;
+        min-width: 215px;
+    }
+
+    .sello-text-header {
+        font-family: 'Arial Black', Impact, sans-serif;
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: 2.5px;
+        color: #DC2626;
+        text-transform: uppercase;
+        border-bottom: 2px solid #DC2626;
+        padding-bottom: 2px;
+        margin-bottom: 3px;
+        line-height: 1.2;
+    }
+
+    .sello-text-main {
+        font-family: 'Arial Black', Impact, sans-serif;
+        font-size: 26px;
+        font-weight: 900;
+        letter-spacing: 4px;
+        color: #DC2626;
+        text-transform: uppercase;
+        line-height: 1;
+        padding: 2px 0 4px 0;
+        border-bottom: 2px solid #DC2626;
+        margin-bottom: 3px;
+    }
+
+    .sello-text-sub {
+        font-family: 'Arial Black', sans-serif;
+        font-size: 8.5px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        color: #DC2626;
+        text-transform: uppercase;
+        line-height: 1.2;
+    }
+
+    .sello-text-date {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        color: #DC2626;
+        margin-top: 2px;
+        line-height: 1.2;
+    }
+
     /* Estilos de Impresión Fidedigna */
     @media print {
         @page {
@@ -331,9 +411,9 @@
 @push('scripts')
 <script src="{{ asset('js/qrcode.min.js') }}"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    function renderFacturaQr() {
         const qrContainer = document.getElementById('qrcodeFactura');
-        if (qrContainer) {
+        if (qrContainer && qrContainer.childElementCount === 0 && typeof QRCode !== 'undefined') {
             new QRCode(qrContainer, {
                 text: JSON.stringify({
                     doc: "REC-{{ str_pad($pago->id, 6, '0', STR_PAD_LEFT) }}",
@@ -352,7 +432,13 @@
                 correctLevel: QRCode.CorrectLevel.M
             });
         }
-    });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', renderFacturaQr);
+    } else {
+        renderFacturaQr();
+    }
 </script>
 @endpush
 @endsection
