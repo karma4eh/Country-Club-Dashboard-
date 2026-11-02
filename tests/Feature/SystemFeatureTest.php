@@ -536,7 +536,7 @@ class SystemFeatureTest extends TestCase
         $response->assertSessionHas('pago_exitoso');
 
         $sessionData = session('pago_exitoso');
-        $this->assertEquals('Pago hecho satisfactoriamente', $sessionData['titulo']);
+        $this->assertEquals('Pago realizado', $sessionData['titulo']);
         $this->assertEquals($montoPago, $sessionData['monto']);
         $this->assertEquals(25.00, $sessionData['saldo']);
         $this->assertTrue($sessionData['correo_enviado']);

@@ -135,7 +135,7 @@ class PagoController extends Controller
         }
 
         return redirect()->route('pagos.receipt', $pago)->with('pago_exitoso', [
-            'titulo' => 'Pago hecho satisfactoriamente',
+            'titulo' => 'Pago realizado',
             'monto' => (float) $pago->monto,
             'monto_bs' => (float) $montoBs,
             'saldo' => (float) $socio->saldo,
