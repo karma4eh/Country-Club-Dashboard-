@@ -5,7 +5,116 @@
 @section('header_subtitle', 'Comprobante oficial emitido por la Administración del Country Club')
 
 @section('content')
-<div class="max-w-4xl mx-auto space-y-3 pb-4">
+@php
+    // Formateo del teléfono para enlace directo a WhatsApp (E.164 para Venezuela)
+    $phone = preg_replace('/[^0-9]/', '', $pago->socio->numero ?? '');
+    if (str_starts_with($phone, '0')) {
+        $phone = '58' . substr($phone, 1);
+    } elseif (!empty($phone) && !str_starts_with($phone, '58') && strlen($phone) == 10) {
+        $phone = '58' . $phone;
+    }
+
+    $textoWs = "★ *COUNTRY CLUB C.A.* ★\n"
+             . "📄 *RECIBO OFICIAL DE COBRO #REC-" . str_pad($pago->id, 6, '0', STR_PAD_LEFT) . "*\n\n"
+             . "Estimado(a) *" . ($pago->socio->nombre_completo ?? 'Socio Titular') . "*,\n"
+             . "Le confirmamos que su pago ha sido procesado satisfactoriamente en Caja Principal:\n\n"
+             . "• *Comprobante N°:* REC-" . str_pad($pago->id, 6, '0', STR_PAD_LEFT) . "\n"
+             . "• *Acción / Membresía:* #" . ($pago->socio->accion ?? 'N/A') . "\n"
+             . "• *Cédula:* V-" . ($pago->socio->cedula ?? 'N/A') . "\n"
+             . "• *Concepto:* " . $pago->descripcion . "\n"
+             . "• *Monto Abonado:* $" . number_format($pago->monto, 2) . " USD (Bs. " . number_format($montoBs, 2, ',', '.') . ")\n"
+             . "• *Tasa BCV:* " . number_format($tasa, 2, ',', '.') . " Bs/USD\n"
+             . "• *Fecha:* " . ($pago->fecha_pago ? $pago->fecha_pago->format('d/m/Y h:i A') : date('d/m/Y h:i A')) . "\n"
+             . "• *Saldo Actual:* $" . number_format($pago->socio->saldo ?? 0, 2) . " USD (" . (($pago->socio->saldo ?? 0) >= 0 ? 'SOLVENTE' : 'PENDIENTE') . ")\n\n"
+             . "🔗 *Ver y Descargar Factura Digital:*\n"
+             . route('pagos.receipt', $pago) . "\n\n"
+             . "_Dirección de Administración y Finanzas • Country Club C.A._";
+
+    $wsUrl = !empty($phone) 
+        ? "https://wa.me/{$phone}?text=" . rawurlencode($textoWs) 
+        : "https://wa.me/?text=" . rawurlencode($textoWs);
+@endphp
+
+<div class="max-w-4xl mx-auto space-y-3 pb-6">
+
+    <!-- AVISO DINÁMICO DE PAGO SATISFACTORIO CON SALDO ACTUAL Y WHATSAPP -->
+    @if(session('pago_exitoso'))
+    <div id="pagoSuccessCard" class="bg-gradient-to-r from-[#064E3B] via-[#065F46] to-[#0A261E] border border-emerald-400/40 rounded-2xl p-4 sm:p-5 shadow-2xl backdrop-blur-xl relative overflow-hidden transition-all duration-300 no-print animate-fade-in">
+        <!-- Glow decorativo de fondo -->
+        <div class="absolute -right-8 -bottom-8 w-36 h-36 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none"></div>
+
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+            <div class="flex items-start sm:items-center space-x-3.5">
+                <!-- Icono animado de confirmación -->
+                <div class="w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center flex-shrink-0 text-emerald-300 shadow-lg shadow-emerald-500/20">
+                    <span class="material-icons-round text-2xl">verified</span>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <h3 class="text-base sm:text-lg font-black text-white tracking-tight flex items-center">
+                            ¡Pago Hecho Satisfactoriamente!
+                        </h3>
+                        <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-400 text-slate-950">
+                            Acreditado
+                        </span>
+                    </div>
+                    <p class="text-xs text-emerald-200/90 mt-0.5">
+                        Comprobante <strong class="font-mono text-white">#REC-{{ str_pad($pago->id, 6, '0', STR_PAD_LEFT) }}</strong> emitido para <strong class="text-white">{{ $pago->socio->nombre_completo }}</strong> (Acción #{{ $pago->socio->accion }}).
+                    </p>
+                </div>
+            </div>
+
+            <!-- Recuadro Dinámico del Saldo del Socio -->
+            <div class="flex items-center space-x-3">
+                <div class="bg-[#042F24]/80 border border-emerald-400/40 rounded-xl px-4 py-2 text-right">
+                    <span class="block text-[9px] font-bold text-emerald-300 uppercase tracking-widest">Saldo Actual del Socio</span>
+                    <div class="flex items-baseline space-x-1.5 justify-end">
+                        <span class="text-lg font-mono font-black text-emerald-300">
+                            ${{ number_format($pago->socio->saldo ?? 0, 2) }} <span class="text-xs">USD</span>
+                        </span>
+                        <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-500/30 text-emerald-200">
+                            {{ ($pago->socio->saldo ?? 0) >= 0 ? 'Solvente' : 'Pendiente' }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Botón Cerrar Aviso -->
+                <button type="button" onclick="document.getElementById('pagoSuccessCard').remove()" class="text-emerald-300/70 hover:text-white p-1 rounded-lg hover:bg-emerald-500/20 transition" title="Cerrar">
+                    <span class="material-icons-round text-lg">close</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Fila de Estado de Notificaciones: Correo & Botón a WhatsApp -->
+        <div class="mt-3.5 pt-3 border-t border-emerald-500/30 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div class="flex items-center space-x-2 text-emerald-200/90">
+                @if(session('pago_exitoso.correo_enviado'))
+                    <span class="inline-flex items-center space-x-1 text-emerald-300 bg-emerald-500/20 px-2.5 py-1 rounded-lg border border-emerald-400/30 font-semibold">
+                        <span class="material-icons-round text-sm text-emerald-400">mark_email_read</span>
+                        <span>Factura enviada automáticamente a: <strong>{{ $pago->socio->correo }}</strong></span>
+                    </span>
+                @elseif(!empty($pago->socio->correo))
+                    <span class="inline-flex items-center space-x-1 text-emerald-300/90 bg-emerald-500/10 px-2 py-1 rounded-lg">
+                        <span class="material-icons-round text-sm">mail</span>
+                        <span>Correo del titular: {{ $pago->socio->correo }}</span>
+                    </span>
+                @else
+                    <span class="text-emerald-200/80 text-[11px] italic">
+                        * Socio sin correo registrado. Puedes enviarle el comprobante oficial directamente a su WhatsApp.
+                    </span>
+                @endif
+            </div>
+
+            <!-- Botón WhatsApp Destacado -->
+            <a href="{{ $wsUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-xl bg-[#25D366] hover:bg-[#20BD5A] text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-[#25D366]/20 transition transform hover:scale-[1.02] active:scale-[0.98]">
+                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                    <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.174.086.275.072.376-.043.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.099.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.155.57 4.178 1.564 5.927l-1.658 6.063 6.22-1.632c1.679.914 3.601 1.43 5.64 1.43 6.627 0 12-5.373 12-12s-5.373-12-12-12z"/>
+                </svg>
+                <span>Enviar Factura a WhatsApp</span>
+            </a>
+        </div>
+    </div>
+    @endif
 
     <!-- BARRA DE ACCIONES SUPERIOR (Oculta al imprimir) -->
     <div class="flex flex-wrap items-center justify-between gap-3 bg-[#111827] border border-[#1F293D] rounded-2xl px-5 py-2.5 shadow-lg no-print">
@@ -18,14 +127,22 @@
                 <span class="material-icons-round text-sm">receipt_long</span>
                 <span>Historial</span>
             </a>
-        </div>
-
-        <div class="flex items-center space-x-2.5">
-            <a href="{{ route('pagos.create') }}" class="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-[#141C30] hover:bg-[#1C2742] text-amber-300 hover:text-amber-200 text-xs font-bold border border-amber-500/30 transition shadow-sm">
+            <a href="{{ route('pagos.create') }}" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-[#141C30] hover:bg-[#1C2742] text-slate-300 hover:text-white text-xs font-semibold border border-[#243352] transition">
                 <span class="material-icons-round text-sm">point_of_sale</span>
                 <span>Nuevo Cobro</span>
             </a>
+        </div>
 
+        <div class="flex items-center space-x-2.5">
+            <!-- Botón WhatsApp permanente en barra superior -->
+            <a href="{{ $wsUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-[#25D366] hover:bg-[#20BD5A] text-slate-950 font-bold text-xs uppercase tracking-wider shadow-md shadow-[#25D366]/20 transition active:scale-[0.98]">
+                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                    <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.174.086.275.072.376-.043.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.099.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.155.57 4.178 1.564 5.927l-1.658 6.063 6.22-1.632c1.679.914 3.601 1.43 5.64 1.43 6.627 0 12-5.373 12-12s-5.373-12-12-12z"/>
+                </svg>
+                <span>WhatsApp</span>
+            </a>
+
+            <!-- Botón de Impresión de Factura -->
             <button type="button" onclick="window.print()" class="inline-flex items-center space-x-1.5 px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 transition active:scale-[0.98]">
                 <span class="material-icons-round text-base">print</span>
                 <span>Imprimir Factura</span>

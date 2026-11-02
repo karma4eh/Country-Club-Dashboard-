@@ -89,9 +89,9 @@
                 </div>
 
                 <!-- Botón de Confirmación -->
-                <button type="submit" class="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-extrabold text-sm shadow-xl shadow-emerald-500/25 flex items-center justify-center transition-all duration-200 transform hover:-translate-y-0.5">
+                <button type="submit" id="btnSubmitPago" class="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-extrabold text-sm shadow-xl shadow-emerald-500/25 flex items-center justify-center transition-all duration-200 transform hover:-translate-y-0.5">
                     <span class="material-icons-round mr-2 text-lg">check_circle</span>
-                    Procesar y Emitir Recibo Oficial
+                    <span id="btnSubmitText">Procesar y Emitir Recibo Oficial</span>
                 </button>
             </form>
         </div>
@@ -265,6 +265,17 @@
     }
 
     cedulaInput.addEventListener('input', consultarSocio);
+
+    // Prevención de doble clic y feedback instantáneo
+    document.getElementById('pagoForm').addEventListener('submit', function () {
+        const btn = document.getElementById('btnSubmitPago');
+        const txt = document.getElementById('btnSubmitText');
+        if (btn) {
+            btn.disabled = true;
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+            if (txt) txt.textContent = 'Procesando y emitiendo factura...';
+        }
+    });
 
     // Inicializar cálculo
     calcularConversion();

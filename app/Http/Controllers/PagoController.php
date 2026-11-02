@@ -6,9 +6,12 @@ use App\Models\Socio;
 use App\Models\Pago;
 use App\Models\Movimiento;
 use App\Services\BcvScraperService;
+use App\Mail\PagoReciboMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class PagoController extends Controller
@@ -107,15 +110,41 @@ class PagoController extends Controller
             return $nuevoPago;
         });
 
+        // Tasa y equivalencia en Bolívares
+        $tasa = app(BcvScraperService::class)->obtenerTasa();
+        $montoBs = (float) $pago->monto * $tasa;
+
+        // Envío automático de factura por correo si el socio tiene email registrado
+        $correoEnviado = false;
+        if (!empty($socio->correo) && filter_var($socio->correo, FILTER_VALIDATE_EMAIL)) {
+            try {
+                Mail::to($socio->correo)->send(new PagoReciboMail($pago, $socio, $tasa, $montoBs));
+                $correoEnviado = true;
+            } catch (\Throwable $e) {
+                Log::warning("No se pudo enviar la factura por correo a {$socio->correo}: " . $e->getMessage());
+            }
+        }
+
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
                 'pago_id' => $pago->id,
                 'nuevo_saldo' => $socio->saldo,
+                'correo_enviado' => $correoEnviado,
             ]);
         }
 
-        return redirect()->route('pagos.receipt', $pago);
+        return redirect()->route('pagos.receipt', $pago)->with('pago_exitoso', [
+            'titulo' => 'Pago hecho satisfactoriamente',
+            'monto' => (float) $pago->monto,
+            'monto_bs' => (float) $montoBs,
+            'saldo' => (float) $socio->saldo,
+            'socio' => $socio->nombre_completo,
+            'accion' => $socio->accion,
+            'correo' => $socio->correo,
+            'correo_enviado' => $correoEnviado,
+            'numero' => $socio->numero,
+        ]);
     }
 
     public function receipt(Pago $pago, BcvScraperService $bcvService)

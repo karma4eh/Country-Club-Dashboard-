@@ -9,6 +9,7 @@ use App\Models\Pago;
 use App\Models\Visita;
 use App\Models\TasaDolar;
 use App\Mail\SocioBienvenidaMail;
+use App\Mail\PagoReciboMail;
 use App\Services\BcvScraperService;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -506,5 +507,56 @@ class SystemFeatureTest extends TestCase
         $buscarPrefijo = $this->getJson('/api/visitas/buscar-socio?query=ACC-' . $numeroAccion);
         $buscarPrefijo->assertStatus(200);
         $buscarPrefijo->assertJsonFragment(['id' => $socio->id]);
+    }
+
+    public function test_pago_registration_sends_email_and_shows_dynamic_notification_with_whatsapp_and_balance()
+    {
+        Mail::fake();
+
+        $admin = User::where('rol', 'admin')->first() ?? User::first();
+        $this->actingAs($admin);
+
+        $socio = Socio::first();
+        $this->assertNotNull($socio);
+
+        // Aseguramos que el socio tenga correo y teléfono para probar WhatsApp y Email
+        $socio->correo = 'socio.pago@countryclub.test';
+        $socio->numero = '04141234567';
+        $socio->saldo = 0.00;
+        $socio->save();
+
+        $montoPago = 25.00;
+        $response = $this->post('/pagos', [
+            'cedula' => $socio->cedula,
+            'monto' => $montoPago,
+            'descripcion' => 'Cuota Especial Mantenimiento Piscina',
+        ]);
+
+        $response->assertStatus(302);
+        $response->assertSessionHas('pago_exitoso');
+
+        $sessionData = session('pago_exitoso');
+        $this->assertEquals('Pago hecho satisfactoriamente', $sessionData['titulo']);
+        $this->assertEquals($montoPago, $sessionData['monto']);
+        $this->assertEquals(25.00, $sessionData['saldo']);
+        $this->assertTrue($sessionData['correo_enviado']);
+
+        // Verificar que se envió el correo con el recibo de pago automáticamente
+        Mail::assertSent(PagoReciboMail::class, function ($mail) use ($socio, $montoPago) {
+            return $mail->hasTo('socio.pago@countryclub.test') &&
+                   $mail->socio->id === $socio->id &&
+                   (float) $mail->pago->monto === (float) $montoPago;
+        });
+
+        // Seguir la ruta del recibo
+        $pago = Pago::where('socios_id', $socio->id)->latest('id')->first();
+        $this->assertNotNull($pago);
+
+        $receiptResponse = $this->get(route('pagos.receipt', $pago));
+        $receiptResponse->assertStatus(200);
+        $receiptResponse->assertSee('WhatsApp');
+        $receiptResponse->assertSee('wa.me/584141234567');
+        $receiptResponse->assertSee('Saldo Actual del Socio');
+        $receiptResponse->assertSee('REC-' . str_pad($pago->id, 6, '0', STR_PAD_LEFT));
     }
 }
