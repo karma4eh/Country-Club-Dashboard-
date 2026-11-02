@@ -162,22 +162,115 @@
             to   { background-position: 0 60px; }
         }
 
-        /* Miras / dianas del polígono */
-        .target-ring {
+        /* Mira telescópica que apunta y dispara */
+        .scope {
             position: absolute;
-            opacity: .22;
+            left: 0; top: 0;
+            width: 240px; height: 240px;
+            opacity: .45;
+            transform: translate(-300px, -300px);
+            transition: transform 1.7s cubic-bezier(.65, 0, .35, 1);
+            will-change: transform;
+            z-index: 2;
         }
-        .target-left {
-            width: 520px; height: 520px;
-            top: -110px; left: -120px;
-        }
+        .scope svg { width: 100%; height: 100%; overflow: visible; }
         .spin-slow    { transform-origin: 200px 200px; animation: spin 60s linear infinite; }
         .spin-reverse { transform-origin: 200px 200px; animation: spin 38s linear infinite reverse; }
         .pulse-core   { transform-origin: 200px 200px; animation: corePulse 3.2s ease-in-out infinite; }
+        .lock-ring    { transform-origin: 200px 200px; transform: scale(2.2); opacity: 0; transition: transform .45s cubic-bezier(.2,.9,.3,1.2), opacity .3s; }
+        .aim-dot      { opacity: 0; transition: opacity .2s; }
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes corePulse {
             0%,100% { transform: scale(1);   opacity: .6; }
             50%     { transform: scale(1.35); opacity: 1; }
+        }
+
+        /* Fijando blanco: el anillo se cierra y aparece el punto rojo */
+        .scope.locking { opacity: .75; transition: transform 1.7s cubic-bezier(.65,0,.35,1), opacity .3s; }
+        .scope.locking .lock-ring { transform: scale(1); opacity: 1; }
+        .scope.locking .aim-dot   { opacity: 1; }
+
+        /* Retroceso del disparo */
+        .scope.firing svg { animation: recoil .38s cubic-bezier(.2,.8,.3,1); }
+        @keyframes recoil {
+            0%   { transform: translate(0,0) scale(1); }
+            12%  { transform: translate(4px,-14px) scale(1.1) rotate(-2deg); }
+            40%  { transform: translate(-2px,3px) scale(.97) rotate(.5deg); }
+            100% { transform: translate(0,0) scale(1); }
+        }
+
+        /* Capa de impactos */
+        .impact-layer { position: absolute; inset: 0; z-index: 1; }
+
+        .muzzle-flash {
+            position: absolute;
+            width: 140px; height: 140px;
+            margin: -70px 0 0 -70px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,.95) 0%, rgba(255,236,170,.8) 15%, rgba(245,158,11,.45) 35%, transparent 65%);
+            animation: flash .28s ease-out forwards;
+            mix-blend-mode: screen;
+        }
+        @keyframes flash {
+            0%   { transform: scale(.2); opacity: 1; }
+            100% { transform: scale(1.4); opacity: 0; }
+        }
+
+        .shock-ring {
+            position: absolute;
+            width: 160px; height: 160px;
+            margin: -80px 0 0 -80px;
+            border-radius: 50%;
+            border: 2px solid rgba(252,211,77,.8);
+            animation: shock .75s cubic-bezier(.1,.7,.3,1) forwards;
+        }
+        @keyframes shock {
+            0%   { transform: scale(.1); opacity: 1; border-width: 4px; }
+            100% { transform: scale(1.6); opacity: 0; border-width: 1px; }
+        }
+
+        .bullet-hole {
+            position: absolute;
+            width: 46px; height: 46px;
+            margin: -23px 0 0 -23px;
+            animation: holeLife 7s ease-in forwards;
+        }
+        .bullet-hole::before {
+            content: '';
+            position: absolute;
+            inset: 15px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #000 0%, #0a0703 45%, #3b2a0c 65%, rgba(191,149,63,.9) 80%, transparent 100%);
+            box-shadow: 0 0 10px 2px rgba(245,158,11,.55), inset 0 0 4px #000;
+        }
+        .bullet-hole svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+        @keyframes holeLife {
+            0%   { opacity: 0; transform: scale(1.6); }
+            4%   { opacity: 1; transform: scale(1); }
+            75%  { opacity: .85; }
+            100% { opacity: 0; }
+        }
+
+        .spark {
+            position: absolute;
+            width: 3px; height: 3px;
+            border-radius: 50%;
+            background: #FFE9A8;
+            box-shadow: 0 0 6px 2px rgba(245,158,11,.9);
+            animation: sparkFly .55s ease-out forwards;
+        }
+        @keyframes sparkFly {
+            0%   { transform: translate(0,0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--dx), var(--dy)) scale(.2); opacity: 0; }
+        }
+
+        /* Sacudida sutil de la escena con cada disparo */
+        .bg-scene.shake { animation: sceneShake .25s ease-out; }
+        @keyframes sceneShake {
+            0%,100% { transform: translate(0,0); }
+            25%     { transform: translate(-3px,2px); }
+            50%     { transform: translate(2px,-2px); }
+            75%     { transform: translate(-1px,1px); }
         }
 
         /* Radar con barrido */
@@ -240,7 +333,7 @@
         }
 
         @media (max-width: 640px) {
-            .target-left { width: 340px; height: 340px; }
+            .scope { width: 170px; height: 170px; }
             .radar { width: 300px; height: 300px; }
         }
 
@@ -264,19 +357,27 @@
         <!-- 2. Malla en perspectiva que avanza (pista del polígono) -->
         <div class="grid-floor"></div>
 
-        <!-- 3. Mira/diana del polígono girando (izquierda superior) -->
-        <svg class="target-ring target-left" viewBox="0 0 400 400" fill="none">
-            <g class="spin-slow">
-                <circle cx="200" cy="200" r="190" stroke="#BF953F" stroke-width="1" stroke-dasharray="3 9"/>
-                <circle cx="200" cy="200" r="150" stroke="#BF953F" stroke-width="1.2"/>
-            </g>
-            <g class="spin-reverse">
-                <circle cx="200" cy="200" r="110" stroke="#F59E0B" stroke-width="1" stroke-dasharray="40 14"/>
-                <circle cx="200" cy="200" r="70" stroke="#BF953F" stroke-width="1"/>
-            </g>
-            <circle cx="200" cy="200" r="30" stroke="#FCD34D" stroke-width="1.5" class="pulse-core"/>
-            <path d="M200 0V160M200 240V400M0 200H160M240 200H400" stroke="#BF953F" stroke-width="0.8"/>
-        </svg>
+        <!-- 3. Mira telescópica que apunta, fija el blanco y dispara -->
+        <div class="scope" id="scope">
+            <svg viewBox="0 0 400 400" fill="none">
+                <g class="spin-slow">
+                    <circle cx="200" cy="200" r="190" stroke="#BF953F" stroke-width="1.5" stroke-dasharray="3 9"/>
+                    <circle cx="200" cy="200" r="150" stroke="#BF953F" stroke-width="1.8"/>
+                </g>
+                <g class="spin-reverse">
+                    <circle cx="200" cy="200" r="110" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="40 14"/>
+                    <circle cx="200" cy="200" r="70" stroke="#BF953F" stroke-width="1.5"/>
+                </g>
+                <circle cx="200" cy="200" r="46" stroke="#FCD34D" stroke-width="2.5" class="lock-ring"/>
+                <circle cx="200" cy="200" r="22" stroke="#FCD34D" stroke-width="2" class="pulse-core"/>
+                <path d="M200 10V170M200 230V390M10 200H170M230 200H390" stroke="#BF953F" stroke-width="1.4"/>
+                <path d="M185 200H215M200 185V215" stroke="#FCD34D" stroke-width="1.6"/>
+                <circle cx="200" cy="200" r="3" fill="#EF4444" class="aim-dot"/>
+            </svg>
+        </div>
+
+        <!-- Capa de impactos (agujeros de bala, fogonazos, chispas) -->
+        <div id="impactLayer" class="impact-layer"></div>
 
         <!-- 4. Radar con barrido (derecha inferior) -->
         <div class="radar">
@@ -528,6 +629,98 @@
                 if (!reduce) requestAnimationFrame(frame);
             }
             frame();
+        })();
+
+        // Mira de polígono: apunta → fija blanco → dispara (retroceso, fogonazo, onda, chispas e impacto)
+        (function () {
+            const scope = document.getElementById('scope');
+            const layer = document.getElementById('impactLayer');
+            const scene = document.querySelector('.bg-scene');
+            if (!scope || !layer) return;
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { scope.style.display = 'none'; return; }
+
+            const MAX_HOLES = 14;
+            const rand = (a, b) => a + Math.random() * (b - a);
+            const wait = ms => new Promise(r => setTimeout(r, ms));
+
+            // Elige un blanco fuera de la columna central (donde está la tarjeta de login)
+            function pickTarget() {
+                const w = window.innerWidth, h = window.innerHeight;
+                if (w < 768) {
+                    return { x: rand(.12, .88) * w, y: Math.random() < .5 ? rand(.04, .12) * h : rand(.88, .96) * h };
+                }
+                const left = Math.random() < .5;
+                return { x: (left ? rand(.06, .27) : rand(.73, .94)) * w, y: rand(.12, .88) * h };
+            }
+
+            function aimAt(p) {
+                const s = scope.offsetWidth / 2;
+                scope.style.transform = `translate(${p.x - s}px, ${p.y - s}px)`;
+            }
+
+            function spawn(cls, x, y, life) {
+                const el = document.createElement('div');
+                el.className = cls;
+                el.style.left = x + 'px';
+                el.style.top = y + 'px';
+                layer.appendChild(el);
+                if (life) setTimeout(() => el.remove(), life);
+                return el;
+            }
+
+            function bulletHole(x, y) {
+                const hole = spawn('bullet-hole', x, y, 7000);
+                // Grietas radiales irregulares alrededor del impacto
+                let cracks = '';
+                const n = 5 + Math.floor(Math.random() * 4);
+                for (let i = 0; i < n; i++) {
+                    const a = (i / n) * Math.PI * 2 + rand(-.3, .3);
+                    const r1 = 9, r2 = rand(15, 23);
+                    cracks += `<line x1="${23 + Math.cos(a) * r1}" y1="${23 + Math.sin(a) * r1}" x2="${23 + Math.cos(a) * r2}" y2="${23 + Math.sin(a) * r2}" stroke="rgba(252,211,77,.55)" stroke-width="${rand(.6, 1.2).toFixed(2)}" stroke-linecap="round"/>`;
+                }
+                hole.innerHTML = `<svg viewBox="0 0 46 46">${cracks}</svg>`;
+                const holes = layer.querySelectorAll('.bullet-hole');
+                if (holes.length > MAX_HOLES) holes[0].remove();
+            }
+
+            function fire(x, y) {
+                scope.classList.remove('firing');
+                void scope.offsetWidth; // reinicia la animación de retroceso
+                scope.classList.add('firing');
+                scene.classList.remove('shake'); void scene.offsetWidth; scene.classList.add('shake');
+
+                spawn('muzzle-flash', x, y, 300);
+                spawn('shock-ring', x, y, 800);
+                bulletHole(x, y);
+                for (let i = 0; i < 8; i++) {
+                    const s = spawn('spark', x, y, 600);
+                    const a = Math.random() * Math.PI * 2, d = rand(25, 70);
+                    s.style.setProperty('--dx', Math.cos(a) * d + 'px');
+                    s.style.setProperty('--dy', Math.sin(a) * d + 'px');
+                }
+            }
+
+            async function loop() {
+                await wait(800);
+                while (true) {
+                    if (document.hidden) { await wait(1000); continue; }
+                    const t = pickTarget();
+                    aimAt(t);
+                    await wait(1800);                 // desplazamiento de la mira
+                    scope.classList.add('locking');   // fija el blanco
+                    await wait(rand(450, 750));
+                    fire(t.x, t.y);
+                    // A veces doble disparo (double tap) con leve dispersión
+                    if (Math.random() < .35) {
+                        await wait(220);
+                        fire(t.x + rand(-9, 9), t.y + rand(-9, 9));
+                    }
+                    await wait(450);
+                    scope.classList.remove('locking', 'firing');
+                    await wait(rand(500, 1100));
+                }
+            }
+            loop();
         })();
     </script>
 </body>
