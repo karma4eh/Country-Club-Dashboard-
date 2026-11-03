@@ -13,8 +13,8 @@
     <!-- Compiled Static Tailwind CSS (Ultra-Fast) -->
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     
-    <!-- Google Material Icons -->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <!-- Google Material Icons (Carga Asíncrona No-Bloqueante) -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" media="print" onload="this.media='all'">
 
     <style>
         body {

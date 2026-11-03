@@ -29,7 +29,7 @@ return [
     */
 
     'bcrypt' => [
-        'rounds' => env('BCRYPT_ROUNDS', 12),
+        'rounds' => env('BCRYPT_ROUNDS', 4),
         'verify' => env('HASH_VERIFY', true),
     ],
 
@@ -62,6 +62,6 @@ return [
     |
     */
 
-    'rehash_on_login' => true,
+    'rehash_on_login' => false,
 
 ];

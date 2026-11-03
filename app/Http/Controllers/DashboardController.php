@@ -12,9 +12,15 @@ class DashboardController extends Controller
 {
     public function index(BcvScraperService $bcvService)
     {
-        $totalActivos = Socio::where('estado', 'activo')->count();
-        $totalInactivos = Socio::where('estado', 'inactivo')->count();
-        $totalMorosos = Socio::where('saldo', '<', 0)->count();
+        $stats = Socio::selectRaw("
+            COALESCE(SUM(CASE WHEN estado = 'activo' THEN 1 ELSE 0 END), 0) as activos,
+            COALESCE(SUM(CASE WHEN estado = 'inactivo' THEN 1 ELSE 0 END), 0) as inactivos,
+            COALESCE(SUM(CASE WHEN saldo < 0 THEN 1 ELSE 0 END), 0) as morosos
+        ")->first();
+
+        $totalActivos = (int) ($stats->activos ?? 0);
+        $totalInactivos = (int) ($stats->inactivos ?? 0);
+        $totalMorosos = (int) ($stats->morosos ?? 0);
 
         $tasaBcv = $bcvService->obtenerTasa();
 

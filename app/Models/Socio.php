@@ -80,8 +80,18 @@ class Socio extends Model
             return asset($this->imagen_perfil);
         }
 
-        $nombre = urlencode($this->nombre_completo);
-        return "https://ui-avatars.com/api/?name={$nombre}&background=1f2937&color=fbbf24";
+        $iniciales = strtoupper(
+            mb_substr(trim((string) $this->nombre), 0, 1) .
+            mb_substr(trim((string) $this->apellido), 0, 1)
+        ) ?: 'CC';
+
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">'
+             . '<rect width="80" height="80" fill="#1f2937"/>'
+             . '<text x="50%" y="52%" dominant-baseline="central" text-anchor="middle" fill="#fbbf24" font-family="sans-serif" font-weight="700" font-size="30">'
+             . htmlspecialchars($iniciales, ENT_QUOTES, 'UTF-8')
+             . '</text></svg>';
+
+        return 'data:image/svg+xml;utf8,' . rawurlencode($svg);
     }
 
     public function getQrCodeDataAttribute(): string

@@ -29,7 +29,6 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
             $request->session()->forget('url.intended');
 
             try {
@@ -42,11 +41,29 @@ class AuthController extends Controller
                 // No bloquear el acceso si falla el registro secundario de bitácora
             }
 
+            $targetUrl = Auth::user()->esVigilante()
+                ? route('visitas.index', [], false)
+                : route('dashboard', [], false);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'redirect' => $targetUrl,
+                ]);
+            }
+
             if (Auth::user()->esVigilante()) {
                 return redirect()->route('visitas.index');
             }
 
             return redirect()->route('dashboard');
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
+            ], 422);
         }
 
         return back()->withErrors([

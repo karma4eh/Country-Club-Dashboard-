@@ -13,8 +13,8 @@
     <!-- Compiled Static Tailwind CSS -->
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     
-    <!-- Material Icons -->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <!-- Material Icons (Non-blocking) -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" media="print" onload="this.media='all'">
 
     <style>
         body {
@@ -472,6 +472,11 @@
             </div>
             @endif
 
+            <div id="loginErrorBox" class="hidden p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start space-x-2.5">
+                <span class="material-icons-round text-rose-400 text-base mt-0.5">error_outline</span>
+                <p id="loginErrorText" class="font-medium"></p>
+            </div>
+
             <form action="{{ route('login.post', [], false) }}" method="POST" id="loginForm" class="space-y-4">
                 @csrf
 
@@ -569,38 +574,102 @@
             document.getElementById('password').value = password;
         }
 
-        // Prevención de doble envío y liberación inmediata del navegador al entrar
+        // Envío instantáneo por AJAX con auto-reintento anti-bloqueo de sockets Keep-Alive
         (function () {
             const form = document.getElementById('loginForm');
             const btn = document.getElementById('btnLoginSubmit');
             const text = document.getElementById('btnLoginText');
             const icon = document.getElementById('btnLoginIcon');
+            const errBox = document.getElementById('loginErrorBox');
+            const errText = document.getElementById('loginErrorText');
             if (!form || !btn) return;
 
-            form.addEventListener('submit', function (e) {
-                if (window.__loginSubmitting) {
-                    e.preventDefault();
-                    return;
+            function resetButton() {
+                window.__loginSubmitting = false;
+                btn.disabled = false;
+                btn.classList.remove('opacity-80', 'cursor-wait');
+                if (text) text.textContent = 'Ingresar al Sistema';
+                if (icon) {
+                    icon.textContent = 'arrow_forward';
+                    icon.classList.remove('animate-spin');
                 }
+            }
+
+            async function sendLoginAttempt(formData, timeoutMs) {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), timeoutMs);
+                try {
+                    const res = await fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        credentials: 'same-origin',
+                        signal: controller.signal
+                    });
+                    clearTimeout(timer);
+                    return res;
+                } catch (err) {
+                    clearTimeout(timer);
+                    throw err;
+                }
+            }
+
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                if (window.__loginSubmitting) return;
+
                 window.__loginSubmitting = true;
+                btn.disabled = true;
                 btn.classList.add('opacity-80', 'cursor-wait');
+                if (errBox) errBox.classList.add('hidden');
                 if (text) text.textContent = 'Ingresando al Sistema...';
                 if (icon) {
                     icon.textContent = 'sync';
                     icon.classList.add('animate-spin');
                 }
+
+                const formData = new FormData(form);
+
+                try {
+                    let res;
+                    try {
+                        // Primer intento rápido (2.5s máx para romper cualquier socket Keep-Alive colgado)
+                        res = await sendLoginAttempt(formData, 2500);
+                    } catch (firstErr) {
+                        // Reintento inmediato en un socket TCP limpio
+                        res = await sendLoginAttempt(formData, 6000);
+                    }
+
+                    if (res.redirected && res.url) {
+                        window.location.replace(res.url);
+                        return;
+                    }
+
+                    const data = await res.json().catch(() => null);
+
+                    if (res.ok && data && data.redirect) {
+                        window.location.replace(data.redirect);
+                        return;
+                    }
+
+                    const msg = (data && (data.message || (data.errors && Object.values(data.errors)[0]?.[0])))
+                        || 'Las credenciales proporcionadas no coinciden con nuestros registros.';
+                    if (errBox && errText) {
+                        errText.textContent = msg;
+                        errBox.classList.remove('hidden');
+                    }
+                    resetButton();
+                } catch (err) {
+                    // Fallback directo si falla fetch
+                    form.submit();
+                }
             });
 
             window.addEventListener('pageshow', function (e) {
-                if (e.persisted) {
-                    window.__loginSubmitting = false;
-                    btn.classList.remove('opacity-80', 'cursor-wait');
-                    if (text) text.textContent = 'Ingresar al Sistema';
-                    if (icon) {
-                        icon.textContent = 'arrow_forward';
-                        icon.classList.remove('animate-spin');
-                    }
-                }
+                if (e.persisted) resetButton();
             });
         })();
 
