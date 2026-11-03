@@ -8,7 +8,7 @@
     <!-- Google Fonts: Plus Jakarta Sans (Carga Asíncrona No-Bloqueante) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     
     <!-- Compiled Static Tailwind CSS (Ultra-Fast) -->
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
@@ -50,19 +50,97 @@
         ::-webkit-scrollbar-thumb:hover { background: #374151; }
 
         .glass-panel {
-            background: rgba(17, 24, 39, 0.75);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(31, 41, 61, 0.8);
+            background: rgba(11, 16, 29, 0.78);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(191, 149, 63, 0.16);
+            box-shadow: 0 20px 40px -16px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
+
+        /* ===== Identidad de lujo compartida con el login ===== */
+        .gold-prestige-title {
+            font-family: 'Cinzel', serif;
+            font-weight: 900;
+            letter-spacing: 0.1em;
+            background: linear-gradient(125deg, #7A5210 0%, #BF953F 18%, #FCF6BA 36%, #A87B22 50%, #FBF5B7 64%, #946416 82%, #7A5210 100%);
+            background-size: 220% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,.9));
+            animation: goldLuster 7s ease-in-out infinite;
+            display: inline-block;
+        }
+        @keyframes goldLuster { 0%,100% { background-position: 0% center; } 50% { background-position: 100% center; } }
+
+        .gold-border {
+            position: relative;
+        }
+        .gold-border::before {
+            content: '';
+            position: absolute; inset: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(252,246,186,.55), rgba(191,149,63,.12) 35%, rgba(191,149,63,.05) 65%, rgba(252,246,186,.4));
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+                    mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .kpi-card {
+            transition: transform .3s cubic-bezier(.16,1,.3,1), box-shadow .3s ease;
+            animation: riseIn .6s cubic-bezier(.16,1,.3,1) both;
+        }
+        .kpi-card:hover { transform: translateY(-4px); box-shadow: 0 24px 44px -14px rgba(0,0,0,.9), 0 0 36px -10px rgba(191,149,63,.35); }
+        @keyframes riseIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+
+        .shine-sweep { position: relative; overflow: hidden; }
+        .shine-sweep::after {
+            content: '';
+            position: absolute; top: 0; bottom: 0; width: 40%;
+            left: -60%;
+            background: linear-gradient(100deg, transparent, rgba(252,246,186,.12), transparent);
+            transform: skewX(-18deg);
+            animation: sweep 7s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes sweep { 0%, 55% { left: -60%; } 100% { left: 130%; } }
+
+        /* ===== Fondo vivo ligero (solo transform/opacity: sin blur costoso) ===== */
+        .app-scene { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+        .app-orb { position: absolute; border-radius: 50%; will-change: transform; }
+        .app-orb.o1 { width: 760px; height: 760px; top: -260px; left: 120px;
+            background: radial-gradient(circle, rgba(217,119,6,.20) 0%, rgba(191,149,63,.07) 45%, transparent 70%);
+            animation: appDrift1 26s ease-in-out infinite; }
+        .app-orb.o2 { width: 700px; height: 700px; bottom: -280px; right: -160px;
+            background: radial-gradient(circle, rgba(245,158,11,.15) 0%, rgba(16,185,129,.05) 45%, transparent 70%);
+            animation: appDrift2 30s ease-in-out infinite; }
+        @keyframes appDrift1 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(160px,110px); } }
+        @keyframes appDrift2 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-170px,-90px); } }
+        .app-grid { position: absolute; inset: 0;
+            background-image: linear-gradient(rgba(191,149,63,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(191,149,63,.05) 1px, transparent 1px);
+            background-size: 56px 56px;
+            -webkit-mask-image: radial-gradient(ellipse at 50% 30%, #000 0%, transparent 75%);
+                    mask-image: radial-gradient(ellipse at 50% 30%, #000 0%, transparent 75%); }
+        .app-reticle { position: absolute; right: 4%; top: 18%; width: 360px; height: 360px; opacity: .07; animation: appSpin 90s linear infinite; }
+        @keyframes appSpin { to { transform: rotate(360deg); } }
+        @media (prefers-reduced-motion: reduce) { .app-orb, .app-reticle, .shine-sweep::after, .gold-prestige-title { animation: none; } }
     </style>
     @stack('styles')
 </head>
 <body class="flex h-screen overflow-hidden antialiased selection:bg-amber-500 selection:text-black">
 
-    <!-- Luces de ambiente sutiles -->
-    <div class="ambient-glow-amber top-[-100px] left-[200px]"></div>
-    <div class="ambient-glow-emerald bottom-[-100px] right-[-100px]"></div>
+    <!-- Fondo vivo dorado (ligero) -->
+    <div class="app-scene" aria-hidden="true">
+        <div class="app-orb o1"></div>
+        <div class="app-orb o2"></div>
+        <div class="app-grid"></div>
+        <svg class="app-reticle" viewBox="0 0 400 400" fill="none" stroke="#BF953F" stroke-width="1.5">
+            <circle cx="200" cy="200" r="190"/><circle cx="200" cy="200" r="130"/><circle cx="200" cy="200" r="70"/><circle cx="200" cy="200" r="14"/>
+            <path d="M200 0v120M200 280v120M0 200h120M280 200h120" stroke-linecap="round"/>
+        </svg>
+    </div>
 
     <!-- SIDEBAR LATERAL DE LUJO -->
     <aside class="w-72 bg-[#0E1526]/90 backdrop-blur-2xl flex flex-col justify-between border-r border-[#1B253B] z-20 shadow-2xl transition-all duration-300">
@@ -70,15 +148,12 @@
             <!-- Marca y Monograma -->
             <div class="h-20 flex items-center px-6 border-b border-[#1B253B]">
                 <div class="flex items-center space-x-3.5">
-                    <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-700 p-[1px] shadow-lg shadow-amber-500/10">
-                        <div class="w-full h-full bg-[#0B0F19] rounded-[11px] flex items-center justify-center">
-                            <img src="{{ asset('img/logo.png') }}" alt="CC" class="h-6 w-auto object-contain">
-                        </div>
+                    <div class="w-12 h-12 flex items-center justify-center">
+                        <img src="{{ asset('img/logo.png') }}" alt="SCOCC" class="h-11 w-auto object-contain" style="filter: drop-shadow(0 0 12px rgba(217,119,6,.45)) drop-shadow(0 4px 8px rgba(0,0,0,.8));">
                     </div>
                     <div>
-                        <h1 class="text-base font-bold text-white tracking-wide flex items-center">
+                        <h1 class="text-[17px] gold-prestige-title uppercase flex items-center">
                             Country Club
-                            <span class="ml-2 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                         </h1>
                         @if(Auth::check() && Auth::user()->esVigilante())
                             <p class="text-[11px] font-medium text-emerald-400/90 tracking-wider uppercase">Puesto de Vigilancia</p>

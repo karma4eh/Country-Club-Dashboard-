@@ -7,31 +7,37 @@
 @section('content')
 <div class="space-y-7">
 
-    <!-- HERO BANNER BIENVENIDA -->
-    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#121B30] via-[#101728] to-[#0D1322] border border-amber-500/20 p-8 shadow-2xl">
-        <div class="absolute -right-10 -bottom-10 w-80 h-80 bg-gradient-to-br from-amber-500/10 to-emerald-500/0 rounded-full blur-3xl pointer-events-none"></div>
+    <!-- HERO INSTITUCIONAL DORADO -->
+    <div class="relative overflow-hidden rounded-3xl glass-panel gold-border shine-sweep p-8 md:p-10">
+        <div class="absolute -right-16 -top-16 w-96 h-96 rounded-full pointer-events-none" style="background: radial-gradient(circle, rgba(217,119,6,.22), transparent 68%);"></div>
+        <svg class="absolute right-8 top-1/2 -translate-y-1/2 w-56 h-56 opacity-[.10] pointer-events-none hidden md:block" viewBox="0 0 400 400" fill="none" stroke="#FCF6BA" stroke-width="2">
+            <circle cx="200" cy="200" r="190"/><circle cx="200" cy="200" r="130"/><circle cx="200" cy="200" r="70"/><circle cx="200" cy="200" r="12" fill="#FCF6BA"/>
+            <path d="M200 0v110M200 290v110M0 200h110M290 200h110" stroke-linecap="round"/>
+        </svg>
 
         <div class="relative z-10 flex flex-wrap items-center justify-between gap-6">
-            <div class="space-y-1.5 max-w-xl">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400 mr-2 animate-ping"></span>
-                    Sistema en Tiempo Real
-                </span>
-                <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
-                    Bienvenido, {{ Auth::user()->nombre_completo ?? 'Administrador' }}
-                </h1>
-                <p class="text-xs text-slate-400 leading-relaxed">
-                    Control centralizado de miembros, estados de cuenta multimoneda y sincronización con el Banco Central de Venezuela.
-                </p>
+            <div class="flex items-center gap-6">
+                <img src="{{ asset('img/logo.png') }}" alt="SCOCC" class="h-20 w-auto object-contain hidden sm:block" style="filter: drop-shadow(0 0 22px rgba(217,119,6,.5)) drop-shadow(0 8px 16px rgba(0,0,0,.9));">
+                <div class="space-y-2 max-w-xl">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.18em] text-amber-200" style="background: linear-gradient(135deg, rgba(191,149,63,.2), rgba(120,82,16,.1)); border: 1px solid rgba(191,149,63,.35);">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-2 animate-pulse"></span>
+                        {{ now()->translatedFormat('l, d \d\e F') }}
+                    </span>
+                    <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">
+                        Bienvenido, <span class="gold-prestige-title" style="letter-spacing:.02em">{{ Auth::user()->nombre_completo ?? 'Administrador' }}</span>
+                    </h1>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Polígono de Tiro &bull; Control de socios, cobranza multimoneda y acceso en garita, sincronizado con el BCV.
+                    </p>
+                </div>
             </div>
 
-            <!-- Acciones Rápidas -->
-            <div class="flex items-center space-x-3">
-                <a href="{{ route('pagos.create') }}" class="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-500/20 flex items-center transition-all duration-200 transform hover:-translate-y-0.5">
+            <div class="flex items-center gap-3">
+                <a href="{{ route('pagos.create') }}" class="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-amber-500/25 flex items-center transition transform hover:-translate-y-0.5">
                     <span class="material-icons-round text-base mr-2">add_card</span>
                     Registrar Cobro
                 </a>
-                <a href="{{ route('socios.create') }}" class="px-5 py-3 rounded-2xl bg-[#162238] hover:bg-[#1E2D4A] border border-[#263757] text-slate-200 font-bold text-xs flex items-center transition-all duration-200 transform hover:-translate-y-0.5">
+                <a href="{{ route('socios.create') }}" class="px-5 py-3 rounded-2xl bg-[#0F172A]/80 hover:bg-[#1A253E] border border-amber-500/30 text-amber-200 font-bold text-xs uppercase tracking-wider flex items-center transition transform hover:-translate-y-0.5">
                     <span class="material-icons-round text-base mr-2">person_add</span>
                     Afiliar Socio
                 </a>
@@ -40,76 +46,79 @@
     </div>
 
     <!-- TARJETAS DE MÉTRICAS (KPIs) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        
-        <!-- 1. Socios Activos -->
-        <div class="glass-panel rounded-2xl p-6 border-l-4 border-l-emerald-400 shadow-xl relative overflow-hidden group hover:border-[#2C3B5E] transition-all">
-            <div class="flex items-center justify-between">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+
+        <div class="kpi-card glass-panel gold-border rounded-2xl p-6 relative overflow-hidden" style="animation-delay:.05s">
+            <div class="absolute -right-6 -top-6 w-28 h-28 rounded-full" style="background: radial-gradient(circle, rgba(16,185,129,.22), transparent 70%);"></div>
+            <div class="relative flex items-start justify-between">
                 <div>
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block">Socios Activos</span>
-                    <h3 class="text-3xl font-extrabold text-white mt-1 font-mono">{{ $totalActivos }}</h3>
-                    <p class="text-[11px] text-emerald-400 font-medium mt-1 flex items-center">
-                        <span class="material-icons-round text-xs mr-1">trending_up</span>
-                        Habilitados para ingreso
-                    </p>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.18em] block">Socios Activos</span>
+                    <h3 class="text-4xl font-black text-white mt-2 font-mono tabular-nums" data-count="{{ $totalActivos }}">{{ $totalActivos }}</h3>
+                    <p class="text-[11px] text-emerald-400 font-medium mt-1.5 flex items-center"><span class="material-icons-round text-xs mr-1">verified</span>de {{ $totalSocios }} registrados</p>
                 </div>
-                <div class="w-13 h-13 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center p-3 group-hover:scale-110 transition-transform">
-                    <span class="material-icons-round text-2xl">groups</span>
-                </div>
+                <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 flex items-center justify-center"><span class="material-icons-round text-2xl">groups</span></div>
             </div>
         </div>
 
-        <!-- 2. Socios en Mora -->
-        <div class="glass-panel rounded-2xl p-6 border-l-4 border-l-rose-400 shadow-xl relative overflow-hidden group hover:border-[#2C3B5E] transition-all">
-            <div class="flex items-center justify-between">
+        <div class="kpi-card glass-panel gold-border rounded-2xl p-6 relative overflow-hidden" style="animation-delay:.12s">
+            <div class="absolute -right-6 -top-6 w-28 h-28 rounded-full" style="background: radial-gradient(circle, rgba(244,63,94,.22), transparent 70%);"></div>
+            <div class="relative flex items-start justify-between">
                 <div>
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block">Socios en Mora</span>
-                    <h3 class="text-3xl font-extrabold text-rose-400 mt-1 font-mono">{{ $totalMorosos }}</h3>
-                    <p class="text-[11px] text-rose-400/80 font-medium mt-1 flex items-center">
-                        <span class="material-icons-round text-xs mr-1">warning</span>
-                        Con saldo negativo
-                    </p>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.18em] block">Socios en Mora</span>
+                    <h3 class="text-4xl font-black text-rose-400 mt-2 font-mono tabular-nums" data-count="{{ $totalMorosos }}">{{ $totalMorosos }}</h3>
+                    <p class="text-[11px] text-rose-400/80 font-medium mt-1.5 flex items-center"><span class="material-icons-round text-xs mr-1">warning</span>con saldo negativo</p>
                 </div>
-                <div class="w-13 h-13 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center p-3 group-hover:scale-110 transition-transform">
-                    <span class="material-icons-round text-2xl">error_outline</span>
-                </div>
+                <div class="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/25 text-rose-400 flex items-center justify-center"><span class="material-icons-round text-2xl">error_outline</span></div>
             </div>
         </div>
 
-        <!-- 3. Socios Inactivos -->
-        <div class="glass-panel rounded-2xl p-6 border-l-4 border-l-slate-500 shadow-xl relative overflow-hidden group hover:border-[#2C3B5E] transition-all">
-            <div class="flex items-center justify-between">
+        <div class="kpi-card glass-panel gold-border rounded-2xl p-6 relative overflow-hidden" style="animation-delay:.19s">
+            <div class="absolute -right-6 -top-6 w-28 h-28 rounded-full" style="background: radial-gradient(circle, rgba(245,158,11,.25), transparent 70%);"></div>
+            <div class="relative flex items-start justify-between">
                 <div>
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block">Inactivos / Retirados</span>
-                    <h3 class="text-3xl font-extrabold text-slate-300 mt-1 font-mono">{{ $totalInactivos }}</h3>
-                    <p class="text-[11px] text-slate-400 font-medium mt-1 flex items-center">
-                        <span class="material-icons-round text-xs mr-1">person_off</span>
-                        Membresías pausadas
-                    </p>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.18em] block">Ingresos del Mes</span>
+                    <h3 class="text-3xl font-black text-amber-300 mt-2 font-mono tabular-nums">${{ number_format($ingresosMes, 2) }}</h3>
+                    <p class="text-[11px] text-amber-400/80 font-medium mt-1.5 flex items-center"><span class="material-icons-round text-xs mr-1">receipt_long</span>{{ $pagosMesCount }} cobros &bull; &asymp; {{ number_format($ingresosMes * $tasaBcv, 0, ',', '.') }} Bs</p>
                 </div>
-                <div class="w-13 h-13 rounded-2xl bg-slate-700/30 border border-slate-700/50 text-slate-400 flex items-center justify-center p-3 group-hover:scale-110 transition-transform">
-                    <span class="material-icons-round text-2xl">history_toggle_off</span>
-                </div>
+                <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-amber-400 flex items-center justify-center"><span class="material-icons-round text-2xl">payments</span></div>
             </div>
         </div>
 
-        <!-- 4. Dólar BCV Oficial -->
-        <div class="glass-panel rounded-2xl p-6 border-l-4 border-l-amber-400 shadow-xl relative overflow-hidden group hover:border-[#2C3B5E] transition-all">
-            <div class="flex items-center justify-between">
+        <div class="kpi-card glass-panel gold-border rounded-2xl p-6 relative overflow-hidden" style="animation-delay:.26s">
+            <div class="absolute -right-6 -top-6 w-28 h-28 rounded-full" style="background: radial-gradient(circle, rgba(59,130,246,.22), transparent 70%);"></div>
+            <div class="relative flex items-start justify-between">
                 <div>
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block">Tasa Oficial BCV</span>
-                    <h3 class="text-2xl font-extrabold text-amber-400 mt-1 font-mono">
-                        {{ number_format($tasaBcv, 2, ',', '.') }} <span class="text-xs font-sans text-amber-300">Bs</span>
-                    </h3>
-                    <p class="text-[11px] text-amber-400/80 font-medium mt-1 flex items-center">
-                        <span class="material-icons-round text-xs mr-1">currency_exchange</span>
-                        Actualizada y en vivo
-                    </p>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.18em] block">En el Club Ahora</span>
+                    <h3 class="text-4xl font-black text-sky-300 mt-2 font-mono tabular-nums" data-count="{{ $dentroAhora }}">{{ $dentroAhora }}</h3>
+                    <p class="text-[11px] text-sky-400/80 font-medium mt-1.5 flex items-center"><span class="material-icons-round text-xs mr-1">login</span>{{ $visitasHoy }} ingresos hoy</p>
                 </div>
-                <div class="w-13 h-13 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center p-3 group-hover:scale-110 transition-transform">
-                    <span class="material-icons-round text-2xl">account_balance</span>
+                <div class="w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-500/25 text-sky-400 flex items-center justify-center"><span class="material-icons-round text-2xl">security</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SALUD DE COBRANZA + TASA BCV -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div class="kpi-card glass-panel gold-border rounded-3xl p-7 lg:col-span-2 flex items-center gap-8" style="animation-delay:.3s">
+            <div class="relative w-32 h-32 flex-shrink-0">
+                <div class="w-full h-full rounded-full" style="background: conic-gradient(#FBBF24 0 {{ $pctSolventes }}%, rgba(244,63,94,.55) {{ $pctSolventes }}% 100%); -webkit-mask: radial-gradient(circle, transparent 54%, #000 55%); mask: radial-gradient(circle, transparent 54%, #000 55%);"></div>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <span class="text-2xl font-black text-white font-mono">{{ $pctSolventes }}%</span>
+                    <span class="text-[9px] uppercase tracking-widest text-slate-400">solventes</span>
                 </div>
             </div>
+            <div class="space-y-2">
+                <h3 class="text-base font-bold text-white flex items-center"><span class="material-icons-round mr-2 text-amber-400">insights</span>Salud de la Cobranza</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">{{ $solventes }} de {{ $totalSocios }} socios están al día. {{ $totalMorosos }} requieren gestión de cobro.</p>
+                <a href="{{ route('socios.index') }}" class="inline-flex items-center text-[11px] font-bold text-amber-300 hover:text-amber-200 uppercase tracking-wider">Ver directorio <span class="material-icons-round text-sm ml-1">arrow_forward</span></a>
+            </div>
+        </div>
+
+        <div class="kpi-card glass-panel gold-border rounded-3xl p-7 relative overflow-hidden" style="animation-delay:.36s">
+            <div class="absolute -right-8 -bottom-8 w-40 h-40 rounded-full" style="background: radial-gradient(circle, rgba(245,158,11,.22), transparent 70%);"></div>
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.18em] block">Tasa Oficial BCV</span>
+            <h3 class="text-3xl font-black text-amber-300 mt-2 font-mono">{{ number_format($tasaBcv, 2, ',', '.') }} <span class="text-xs font-sans text-amber-200">Bs / USD</span></h3>
+            <p class="text-[11px] text-amber-400/80 font-medium mt-2 flex items-center"><span class="material-icons-round text-xs mr-1">currency_exchange</span>Cuota mensual &asymp; {{ number_format((float) config('club.cuota_mensual', 10) * $tasaBcv, 0, ',', '.') }} Bs</p>
         </div>
     </div>
 
@@ -277,6 +286,18 @@
 
 @push('scripts')
 <script>
+    // Conteo animado de los KPIs
+    document.querySelectorAll('[data-count]').forEach(el => {
+        const target = parseInt(el.dataset.count, 10) || 0;
+        if (target === 0) return;
+        const t0 = performance.now(), dur = 900;
+        (function tick(t) {
+            const k = Math.min(1, (t - t0) / dur);
+            el.textContent = Math.round(target * (1 - Math.pow(1 - k, 3)));
+            if (k < 1) requestAnimationFrame(tick);
+        })(t0);
+    });
+
     // Búsqueda interactiva en tiempo real con debounce
     const searchInput = document.getElementById('searchInput');
     const tbody = document.getElementById('sociosTbody');

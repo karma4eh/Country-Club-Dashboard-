@@ -49,16 +49,8 @@
         }
 
         @keyframes goldPrestigeLuster {
-            0%, 100% {
-                background-position: 0% center;
-                filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.95)) 
-                        drop-shadow(0 0 14px rgba(191, 149, 63, 0.3));
-            }
-            50% {
-                background-position: 100% center;
-                filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.95)) 
-                        drop-shadow(0 0 24px rgba(251, 245, 183, 0.65));
-            }
+            0%, 100% { background-position: 0% center; }
+            50% { background-position: 100% center; }
         }
 
         /* Logotipo flotante puro sin recuadro ni marcos */
@@ -103,8 +95,6 @@
         .aurora-orb {
             position: absolute;
             border-radius: 50%;
-            filter: blur(90px);
-            mix-blend-mode: screen;
             will-change: transform;
         }
         .orb-1 {

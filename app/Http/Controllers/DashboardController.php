@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Socio;
 use App\Models\Pago;
 use App\Models\Movimiento;
+use App\Models\Visita;
 use App\Services\BcvScraperService;
 use Illuminate\Http\Request;
 
@@ -27,7 +28,23 @@ class DashboardController extends Controller
         $sociosRecientes = Socio::orderBy('id', 'desc')->take(10)->get();
         $pagosRecientes = Pago::with('socio')->orderBy('fecha_pago', 'desc')->take(10)->get();
 
+        $inicioMes = now()->startOfMonth();
+        $ingresosMes = (float) Pago::where('fecha_pago', '>=', $inicioMes)->sum('monto');
+        $pagosMesCount = Pago::where('fecha_pago', '>=', $inicioMes)->count();
+        $visitasHoy = Visita::whereDate('fecha_entrada', today())->count();
+        $dentroAhora = Visita::whereDate('fecha_entrada', today())->whereNull('fecha_salida')->count();
+        $totalSocios = $totalActivos + $totalInactivos;
+        $solventes = max(0, $totalSocios - $totalMorosos);
+        $pctSolventes = $totalSocios > 0 ? round(($solventes / $totalSocios) * 100) : 0;
+
         return view('dashboard', compact(
+            'ingresosMes',
+            'pagosMesCount',
+            'visitasHoy',
+            'dentroAhora',
+            'totalSocios',
+            'solventes',
+            'pctSolventes',
             'totalActivos',
             'totalInactivos',
             'totalMorosos',
